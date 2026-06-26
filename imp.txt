@@ -1,0 +1,7 @@
+admin@demo.clinic
+dentist@demo.clinic
+hygienist@demo.clinic
+assistant@demo.clinic
+receptionist@demo.clinic
+
+

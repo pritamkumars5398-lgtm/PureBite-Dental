@@ -14,7 +14,7 @@
 set -euo pipefail
 
 COOLIFY_PROJECT="wz49q8rmlqkhh9qun1kwgge8"
-LANG_ARG="${1:-es}"
+LANG_ARG="${1:-en}"
 LOG_TAG="dentalpin-reset"
 log() { logger -t "$LOG_TAG" -- "$*"; echo "[$(date -Is)] $*"; }
 

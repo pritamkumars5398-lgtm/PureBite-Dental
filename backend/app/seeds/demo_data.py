@@ -81,18 +81,18 @@ def get_clinic_data() -> dict:
     """Get clinic data in current language."""
     return {
         "id": CLINIC_ID,
-        "name": t({"es": "Clínica Dental Demo", "en": "Demo Dental Clinic"}),
-        "tax_id": t({"es": "B12345678", "en": "12-3456789"}),
+        "name": t({"es": "Estudio Dental Luminoso", "en": "Luminous Dental Studio"}),
+        "tax_id": t({"es": "B98765432", "en": "94-1234567"}),
         "address": {
-            "street": t({"es": "Calle Gran Vía 123", "en": "123 Main Street"}),
-            "city": t({"es": "Madrid", "en": "New York"}),
-            "postal_code": t({"es": "28013", "en": "10001"}),
+            "street": t({"es": "Calle Brillante 456", "en": "456 Brilliant Blvd"}),
+            "city": t({"es": "Barcelona", "en": "San Francisco"}),
+            "postal_code": t({"es": "08002", "en": "94105"}),
             "country": t({"es": "España", "en": "USA"}),
         },
-        "phone": t({"es": "+34 912 345 678", "en": "+1 (212) 555-0100"}),
-        "email": "info@demo.clinic",
+        "phone": t({"es": "+34 932 345 678", "en": "+1 (415) 555-0123"}),
+        "email": "info@luminous.dental",
         "currency": t({"es": "EUR", "en": "USD"}),
-        "timezone": t({"es": "Europe/Madrid", "en": "America/New_York"}),
+        "timezone": t({"es": "Europe/Madrid", "en": "America/Los_Angeles"}),
         "settings": {
             "slot_duration_min": 30,
             "working_hours": {
@@ -104,8 +104,8 @@ def get_clinic_data() -> dict:
             },
         },
         "cabinets": [
-            {"name": t({"es": "Gabinete 1", "en": "Room 1"}), "color": "#3B82F6"},
-            {"name": t({"es": "Gabinete 2", "en": "Room 2"}), "color": "#10B981"},
+            {"name": t({"es": "Sala 1 - Estética", "en": "Suite 1 - Aesthetic"}), "color": "#06B6D4"},
+            {"name": t({"es": "Sala 2 - Cirugía", "en": "Suite 2 - Surgery"}), "color": "#14B8A6"},
         ],
     }
 
@@ -2546,6 +2546,8 @@ def generate_invoices_data(catalog_items_map: dict[str, dict], budgets_result: d
         sequential_number += 1
         invoice_number = f"FAC-{current_year}-{sequential_number:04d}"
 
+        clinic_currency = get_clinic_data()["currency"]
+
         is_overdue = invoice_scenario.get("overdue", False)
         if invoice_scenario["status"] == "draft":
             issue_date = None
@@ -2625,7 +2627,7 @@ def generate_invoices_data(catalog_items_map: dict[str, dict], budgets_result: d
                     "clinic_id": CLINIC_ID,
                     "patient_id": patient["id"],
                     "amount": amount,
-                    "currency": "EUR",
+                    "currency": clinic_currency,
                     "method": payment_data["method"],
                     "payment_date": pay_date,
                     "reference": f"REF-{payment_idx:04d}",

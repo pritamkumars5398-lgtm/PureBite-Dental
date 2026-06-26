@@ -33,7 +33,7 @@ services:
       # the demo clinic already exists). Real production deployments
       # leave it unset so seed never runs.
       SEED_ON_STARTUP: ${SEED_ON_STARTUP:-0}
-      SEED_LANG: ${SEED_LANG:-es}
+      SEED_LANG: ${SEED_LANG:-en}
     volumes:
       - storage_data:/app/storage
     depends_on:

@@ -10,15 +10,23 @@ if [ "${RUN_MIGRATIONS:-1}" = "1" ]; then
   PG_URL="$(python -c 'from app.config import settings; print(settings.DATABASE_URL.replace("postgresql+asyncpg://","postgresql://"))')"
   psql "$PG_URL" -v ON_ERROR_STOP=1 <<'SQL' || true
 DO $$
+DECLARE
+  has_alembic boolean;
+  needs_stamp boolean;
 BEGIN
   IF EXISTS (
         SELECT 1 FROM information_schema.tables
         WHERE table_schema = 'public' AND table_name = 'clinic_weekly_schedules'
      )
-     AND NOT EXISTS (SELECT 1 FROM alembic_version WHERE version_num = 'sch_0001')
   THEN
-    INSERT INTO alembic_version(version_num) VALUES ('sch_0001');
-    RAISE NOTICE 'Stamped sch_0001 for pre-branch schedules tables';
+    has_alembic := to_regclass('public.alembic_version') IS NOT NULL;
+    IF has_alembic THEN
+      EXECUTE 'SELECT NOT EXISTS (SELECT 1 FROM alembic_version WHERE version_num = ''sch_0001'')' INTO needs_stamp;
+      IF needs_stamp THEN
+        EXECUTE 'INSERT INTO alembic_version(version_num) VALUES (''sch_0001'')';
+        RAISE NOTICE 'Stamped sch_0001 for pre-branch schedules tables';
+      END IF;
+    END IF;
   END IF;
 END
 $$;
@@ -30,7 +38,7 @@ fi
 
 if [ "${SEED_ON_STARTUP:-0}" = "1" ]; then
   (
-    SEED_LANG_ARG="${SEED_LANG:-es}"
+    SEED_LANG_ARG="${SEED_LANG:-en}"
     for i in $(seq 1 60); do
       if python -c "import urllib.request,sys
 try:
