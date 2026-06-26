@@ -1,91 +1,91 @@
 {
   "layers": [
-    "/module_layers/patients/frontend",
-    "/module_layers/catalog/frontend",
-    "/module_layers/odontogram/frontend",
-    "/module_layers/agenda/frontend",
-    "/module_layers/budget/frontend",
-    "/module_layers/payments/frontend",
-    "/module_layers/billing/frontend",
-    "/module_layers/copilot/frontend",
-    "/module_layers/media/frontend",
-    "/module_layers/patients_clinical/frontend",
-    "/module_layers/treatment_plan/frontend",
-    "/module_layers/clinical_notes/frontend",
-    "/module_layers/schedules/frontend",
-    "/module_layers/recalls/frontend",
-    "/module_layers/notifications/frontend",
-    "/module_layers/patient_timeline/frontend",
-    "/module_layers/reports/frontend"
+    "../backend/app/modules/patients/frontend",
+    "../backend/app/modules/catalog/frontend",
+    "../backend/app/modules/odontogram/frontend",
+    "../backend/app/modules/agenda/frontend",
+    "../backend/app/modules/budget/frontend",
+    "../backend/app/modules/payments/frontend",
+    "../backend/app/modules/billing/frontend",
+    "../backend/app/modules/copilot/frontend",
+    "../backend/app/modules/media/frontend",
+    "../backend/app/modules/patients_clinical/frontend",
+    "../backend/app/modules/treatment_plan/frontend",
+    "../backend/app/modules/clinical_notes/frontend",
+    "../backend/app/modules/schedules/frontend",
+    "../backend/app/modules/recalls/frontend",
+    "../backend/app/modules/notifications/frontend",
+    "../backend/app/modules/patient_timeline/frontend",
+    "../backend/app/modules/reports/frontend"
   ],
   "modules": [
     {
       "name": "patients",
-      "path": "/module_layers/patients/frontend"
+      "path": "../backend/app/modules/patients/frontend"
     },
     {
       "name": "catalog",
-      "path": "/module_layers/catalog/frontend"
+      "path": "../backend/app/modules/catalog/frontend"
     },
     {
       "name": "odontogram",
-      "path": "/module_layers/odontogram/frontend"
+      "path": "../backend/app/modules/odontogram/frontend"
     },
     {
       "name": "agenda",
-      "path": "/module_layers/agenda/frontend"
+      "path": "../backend/app/modules/agenda/frontend"
     },
     {
       "name": "budget",
-      "path": "/module_layers/budget/frontend"
+      "path": "../backend/app/modules/budget/frontend"
     },
     {
       "name": "payments",
-      "path": "/module_layers/payments/frontend"
+      "path": "../backend/app/modules/payments/frontend"
     },
     {
       "name": "billing",
-      "path": "/module_layers/billing/frontend"
+      "path": "../backend/app/modules/billing/frontend"
     },
     {
       "name": "copilot",
-      "path": "/module_layers/copilot/frontend"
+      "path": "../backend/app/modules/copilot/frontend"
     },
     {
       "name": "media",
-      "path": "/module_layers/media/frontend"
+      "path": "../backend/app/modules/media/frontend"
     },
     {
       "name": "patients_clinical",
-      "path": "/module_layers/patients_clinical/frontend"
+      "path": "../backend/app/modules/patients_clinical/frontend"
     },
     {
       "name": "treatment_plan",
-      "path": "/module_layers/treatment_plan/frontend"
+      "path": "../backend/app/modules/treatment_plan/frontend"
     },
     {
       "name": "clinical_notes",
-      "path": "/module_layers/clinical_notes/frontend"
+      "path": "../backend/app/modules/clinical_notes/frontend"
     },
     {
       "name": "schedules",
-      "path": "/module_layers/schedules/frontend"
+      "path": "../backend/app/modules/schedules/frontend"
     },
     {
       "name": "recalls",
-      "path": "/module_layers/recalls/frontend"
+      "path": "../backend/app/modules/recalls/frontend"
     },
     {
       "name": "notifications",
-      "path": "/module_layers/notifications/frontend"
+      "path": "../backend/app/modules/notifications/frontend"
     },
     {
       "name": "patient_timeline",
-      "path": "/module_layers/patient_timeline/frontend"
+      "path": "../backend/app/modules/patient_timeline/frontend"
     },
     {
       "name": "reports",
-      "path": "/module_layers/reports/frontend"
+      "path": "../backend/app/modules/reports/frontend"
     }
   ],
   "version": 1
