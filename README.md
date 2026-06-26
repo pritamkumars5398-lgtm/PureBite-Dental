@@ -256,3 +256,5 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 ---
 
 Backed by [Dentaltix](https://www.dentaltix.com)
+#   P u r e B i t e - D e n t a l  
+ 
