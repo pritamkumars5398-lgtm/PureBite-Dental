@@ -2,7 +2,6 @@ import { STORAGE_KEYS } from '~/constants/storage'
 
 export default defineNuxtPlugin(async (nuxtApp) => {
   const i18n = nuxtApp.$i18n
-  const SUPPORTED_LOCALES = ['en', 'es']
   const forcedLocale = 'en'
 
   const savedLocale = localStorage.getItem(STORAGE_KEYS.LOCALE)
