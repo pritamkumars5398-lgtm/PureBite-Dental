@@ -104,7 +104,10 @@ def get_clinic_data() -> dict:
             },
         },
         "cabinets": [
-            {"name": t({"es": "Sala 1 - Estética", "en": "Suite 1 - Aesthetic"}), "color": "#06B6D4"},
+            {
+                "name": t({"es": "Sala 1 - Estética", "en": "Suite 1 - Aesthetic"}),
+                "color": "#06B6D4",
+            },
             {"name": t({"es": "Sala 2 - Cirugía", "en": "Suite 2 - Surgery"}), "color": "#14B8A6"},
         ],
     }
