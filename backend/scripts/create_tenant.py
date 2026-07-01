@@ -7,7 +7,6 @@ import sys
 from uuid import uuid4
 
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth.models import Clinic, ClinicMembership, User
 from app.core.auth.service import hash_password
@@ -73,7 +72,7 @@ async def create_tenant(
         print(f"Clinic Name : {clinic.name}")
         print(f"Clinic ID   : {clinic.id}")
         print(f"Admin Email : {user.email}")
-        print(f"Admin Role  : admin")
+        print("Admin Role  : admin")
         print("==================================================")
 
 
