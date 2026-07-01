@@ -14,10 +14,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     ALGORITHM: str = "HS256"
-    # Independent secret used to sign the public-budget verification
-    # cookies (ADR 0006). Falls back to ``SECRET_KEY`` for local/dev
-    # convenience, but production deploys must set it explicitly so a
-    # leak of one key does not compromise the other.
+
     BUDGET_PUBLIC_SECRET_KEY: str = ""
 
     # Environment
@@ -94,7 +91,7 @@ class Settings(BaseSettings):
             return []
         return [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",")]
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
 
 settings = Settings()
