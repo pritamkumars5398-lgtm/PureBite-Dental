@@ -75,11 +75,12 @@ function apiBase(): string {
   // The host frontend exposes the backend URL as ``public.apiBaseUrl``
   // (see frontend/nuxt.config.ts). Falling back to ``apiBase`` keeps
   // the composable resilient if the key gets renamed.
-  return (
+  const base = (
     (config.public.apiBaseUrl as string)
     || (config.public.apiBase as string)
     || ''
   )
+  return base.replace(/\/$/, '')
 }
 
 export function usePublicBudget(token: string) {
