@@ -1,57 +1,32 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="280" height="64" viewBox="0 0 280 64" fill="none" role="img" aria-label="Luminous Dental Studio">
-  <!-- Background -->
-  <rect width="280" height="64" fill="none"/>
-  
-  <!-- Mark: Luminous tooth icon -->
-  <g transform="translate(6,8)">
-    <defs>
-      <linearGradient id="luminousGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:#06B6D4;stop-opacity:1" />
-        <stop offset="100%" style="stop-color:#14B8A6;stop-opacity:1" />
-      </linearGradient>
-    </defs>
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="64" viewBox="0 0 280 64" fill="none" role="img" aria-label="Nº 1 Dental Studio">
+  <!-- Icon part (left aligned) -->
+  <g transform="translate(8, 8)">
+    <rect width="48" height="48" rx="12" fill="#FAF6F0"/>
+    <rect width="46" height="46" x="1" y="1" rx="11" fill="none" stroke="#B39D82" stroke-width="1" stroke-opacity="0.2"/>
     
-    <!-- Background circle -->
-    <circle cx="22" cy="22" r="22" fill="url(#luminousGradient)" opacity="0.15"/>
-    <circle cx="22" cy="22" r="20" fill="none" stroke="#14B8A6" stroke-width="1.5" stroke-dasharray="2,2" opacity="0.3"/>
-    
-    <!-- Tooth shape -->
-    <path d="M 22 6
-             C 18.5 6 15.5 8 14 9
-             C 12 10 10.5 12.5 10.5 16
-             C 10.5 19 12 21.5 13 25
-             C 14 28 14 32 16 33.5
-             C 17 34 18 31 18.5 27.5
-             C 19 24.5 19.8 23 21 23
-             C 22.2 23 23 24.5 23.5 27.5
-             C 24 31 25 34 26 33.5
-             C 28 32 28 28 29 25
-             C 30 21.5 31.5 19 31.5 16
-             C 31.5 12.5 30 10 28 9
-             C 26.5 8 23.5 6 22 6 Z"
-          fill="url(#luminousGradient)"
-          stroke="#0D9488"
-          stroke-width="1.5"
-          stroke-linejoin="round"
-          stroke-linecap="round"/>
-    
-    <!-- Highlight on tooth -->
-    <ellipse cx="20" cy="18" rx="2" ry="3" fill="#F0F9FF" opacity="0.6"/>
-    
-    <!-- Sparkle effect -->
-    <g opacity="0.7">
-      <line x1="38" y1="8" x2="42" y2="4" stroke="#14B8A6" stroke-width="1.5" stroke-linecap="round"/>
-      <line x1="40" y1="6" x2="40" y2="2" stroke="#14B8A6" stroke-width="1.5" stroke-linecap="round"/>
+    <!-- Nº 1 Serif Logo -->
+    <g transform="translate(4, 8)">
+      <text x="0" y="25" font-family="'Georgia', 'Times New Roman', serif" font-size="24" font-weight="normal" fill="#2C2A29">N</text>
+      <text x="18" y="13" font-family="'Georgia', 'Times New Roman', serif" font-size="10" font-weight="normal" fill="#2C2A29">o</text>
+      <line x1="18" y1="16" x2="24" y2="16" stroke="#2C2A29" stroke-width="1"/>
+      <text x="24" y="25" font-family="'Georgia', 'Times New Roman', serif" font-size="24" font-weight="normal" fill="#B39D82">1</text>
     </g>
   </g>
-
-  <!-- Wordmark -->
-  <g transform="translate(62,20)">
-    <text x="0" y="18" font-family="'Inter', 'Segoe UI', system-ui, sans-serif" font-size="28" font-weight="700" fill="#0F1116" letter-spacing="-0.5">
-      Luminous
-    </text>
-    <text x="0" y="38" font-family="'Inter', 'Segoe UI', system-ui, sans-serif" font-size="14" font-weight="500" fill="#14B8A6" letter-spacing="0.5">
-      DENTAL STUDIO
-    </text>
+  
+  <!-- Text part (right aligned) -->
+  <g transform="translate(72, 10)">
+    <!-- Nº 1 -->
+    <g transform="translate(0, 0)">
+      <text x="0" y="20" font-family="'Georgia', 'Times New Roman', serif" font-size="22" font-weight="normal" fill="#2C2A29">N</text>
+      <text x="16" y="10" font-family="'Georgia', 'Times New Roman', serif" font-size="10" font-weight="normal" fill="#2C2A29">o</text>
+      <line x1="16" y1="12" x2="22" y2="12" stroke="#2C2A29" stroke-width="0.8"/>
+      <text x="22" y="20" font-family="'Georgia', 'Times New Roman', serif" font-size="22" font-weight="normal" fill="#B39D82">1</text>
+    </g>
+    
+    <!-- DENTAL STUDIO -->
+    <text x="0" y="34" font-family="'Inter', 'Segoe UI', system-ui, sans-serif" font-size="10" font-weight="600" fill="#2C2A29" letter-spacing="4">DENTAL STUDIO</text>
+    
+    <!-- Accent Line -->
+    <line x1="0" y1="42" x2="108" y2="42" stroke="#B39D82" stroke-width="1"/>
   </g>
 </svg>

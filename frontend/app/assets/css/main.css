@@ -5,6 +5,19 @@
 
 @theme static {
   --font-sans: 'Inter Variable', 'Inter', -apple-system, system-ui, 'Segoe UI', Helvetica, Arial, sans-serif;
+
+  /* Custom Primary Palette - Nº 1 Gold/Taupe (#B39D82) */
+  --color-primary-50: #FAF6F0;
+  --color-primary-100: #F4ECE0;
+  --color-primary-200: #E6D8C4;
+  --color-primary-300: #D3BEA2;
+  --color-primary-400: #C0A481;
+  --color-primary-500: #B39D82;
+  --color-primary-600: #9E8569;
+  --color-primary-700: #816A52;
+  --color-primary-800: #66523F;
+  --color-primary-900: #524233;
+  --color-primary-950: #2C221A;
 }
 
 /* ============================================================================
@@ -27,10 +40,10 @@
   --color-text-disabled: #BAB6B0;
 
   /* Primary */
-  --color-primary: #0EA5E9;
-  --color-primary-hover: #0284C7;
-  --color-primary-soft: #E0F2FE;
-  --color-primary-soft-text: #0369A1;
+  --color-primary: #B39D82;
+  --color-primary-hover: #9E8569;
+  --color-primary-soft: #FAF6F0;
+  --color-primary-soft-text: #66523F;
 
   /* Semantics — accent / soft bg / text */
   --color-success-accent: #0F9D58;
@@ -80,11 +93,11 @@
   --color-text-subtle: #787570;
   --color-text-disabled: #525049;
 
-  /* Primary — sky-400 for better punch on dark */
-  --color-primary: #38BDF8;
-  --color-primary-hover: #7DD3FC;
-  --color-primary-soft: rgba(56, 189, 248, 0.12);
-  --color-primary-soft-text: #7DD3FC;
+  /* Primary - gold/taupe for punch on dark */
+  --color-primary: #C0A481;
+  --color-primary-hover: #D3BEA2;
+  --color-primary-soft: rgba(179, 157, 130, 0.15);
+  --color-primary-soft-text: #E5D7C2;
 
   /* Semantics — dark */
   --color-success-accent: #34D399;

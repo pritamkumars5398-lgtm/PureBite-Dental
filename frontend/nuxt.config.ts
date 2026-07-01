@@ -49,7 +49,7 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
-      title: 'DentalPin',
+      title: 'Nº 1 Dental Studio',
       link: [
         { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }
       ]

@@ -1,30 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
-  <defs>
-    <linearGradient id="faviconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#06B6D4;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#14B8A6;stop-opacity:1" />
-    </linearGradient>
-  </defs>
-  
-  <rect width="32" height="32" rx="8" fill="url(#faviconGradient)"/>
-  
-  <!-- Tooth -->
-  <path d="M 16 6
-           C 12.5 6 10 8 8 9
-           C 6.5 10 5.5 11.8 5.5 14.5
-           C 5.5 16.5 6.8 18.2 7.5 20.5
-           C 8.2 23 8.2 25.5 10 26.5
-           C 11 27 11.8 24.5 12.2 21.5
-           C 12.6 18.5 13.2 17.5 14.5 17.5
-           C 15.8 17.5 16.4 18.5 16.8 21.5
-           C 17.2 24.5 18 27 19 26.5
-           C 20.8 25.5 20.8 23 21.5 20.5
-           C 22.2 18.2 23.5 16.5 23.5 14.5
-           C 23.5 11.8 22.5 10 21 9
-           C 19 8 16.5 6 16 6 Z"
-        fill="white"/>
-  
-  <!-- Shine detail -->
-  <ellipse cx="13.5" cy="11" rx="1.5" ry="1.8" fill="#06B6D4" opacity="0.6"/>
-  <circle cx="16" cy="13.5" r="2" fill="#0EA5E9"/>
+  <rect width="32" height="32" rx="8" fill="#FAF6F0"/>
+  <g transform="translate(2, 6)">
+    <text x="0" y="15" font-family="'Georgia', 'Times New Roman', serif" font-size="16" font-weight="normal" fill="#2C2A29">N</text>
+    <text x="12" y="7" font-family="'Georgia', 'Times New Roman', serif" font-size="7" font-weight="normal" fill="#2C2A29">o</text>
+    <line x1="12" y1="9" x2="16" y2="9" stroke="#2C2A29" stroke-width="0.7"/>
+    <text x="16" y="15" font-family="'Georgia', 'Times New Roman', serif" font-size="16" font-weight="normal" fill="#B39D82">1</text>
+  </g>
 </svg>
