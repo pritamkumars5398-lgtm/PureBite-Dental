@@ -44,7 +44,7 @@ def _add_months(d: date, months: int) -> date:
 # Eight scenario templates, cycled across patients. Together they
 # cover every status the call-list filters can show, plus enough
 # reasons and priorities for the dashboard counters to be non-trivial.
-_SCENARIOS = (
+_SCENARIOS_ES = (
     {
         "key": "pending_due_this_month_hygiene",
         "month_offset": 0,
@@ -119,12 +119,94 @@ _SCENARIOS = (
     },
 )
 
+_SCENARIOS_EN = (
+    {
+        "key": "pending_due_this_month_hygiene",
+        "month_offset": 0,
+        "reason": "hygiene",
+        "priority": "normal",
+        "status": "pending",
+        "attempts": 0,
+        "note": "Annual hygiene reminder.",
+    },
+    {
+        "key": "no_answer_overdue_checkup",
+        "month_offset": -1,
+        "reason": "checkup",
+        "priority": "normal",
+        "status": "contacted_no_answer",
+        "attempts": 2,
+        "note": "Annual checkup; no answer on landline.",
+    },
+    {
+        "key": "scheduled_postop_high",
+        "month_offset": 0,
+        "reason": "post_op",
+        "priority": "high",
+        "status": "contacted_scheduled",
+        "attempts": 1,
+        "note": "Post-op follow-up for tooth 36; appointment confirmed.",
+    },
+    {
+        "key": "done_last_month_hygiene",
+        "month_offset": -1,
+        "reason": "hygiene",
+        "priority": "normal",
+        "status": "done",
+        "attempts": 1,
+        "note": "Hygiene completed during previous visit.",
+    },
+    {
+        "key": "pending_next_month_ortho",
+        "month_offset": 1,
+        "reason": "ortho_review",
+        "priority": "normal",
+        "status": "pending",
+        "attempts": 0,
+        "note": "Monthly orthodontics checkup.",
+    },
+    {
+        "key": "needs_review_implant",
+        "month_offset": -2,
+        "reason": "implant_review",
+        "priority": "high",
+        "status": "needs_review",
+        "attempts": 0,
+        "note": "Implant 46 checkup; check contact info.",
+    },
+    {
+        "key": "cancelled_treatment_followup",
+        "month_offset": -1,
+        "reason": "treatment_followup",
+        "priority": "low",
+        "status": "cancelled",
+        "attempts": 1,
+        "note": "Patient declined follow-up.",
+    },
+    {
+        "key": "pending_three_months_implant",
+        "month_offset": 3,
+        "reason": "implant_review",
+        "priority": "normal",
+        "status": "pending",
+        "attempts": 0,
+        "note": "Implant control at 3 months.",
+    },
+)
 
-_ATTEMPT_NOTES = (
+
+_ATTEMPT_NOTES_ES = (
     "Llamada al móvil sin respuesta.",
     "Buzón de voz; mensaje dejado.",
     "Indica que llamemos la próxima semana.",
     "Acuerda agendar tras revisar agenda laboral.",
+)
+
+_ATTEMPT_NOTES_EN = (
+    "Called mobile, no response.",
+    "Voicemail; message left.",
+    "Asked to call back next week.",
+    "Agreed to book after checking work calendar.",
 )
 
 
@@ -134,12 +216,16 @@ async def seed_recalls_demo(
     dentist_id: UUID,
     hygienist_id: UUID,
     receptionist_id: UUID,
+    lang: str = "en",
 ) -> dict[str, int]:
     """Populate the recalls module for the demo clinic.
 
     Returns ``{<status>: count}`` plus a top-level ``total`` for the
     summary line printed by ``seed_demo.py``.
     """
+    scenarios = _SCENARIOS_ES if lang == "es" else _SCENARIOS_EN
+    attempt_notes = _ATTEMPT_NOTES_ES if lang == "es" else _ATTEMPT_NOTES_EN
+
     # Wipe — attempts cascade via FK ondelete=CASCADE.
     await db.execute(delete(Recall).where(Recall.clinic_id == clinic_id))
     await db.flush()
@@ -181,7 +267,7 @@ async def seed_recalls_demo(
     }
 
     for i, patient in enumerate(patient_list):
-        scenario = _SCENARIOS[i % len(_SCENARIOS)]
+        scenario = scenarios[i % len(scenarios)]
         due_month = _add_months(today, scenario["month_offset"])
         created_at = now - timedelta(days=14 + (i % 21))
 
@@ -247,7 +333,7 @@ async def seed_recalls_demo(
                     channel=channel,
                     outcome=outcome,
                     attempted_at=now - timedelta(days=k + 1, hours=2 * k),
-                    note=_ATTEMPT_NOTES[(i + k) % len(_ATTEMPT_NOTES)],
+                    note=attempt_notes[(i + k) % len(attempt_notes)],
                 )
             )
             stats["attempts"] += 1

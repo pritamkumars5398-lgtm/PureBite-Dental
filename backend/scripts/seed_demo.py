@@ -662,6 +662,7 @@ async def main(lang: str = "en") -> None:
                 clinic_id=CLINIC_ID,
                 dentist_id=USER_DENTIST_ID,
                 hygienist_id=USER_HYGIENIST_ID,
+                lang=lang,
             )
             print(
                 f"  Administrative: {notes_stats['administrative']} | "
@@ -720,6 +721,7 @@ async def main(lang: str = "en") -> None:
                     dentist_id=USER_DENTIST_ID,
                     hygienist_id=USER_HYGIENIST_ID,
                     receptionist_id=USER_RECEPTIONIST_ID,
+                    lang=lang,
                 )
                 print(
                     f"  Total: {stats['total']} | "

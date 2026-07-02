@@ -35,8 +35,8 @@ from .models import (
     ClinicalNote,
 )
 
-# UI strings stay in Spanish per project convention (CLAUDE.md).
-_ADMIN_BODIES = (
+# Spanish strings
+_ADMIN_BODIES_ES = (
     "Prefiere citas por la tarde. Avisar 24h antes para confirmar.",
     "Llamar siempre al móvil; no responde al fijo.",
     "Pago habitual con tarjeta. Solicita factura simplificada.",
@@ -46,7 +46,7 @@ _ADMIN_BODIES = (
     "Tiene movilidad reducida; reservar cabinete accesible.",
 )
 
-_DIAGNOSIS_BODIES = (
+_DIAGNOSIS_BODIES_ES = (
     "Caries oclusal incipiente; valorar empaste en próxima visita.",
     "Movilidad grado I y sospecha de absceso periapical. Solicitar radiografía periapical.",
     "Sensibilidad al frío en el cuadrante; descartar recesión gingival.",
@@ -56,7 +56,7 @@ _DIAGNOSIS_BODIES = (
     "Tercer molar incluido sin sintomatología actual; mantener en observación.",
 )
 
-_TREATMENT_BODIES = (
+_TREATMENT_BODIES_ES = (
     "Se aplica anestesia local (articaína 4% con epinefrina 1:100.000) sin incidencias.",
     "Apertura cameral e irrigación con hipoclorito sódico al 5,25%. Localizados 3 conductos.",
     "Adaptación marginal correcta tras pulido. Paciente refiere ausencia de molestias.",
@@ -66,7 +66,7 @@ _TREATMENT_BODIES = (
     "Cementado definitivo con cemento de ionómero de vidrio. Ajuste oclusal verificado.",
 )
 
-_PLAN_BODIES = (
+_PLAN_BODIES_ES = (
     "Plan acordado con el paciente. Priorizar tratamientos urgentes en cuadrante superior derecho.",
     "Paciente solicita financiación; gestionar opción a 6 meses sin intereses.",
     "Se acuerda iniciar fase higiénica antes de los tratamientos restauradores.",
@@ -75,12 +75,53 @@ _PLAN_BODIES = (
     "Paciente prefiere posponer la fase estética hasta después del verano.",
 )
 
+# English strings
+_ADMIN_BODIES_EN = (
+    "Prefers afternoon appointments. Call 24h in advance to confirm.",
+    "Always call mobile; does not answer landline.",
+    "Usually pays by card. Requests simplified invoice.",
+    "Accompanied by a family member; document consent.",
+    "Preferred language for communications: English.",
+    "Requests WhatsApp reminder the day before.",
+    "Has reduced mobility; book accessible cabinet.",
+)
+
+_DIAGNOSIS_BODIES_EN = (
+    "Incipient occlusal caries; assess filling on next visit.",
+    "Grade I mobility and suspected periapical abscess. Request periapical X-ray.",
+    "Cold sensitivity in quadrant; rule out gingival recession.",
+    "Evident bruxism with generalized occlusal wear. Consider mouthguard.",
+    "Swollen gums with bleeding on probing. Reinforce oral hygiene.",
+    "Leaking old restoration; recommend replacement.",
+    "Impacted third molar without current symptoms; keep under observation.",
+)
+
+_TREATMENT_BODIES_EN = (
+    "Local anesthesia applied (4% articaine with epinephrine 1:100,000) without incident.",
+    "Access cavity preparation and irrigation with 5.25% sodium hypochlorite. 3 root canals located.",
+    "Correct marginal fit after polishing. Patient reports no discomfort.",
+    "Rubber dam placed for absolute isolation. Good patient cooperation.",
+    "Follow-up appointment recommended in two weeks to check occlusion.",
+    "Procedure without complications. Post-operative instructions delivered.",
+    "Definitive cementation with glass ionomer cement. Occlusal adjustment verified.",
+)
+
+_PLAN_BODIES_EN = (
+    "Plan agreed with the patient. Prioritize urgent treatments in upper right quadrant.",
+    "Patient requests financing; manage 6-month interest-free option.",
+    "Agreed to start hygiene phase before restorative treatments.",
+    "Pending presentation to spouse; will confirm acceptance after family discussion.",
+    "10% discount applied for comprehensive treatment.",
+    "Patient prefers to postpone aesthetic phase until after summer.",
+)
+
 
 async def seed_clinical_notes_demo(
     db: AsyncSession,
     clinic_id: UUID,
     dentist_id: UUID,
     hygienist_id: UUID,
+    lang: str = "en",
 ) -> dict[str, int]:
     """Populate clinical_notes for the demo clinic.
 
@@ -88,6 +129,11 @@ async def seed_clinical_notes_demo(
     "treatment_plan": n}`` for the seed-demo summary line.
     """
     await db.execute(delete(ClinicalNote).where(ClinicalNote.clinic_id == clinic_id))
+
+    admin_bodies = _ADMIN_BODIES_ES if lang == "es" else _ADMIN_BODIES_EN
+    diagnosis_bodies = _DIAGNOSIS_BODIES_ES if lang == "es" else _DIAGNOSIS_BODIES_EN
+    treatment_bodies = _TREATMENT_BODIES_ES if lang == "es" else _TREATMENT_BODIES_EN
+    plan_bodies = _PLAN_BODIES_ES if lang == "es" else _PLAN_BODIES_EN
 
     stats = {"administrative": 0, "diagnosis": 0, "treatment": 0, "treatment_plan": 0}
     now = datetime.now(UTC)
@@ -122,7 +168,7 @@ async def seed_clinical_notes_demo(
                 owner_type=NOTE_OWNER_PATIENT,
                 owner_id=patient.id,
                 tooth_number=None,
-                body=_ADMIN_BODIES[cursor % len(_ADMIN_BODIES)],
+                body=admin_bodies[cursor % len(admin_bodies)],
                 author_id=author(cursor),
                 created_at=admin_at,
                 updated_at=admin_at,
@@ -139,7 +185,7 @@ async def seed_clinical_notes_demo(
                 owner_type=NOTE_OWNER_PATIENT,
                 owner_id=patient.id,
                 tooth_number=tooth_by_patient.get(patient.id),
-                body=_DIAGNOSIS_BODIES[cursor % len(_DIAGNOSIS_BODIES)],
+                body=diagnosis_bodies[cursor % len(diagnosis_bodies)],
                 author_id=author(cursor),
                 created_at=diag_at,
                 updated_at=diag_at,
@@ -165,7 +211,7 @@ async def seed_clinical_notes_demo(
                 owner_type=NOTE_OWNER_PLAN,
                 owner_id=plan.id,
                 tooth_number=None,
-                body=_PLAN_BODIES[cursor % len(_PLAN_BODIES)],
+                body=plan_bodies[cursor % len(plan_bodies)],
                 author_id=author(cursor),
                 created_at=plan_at,
                 updated_at=plan_at,
@@ -192,7 +238,7 @@ async def seed_clinical_notes_demo(
                 owner_type=NOTE_OWNER_TREATMENT,
                 owner_id=t.id,
                 tooth_number=None,
-                body=_TREATMENT_BODIES[cursor % len(_TREATMENT_BODIES)],
+                body=treatment_bodies[cursor % len(treatment_bodies)],
                 author_id=author(cursor),
                 created_at=tx_at,
                 updated_at=tx_at,
