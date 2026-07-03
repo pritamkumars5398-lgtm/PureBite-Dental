@@ -45,8 +45,6 @@ from .schemas import (
     TrendPoint,
 )
 
-# Public sort fields for /payments list. amount + date are the two real
-# use cases; everything else is too noisy to be useful in a list.
 _PAYMENT_SORT_ALLOW = {
     "payment_date": Payment.payment_date,
     "amount": Payment.amount,
@@ -54,8 +52,7 @@ _PAYMENT_SORT_ALLOW = {
 }
 _PAYMENT_SORT_DEFAULT = "payment_date:desc"
 
-# Caps for the cross-module filter endpoints. Keep in sync with the
-# contract in docs/technical/payments/cross-module-summaries.md.
+
 _FILTER_IDS_CAP = 1000
 
 
@@ -98,9 +95,7 @@ class PaymentService:
             filters.append(refund_exists if has_refunds else ~refund_exists)
 
         if has_unallocated is not None:
-            # "unallocated" semantically means: at least one allocation
-            # targets ``on_account``. The on_account balance is
-            # reassignable, so it counts as not-yet-bound work.
+        
             on_account_exists = (
                 select(PaymentAllocation.id)
                 .where(
@@ -114,13 +109,32 @@ class PaymentService:
         total_result = await db.execute(select(func.count(Payment.id)).where(*filters))
         total = total_result.scalar() or 0
 
+        if not total:
+            return [], 0
+
         offset = (page - 1) * page_size
+        id_query = (
+            select(Payment.id)
+            .where(*filters)
+            .order_by(
+                parse_sort(sort, _PAYMENT_SORT_ALLOW, _PAYMENT_SORT_DEFAULT),
+                desc(Payment.created_at),
+            )
+            .offset(offset)
+            .limit(page_size)
+        )
+        id_result = await db.execute(id_query)
+        payment_ids = [row[0] for row in id_result.all()]
+
+        if not payment_ids:
+            return [], total
+
         query = (
             select(Payment)
-            .where(*filters)
+            .where(Payment.id.in_(payment_ids))
             .options(
-                selectinload(Payment.allocations),
-                selectinload(Payment.refunds),
+                joinedload(Payment.allocations),
+                joinedload(Payment.refunds),
                 joinedload(Payment.recorder),
                 joinedload(Payment.patient),
             )
@@ -128,8 +142,6 @@ class PaymentService:
                 parse_sort(sort, _PAYMENT_SORT_ALLOW, _PAYMENT_SORT_DEFAULT),
                 desc(Payment.created_at),
             )
-            .offset(offset)
-            .limit(page_size)
         )
         result = await db.execute(query)
         items = list(result.scalars().unique().all())
@@ -186,12 +198,7 @@ class PaymentReadService:
         )
         return result.scalar_one()
 
-    # --- Cross-module bulk summaries (for /budgets and /patients lists) ---
-    #
-    # These are read-only, off-books-safe aggregates other modules' list
-    # pages consume via slot fillers. The hosting modules never import
-    # payments — they only know the slot name + the endpoint shape. See
-    # docs/technical/payments/cross-module-summaries.md for contract.
+    
 
     @staticmethod
     async def summaries_by_budgets(
@@ -223,10 +230,6 @@ class PaymentReadService:
         )
         collected_per_budget: dict[UUID, Decimal] = {row[0]: row[1] for row in alloc_rows.all()}
 
-        # Per-budget total_with_tax. ``Budget.total`` is the post-discount
-        # tax-inclusive total in this codebase (see budget/models.py
-        # comment and PDF service). Reads from budgets table — legal
-        # because ``payments.depends`` includes ``budget``.
         budget_rows = await db.execute(
             select(Budget.id, Budget.total).where(
                 Budget.clinic_id == clinic_id,
@@ -563,13 +566,6 @@ class LedgerService:
                 )
             )
 
-        # Earned — enriched with treatment + catalog + performer data
-        # in one round-trip so the patient timeline can show "Empaste
-        # composite · realizado · Dra. García" instead of the bare
-        # ``source_event`` string. Raw text() keeps the payments
-        # module's CLAUDE.md contract (no Python imports from
-        # ``odontogram`` / ``treatment_plan`` / ``auth``); we read the
-        # shared tables via SQL only.
         from sqlalchemy import text
 
         result = await db.execute(
@@ -593,18 +589,14 @@ class LedgerService:
         )
         for row in result.mappings():
             catalog_names = row["catalog_names"] or {}
-            # Catalog names are stored as i18n JSONB; prefer the
-            # operative language Spanish, fall back to English.
+          
             treatment_name: str | None = None
             if isinstance(catalog_names, dict):
                 treatment_name = catalog_names.get("es") or catalog_names.get("en")
             prof_first = row["prof_first_name"] or ""
             prof_last = row["prof_last_name"] or ""
             prof_name = f"{prof_first} {prof_last}".strip() or None
-            # Display label fallback chain: catalog name (joined) →
-            # snapshot ``description`` (writer-supplied human label,
-            # e.g. multi-session label or migration debt context) →
-            # bare ``source_event`` so the row is never label-less.
+ 
             display_description = treatment_name or row["row_description"] or row["source_event"]
             entries.append(
                 LedgerEntry(
@@ -729,9 +721,7 @@ class PaymentReportsService:
         )
         total_refunded, refund_count = result.one()
 
-        # Patient credit / clinic receivable totals — sum across patients
-        # who fall on each side of the (paid − earned) inequality.
-        # Implemented in app code from per-patient aggregates.
+     
         patient_credit_total, clinic_receivable_total = await PaymentReportsService._patient_totals(
             db, clinic_id
         )
@@ -1033,8 +1023,7 @@ class PaymentReportsService:
         date_to: date,
         granularity: str,
     ) -> PaymentsTrends:
-        # Compute bucket starts in Python from raw rows; portable across
-        # SQL dialects and avoids dialect-specific date_trunc usage.
+
         coll_rows = await db.execute(
             select(Payment.payment_date, Payment.amount).where(
                 Payment.clinic_id == clinic_id,
