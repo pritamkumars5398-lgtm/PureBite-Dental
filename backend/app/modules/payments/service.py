@@ -95,7 +95,7 @@ class PaymentService:
             filters.append(refund_exists if has_refunds else ~refund_exists)
 
         if has_unallocated is not None:
-        
+
             on_account_exists = (
                 select(PaymentAllocation.id)
                 .where(
@@ -198,7 +198,7 @@ class PaymentReadService:
         )
         return result.scalar_one()
 
-    
+
 
     @staticmethod
     async def summaries_by_budgets(
@@ -589,14 +589,14 @@ class LedgerService:
         )
         for row in result.mappings():
             catalog_names = row["catalog_names"] or {}
-          
+
             treatment_name: str | None = None
             if isinstance(catalog_names, dict):
                 treatment_name = catalog_names.get("es") or catalog_names.get("en")
             prof_first = row["prof_first_name"] or ""
             prof_last = row["prof_last_name"] or ""
             prof_name = f"{prof_first} {prof_last}".strip() or None
- 
+
             display_description = treatment_name or row["row_description"] or row["source_event"]
             entries.append(
                 LedgerEntry(
@@ -721,7 +721,7 @@ class PaymentReportsService:
         )
         total_refunded, refund_count = result.one()
 
-     
+
         patient_credit_total, clinic_receivable_total = await PaymentReportsService._patient_totals(
             db, clinic_id
         )

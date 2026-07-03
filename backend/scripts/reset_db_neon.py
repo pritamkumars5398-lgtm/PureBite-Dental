@@ -1,6 +1,9 @@
 import asyncio
+
 from sqlalchemy import text
+
 from app.database import engine
+
 
 async def main():
     print("Connecting to database and dropping all tables...")
