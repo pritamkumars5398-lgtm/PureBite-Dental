@@ -4,16 +4,10 @@ type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
 interface UseApiOptions {
   method?: HttpMethod
-  // Accept any plain object so callers can pass a typed domain payload
-  // (e.g. ``BudgetCreate``) without an ``as unknown as Record<…>`` cast.
-  // ``$fetch`` serializes via JSON.stringify, which handles any object.
   body?: object | null
   headers?: Record<string, string>
   skipAuth?: boolean
-  // Optional AbortSignal so callers can cancel in-flight requests
-  // (debounced lookups, component unmount, etc.).
   signal?: AbortSignal
-  // Optional timeout in milliseconds.
   timeout?: number
 }
 
@@ -23,7 +17,7 @@ export function useApi() {
   const { t } = useI18n()
   const toast = useToast()
 
-  // Use different API URL for server (Docker internal) vs client (browser)
+
   const apiBaseUrl = computed(() =>
     import.meta.server ? config.apiBaseUrlServer : config.public.apiBaseUrl
   )
@@ -46,7 +40,7 @@ export function useApi() {
     try {
       return await $fetch<T>(path, {
         baseURL: apiBaseUrl.value,
-        timeout: options.timeout ?? 60000, // 60 seconds default to match backend maxDuration
+        timeout: options.timeout ?? 60000,
         method,
         body,
         headers,
@@ -55,19 +49,13 @@ export function useApi() {
     } catch (error: unknown) {
       const fetchError = error as { name?: string, statusCode?: number, data?: { message?: string } }
 
-      // Caller-initiated cancellation: don't toast, just rethrow so the
-      // caller can no-op. AbortController is used by orchestrators
-      // (e.g. dashboard) to cancel stale parallel fetches.
       if (fetchError.name === 'AbortError' || signal?.aborted) {
         throw error
       }
 
-      // Handle specific error codes
       if (fetchError.statusCode === 401) {
-        // Try to refresh token
         const refreshed = await auth.refresh()
         if (refreshed) {
-          // Retry the request with new token
           headers.Authorization = `Bearer ${auth.accessToken.value}`
           return await $fetch<T>(path, {
             baseURL: apiBaseUrl.value,
@@ -78,7 +66,6 @@ export function useApi() {
             signal
           })
         }
-        // Redirect to login
         await auth.logout()
         throw error
       }
@@ -97,12 +84,10 @@ export function useApi() {
       }
 
       if (fetchError.statusCode === 409) {
-        // Conflict - let the caller handle it
         throw error
       }
 
       if (fetchError.statusCode === 422) {
-        // Validation error - let the caller handle it
         throw error
       }
 
@@ -115,7 +100,6 @@ export function useApi() {
         throw error
       }
 
-      // Network error
       if (!fetchError.statusCode) {
         toast.add({
           title: t('common.error'),
@@ -128,7 +112,6 @@ export function useApi() {
     }
   }
 
-  // Convenience methods
   async function get<T>(path: string, options: Omit<UseApiOptions, 'method' | 'body'> = {}): Promise<T> {
     return $api<T>(path, { ...options, method: 'GET' })
   }
@@ -158,6 +141,4 @@ export function useApi() {
     del
   }
 }
-
-// Type helpers for API responses
 export type { ApiResponse, PaginatedResponse }

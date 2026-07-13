@@ -95,7 +95,6 @@ class PaymentService:
             filters.append(refund_exists if has_refunds else ~refund_exists)
 
         if has_unallocated is not None:
-
             on_account_exists = (
                 select(PaymentAllocation.id)
                 .where(
@@ -197,8 +196,6 @@ class PaymentReadService:
             )
         )
         return result.scalar_one()
-
-
 
     @staticmethod
     async def summaries_by_budgets(
@@ -720,7 +717,6 @@ class PaymentReportsService:
             )
         )
         total_refunded, refund_count = result.one()
-
 
         patient_credit_total, clinic_receivable_total = await PaymentReportsService._patient_totals(
             db, clinic_id
