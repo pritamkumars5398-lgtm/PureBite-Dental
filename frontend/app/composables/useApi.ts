@@ -13,6 +13,8 @@ interface UseApiOptions {
   // Optional AbortSignal so callers can cancel in-flight requests
   // (debounced lookups, component unmount, etc.).
   signal?: AbortSignal
+  // Optional timeout in milliseconds.
+  timeout?: number
 }
 
 export function useApi() {
@@ -44,7 +46,7 @@ export function useApi() {
     try {
       return await $fetch<T>(path, {
         baseURL: apiBaseUrl.value,
-        timeout: 10000, // 10 seconds
+        timeout: options.timeout ?? 60000, // 60 seconds default to match backend maxDuration
         method,
         body,
         headers,
@@ -69,9 +71,11 @@ export function useApi() {
           headers.Authorization = `Bearer ${auth.accessToken.value}`
           return await $fetch<T>(path, {
             baseURL: apiBaseUrl.value,
+            timeout: options.timeout ?? 60000,
             method,
             body,
-            headers
+            headers,
+            signal
           })
         }
         // Redirect to login
