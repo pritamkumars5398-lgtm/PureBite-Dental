@@ -354,7 +354,11 @@ function patientCity(p: Patient): string {
                 :title="t('patients.doNotContact.label')"
               />
             </div>
-            <div class="text-caption text-subtle truncate">
+            <div class="text-caption text-subtle truncate flex items-center gap-2 mt-0.5">
+              <span v-if="patient.patient_number" class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-surface-muted border border-default text-subtle">
+                {{ patient.patient_number }}
+              </span>
+              <span v-if="patient.patient_number && (patientCity(patient) || patient.phone || patient.email)">·</span>
               <span v-if="patientCity(patient)">{{ patientCity(patient) }} · </span>{{ patient.phone || patient.email || '—' }}
             </div>
           </div>
@@ -389,7 +393,11 @@ function patientCity(p: Patient): string {
                   class="w-3.5 h-3.5 text-warning shrink-0"
                 />
               </div>
-              <div class="text-caption text-subtle truncate">
+              <div class="text-caption text-subtle truncate flex items-center gap-2 mt-0.5">
+                <span v-if="patient.patient_number" class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-surface-muted border border-default text-subtle">
+                  {{ patient.patient_number }}
+                </span>
+                <span v-if="patient.patient_number && (patient.phone || patient.email)">·</span>
                 {{ patient.phone || patient.email || '—' }}
               </div>
             </div>

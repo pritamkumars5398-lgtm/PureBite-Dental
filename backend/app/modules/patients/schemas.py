@@ -56,6 +56,7 @@ class PatientUpdate(BaseModel):
 class PatientResponse(BaseModel):
     id: UUID
     clinic_id: UUID
+    patient_number: str | None  # e.g. PT-AMA-000123 — None for legacy records
     first_name: str
     last_name: str
     phone: str | None
@@ -79,6 +80,7 @@ class PatientBrief(BaseModel):
     """Brief patient info for lists and references across modules."""
 
     id: UUID
+    patient_number: str | None  # e.g. PT-AMA-000123
     first_name: str
     last_name: str
     phone: str | None

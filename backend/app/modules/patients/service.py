@@ -52,6 +52,7 @@ _SEARCH_FIELDS = (
     Patient.phone,
     Patient.email,
     Patient.national_id,
+    Patient.patient_number,
 )
 _FULL_NAME = func.concat(Patient.first_name, " ", Patient.last_name)
 
@@ -253,11 +254,24 @@ class PatientService:
         db.add(patient)
         await db.flush()
 
+        # Generate human-readable patient number: PT-{FIRST3}-{6-digit-seq}
+        # The sequence is the total count of patients in the clinic (including
+        # the one just inserted), giving a monotonically increasing number.
+        # Example: PT-AMA-000001 for the first patient named Amartya.
+        prefix = (patient.first_name or "XXX")[:3].upper()
+        count_result = await db.execute(
+            select(func.count(Patient.id)).where(Patient.clinic_id == clinic_id)
+        )
+        seq = count_result.scalar() or 1
+        patient.patient_number = f"PT-{prefix}-{seq:06d}"
+        await db.flush()
+
         await event_bus.publish(
             EventType.PATIENT_CREATED,
             {"patient_id": str(patient.id), "clinic_id": str(clinic_id)},
         )
         return patient
+
 
     @staticmethod
     async def update_patient(db: AsyncSession, patient: Patient, data: dict) -> Patient:

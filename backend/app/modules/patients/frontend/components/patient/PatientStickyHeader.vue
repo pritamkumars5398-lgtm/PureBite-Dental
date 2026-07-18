@@ -151,12 +151,19 @@ const actionItems = computed(() => [
           />
         </div>
 
-        <!-- Metadata strip — age · gender · DNI · contact icons -->
+        <!-- Metadata strip — patient id · age · gender · DNI · contact icons -->
         <div class="flex items-center gap-x-2.5 gap-y-1 flex-wrap text-caption text-muted">
+          <span
+            v-if="patient.patient_number"
+            class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-surface-muted border border-default text-subtle"
+          >
+            {{ patient.patient_number }}
+          </span>
           <span
             v-if="age != null"
             class="tnum"
           >
+            <span v-if="patient.patient_number" class="mr-2 text-subtle">·</span>
             {{ age }} {{ t('patients.years') }}
           </span>
           <span
