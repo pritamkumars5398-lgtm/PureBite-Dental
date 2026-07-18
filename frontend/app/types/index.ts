@@ -139,6 +139,7 @@ export interface PatientBillingAddress {
 export interface Patient {
   id: string
   clinic_id: string
+  patient_number?: string | null  // e.g. PT-AMA-000123 — null for legacy records
   first_name: string
   last_name: string
   phone?: string
@@ -796,6 +797,7 @@ export type RelationshipToPatient = 'patient' | 'guardian' | 'representative'
 // Brief types for nested responses
 export interface PatientBrief {
   id: string
+  patient_number?: string | null  // e.g. PT-AMA-000123
   first_name: string
   last_name: string
   phone?: string

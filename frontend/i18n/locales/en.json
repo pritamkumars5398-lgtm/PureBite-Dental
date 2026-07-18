@@ -59,7 +59,7 @@
     "create": "New patient",
     "edit": "Edit patient",
     "search": "Search patient...",
-    "searchPlaceholder": "Name or phone",
+    "searchPlaceholder": "Name, phone or patient ID",
     "noResults": "No patients found",
     "empty": "No patients registered",
     "emptyAction": "Create first patient",
