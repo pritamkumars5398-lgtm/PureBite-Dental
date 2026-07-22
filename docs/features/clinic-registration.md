@@ -114,8 +114,8 @@ async def register_clinic(
             id=uuid4(),
             name=data.clinic_name,
             tax_id=data.tax_id,
-            timezone="Europe/Madrid",  # Default timezone
-            currency="EUR",            # Default currency
+            timezone="Asia/Kolkata",   # Default timezone (override at provision/seed time)
+            currency="INR",            # Default currency (override at provision/seed time)
             settings={
                 "slot_duration_min": 15,
                 "budget_expiry_days": 30,

@@ -27,6 +27,7 @@ const emit = defineEmits<{
 
 const { t, locale } = useI18n()
 const catalog = useCatalog()
+const { symbol: currencySymbol } = useCurrency()
 
 // VAT Types
 const {
@@ -522,7 +523,7 @@ function handleClose() {
                     min="0"
                   >
                     <template #trailing>
-                      <span class="text-muted text-sm">€</span>
+                      <span class="text-muted text-sm">{{ currencySymbol }}</span>
                     </template>
                   </UInput>
                 </UFormField>
@@ -535,7 +536,7 @@ function handleClose() {
                     min="0"
                   >
                     <template #trailing>
-                      <span class="text-muted text-sm">€</span>
+                      <span class="text-muted text-sm">{{ currencySymbol }}</span>
                     </template>
                   </UInput>
                 </UFormField>
@@ -662,7 +663,7 @@ function handleClose() {
                         class="w-28"
                       >
                         <template #trailing>
-                          <span class="text-muted text-xs">€</span>
+                          <span class="text-muted text-xs">{{ currencySymbol }}</span>
                         </template>
                       </UInput>
                       <UButton
@@ -688,7 +689,7 @@ function handleClose() {
                   <div class="px-3 pb-3 pt-1 border-t border-subtle">
                     <div class="flex items-center justify-between text-xs mb-1.5">
                       <span class="text-muted">
-                        {{ sessionsSum.toFixed(2) }} € / {{ (Number(formData.default_price) || 0).toFixed(2) }} €
+                        {{ sessionsSum.toFixed(2) }} {{ currencySymbol }} / {{ (Number(formData.default_price) || 0).toFixed(2) }} {{ currencySymbol }}
                       </span>
                       <span
                         class="flex items-center gap-1 font-medium"

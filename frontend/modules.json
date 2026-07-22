@@ -1,91 +1,91 @@
 {
   "layers": [
-    "..\\backend\\app\\modules\\patients\\frontend",
-    "..\\backend\\app\\modules\\catalog\\frontend",
-    "..\\backend\\app\\modules\\odontogram\\frontend",
-    "..\\backend\\app\\modules\\agenda\\frontend",
-    "..\\backend\\app\\modules\\budget\\frontend",
-    "..\\backend\\app\\modules\\payments\\frontend",
-    "..\\backend\\app\\modules\\billing\\frontend",
-    "..\\backend\\app\\modules\\copilot\\frontend",
-    "..\\backend\\app\\modules\\media\\frontend",
-    "..\\backend\\app\\modules\\patients_clinical\\frontend",
-    "..\\backend\\app\\modules\\treatment_plan\\frontend",
-    "..\\backend\\app\\modules\\clinical_notes\\frontend",
-    "..\\backend\\app\\modules\\schedules\\frontend",
-    "..\\backend\\app\\modules\\recalls\\frontend",
-    "..\\backend\\app\\modules\\notifications\\frontend",
-    "..\\backend\\app\\modules\\patient_timeline\\frontend",
-    "..\\backend\\app\\modules\\reports\\frontend"
+    "../backend/app/modules/patients/frontend",
+    "../backend/app/modules/catalog/frontend",
+    "../backend/app/modules/odontogram/frontend",
+    "../backend/app/modules/agenda/frontend",
+    "../backend/app/modules/budget/frontend",
+    "../backend/app/modules/payments/frontend",
+    "../backend/app/modules/billing/frontend",
+    "../backend/app/modules/copilot/frontend",
+    "../backend/app/modules/media/frontend",
+    "../backend/app/modules/patients_clinical/frontend",
+    "../backend/app/modules/treatment_plan/frontend",
+    "../backend/app/modules/clinical_notes/frontend",
+    "../backend/app/modules/schedules/frontend",
+    "../backend/app/modules/recalls/frontend",
+    "../backend/app/modules/notifications/frontend",
+    "../backend/app/modules/patient_timeline/frontend",
+    "../backend/app/modules/reports/frontend"
   ],
   "modules": [
     {
       "name": "patients",
-      "path": "..\\backend\\app\\modules\\patients\\frontend"
+      "path": "../backend/app/modules/patients/frontend"
     },
     {
       "name": "catalog",
-      "path": "..\\backend\\app\\modules\\catalog\\frontend"
+      "path": "../backend/app/modules/catalog/frontend"
     },
     {
       "name": "odontogram",
-      "path": "..\\backend\\app\\modules\\odontogram\\frontend"
+      "path": "../backend/app/modules/odontogram/frontend"
     },
     {
       "name": "agenda",
-      "path": "..\\backend\\app\\modules\\agenda\\frontend"
+      "path": "../backend/app/modules/agenda/frontend"
     },
     {
       "name": "budget",
-      "path": "..\\backend\\app\\modules\\budget\\frontend"
+      "path": "../backend/app/modules/budget/frontend"
     },
     {
       "name": "payments",
-      "path": "..\\backend\\app\\modules\\payments\\frontend"
+      "path": "../backend/app/modules/payments/frontend"
     },
     {
       "name": "billing",
-      "path": "..\\backend\\app\\modules\\billing\\frontend"
+      "path": "../backend/app/modules/billing/frontend"
     },
     {
       "name": "copilot",
-      "path": "..\\backend\\app\\modules\\copilot\\frontend"
+      "path": "../backend/app/modules/copilot/frontend"
     },
     {
       "name": "media",
-      "path": "..\\backend\\app\\modules\\media\\frontend"
+      "path": "../backend/app/modules/media/frontend"
     },
     {
       "name": "patients_clinical",
-      "path": "..\\backend\\app\\modules\\patients_clinical\\frontend"
+      "path": "../backend/app/modules/patients_clinical/frontend"
     },
     {
       "name": "treatment_plan",
-      "path": "..\\backend\\app\\modules\\treatment_plan\\frontend"
+      "path": "../backend/app/modules/treatment_plan/frontend"
     },
     {
       "name": "clinical_notes",
-      "path": "..\\backend\\app\\modules\\clinical_notes\\frontend"
+      "path": "../backend/app/modules/clinical_notes/frontend"
     },
     {
       "name": "schedules",
-      "path": "..\\backend\\app\\modules\\schedules\\frontend"
+      "path": "../backend/app/modules/schedules/frontend"
     },
     {
       "name": "recalls",
-      "path": "..\\backend\\app\\modules\\recalls\\frontend"
+      "path": "../backend/app/modules/recalls/frontend"
     },
     {
       "name": "notifications",
-      "path": "..\\backend\\app\\modules\\notifications\\frontend"
+      "path": "../backend/app/modules/notifications/frontend"
     },
     {
       "name": "patient_timeline",
-      "path": "..\\backend\\app\\modules\\patient_timeline\\frontend"
+      "path": "../backend/app/modules/patient_timeline/frontend"
     },
     {
       "name": "reports",
-      "path": "..\\backend\\app\\modules\\reports\\frontend"
+      "path": "../backend/app/modules/reports/frontend"
     }
   ],
   "version": 1

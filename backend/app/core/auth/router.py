@@ -593,8 +593,7 @@ async def update_clinic_metadata(
         clinic.address = {**existing_address, **new_address}
     if data.timezone is not None:
         clinic.timezone = data.timezone
-    if data.currency is not None:
-        clinic.currency = data.currency
+    # currency is deliberately not updatable — see ClinicMetadataUpdate.
 
     await db.commit()
     # Re-query with cabinets eagerly loaded so ClinicMetadataResponse

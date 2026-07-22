@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { ClinicAddress, ClinicUpdate } from '~/types'
-import { SUPPORTED_CURRENCIES } from '~/constants/currencies'
 import { PERMISSIONS } from '~/config/permissions'
 
 const { t } = useI18n()
@@ -66,21 +65,12 @@ function translateCountry(value: string | undefined | null): string {
   return value
 }
 
-const currencyOptions = computed(() => {
-  let displayNames: Intl.DisplayNames | null = null
-  try {
-    displayNames = new Intl.DisplayNames([currentLocale.value], { type: 'currency' })
-  } catch {
-    displayNames = null
-  }
-  const collator = new Intl.Collator(currentLocale.value, { sensitivity: 'base' })
-  return SUPPORTED_CURRENCIES.map(code => ({
-    value: code,
-    label: displayNames?.of(code) ? `${code} — ${displayNames.of(code)}` : code
-  })).sort((a, b) => collator.compare(a.label, b.label))
-})
+// Currency is set once at seed/provisioning time and is intentionally not
+// editable here (changing it after invoices exist would reinterpret
+// historical totals). It is shown read-only below.
 
 const timezoneOptions = [
+  { label: 'Asia/Kolkata (IST)', value: 'Asia/Kolkata' },
   { label: 'Europe/Madrid', value: 'Europe/Madrid' },
   { label: 'Europe/London', value: 'Europe/London' },
   { label: 'Europe/Paris', value: 'Europe/Paris' },
@@ -110,8 +100,7 @@ const form = ref({
   country: '',
   phone: '',
   email: '',
-  timezone: 'Europe/Madrid',
-  currency: 'EUR'
+  timezone: 'Asia/Kolkata'
 })
 
 function loadForm() {
@@ -126,8 +115,7 @@ function loadForm() {
     country: c?.address?.country || '',
     phone: c?.phone || '',
     email: c?.email || '',
-    timezone: c?.timezone || 'Europe/Madrid',
-    currency: c?.currency || 'EUR'
+    timezone: c?.timezone || 'Asia/Kolkata'
   }
 }
 
@@ -155,8 +143,7 @@ async function save() {
     address,
     phone: form.value.phone || undefined,
     email: form.value.email || undefined,
-    timezone: form.value.timezone || undefined,
-    currency: form.value.currency || undefined
+    timezone: form.value.timezone || undefined
   }
   const result = await clinic.updateClinic(updateData)
   isSaving.value = false
@@ -309,30 +296,17 @@ function formatAddress(address?: Record<string, string>): string {
         </UFormField>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <UFormField
-          :label="t('settings.timezone')"
-          :help="t('settings.timezoneHelp')"
-        >
-          <USelect
-            v-model="form.timezone"
-            :items="timezoneOptions"
-            value-key="value"
-            label-key="label"
-          />
-        </UFormField>
-        <UFormField
-          :label="t('settings.currency')"
-          :help="t('settings.currencyHelp')"
-        >
-          <USelect
-            v-model="form.currency"
-            :items="currencyOptions"
-            value-key="value"
-            label-key="label"
-          />
-        </UFormField>
-      </div>
+      <UFormField
+        :label="t('settings.timezone')"
+        :help="t('settings.timezoneHelp')"
+      >
+        <USelect
+          v-model="form.timezone"
+          :items="timezoneOptions"
+          value-key="value"
+          label-key="label"
+        />
+      </UFormField>
 
       <div class="flex justify-end gap-2 pt-2">
         <UButton

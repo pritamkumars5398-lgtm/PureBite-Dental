@@ -55,7 +55,8 @@ export interface ClinicUpdate {
   phone?: string
   email?: string
   timezone?: string
-  currency?: string
+  // currency is intentionally omitted — it is fixed at seed/provisioning
+  // time and not editable via the clinic-update endpoint.
 }
 
 export interface Clinic {
