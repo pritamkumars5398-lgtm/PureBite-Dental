@@ -23,6 +23,7 @@
     "reports": "Reports",
     "settings": "Settings",
     "catalog": "Catalog",
+    "saas_admin": "SaaS Platform",
     "menu": "Menu",
     "openMenu": "Open menu",
     "close": "Close",
@@ -1006,6 +1007,16 @@
     "editClinicInfo": "Edit information",
     "clinicUpdated": "Clinic information updated",
     "clinicUpdateError": "Error updating information",
+    "subscription": {
+      "heading": "Subscription",
+      "active": "Active",
+      "expired": "Expired",
+      "notActivated": "Not activated",
+      "endsOn": "Renews / ends on {date}",
+      "expiredOn": "Expired on {date}",
+      "notActivatedBody": "Your platform administrator hasn't granted a subscription yet.",
+      "expiringWarning": "Your subscription ends in {days} day(s). Contact your platform administrator to renew before you lose access."
+    },
     "cabinets": "Cabinets",
     "language": "Language",
     "languageDescription": "Select your preferred language",
@@ -2756,5 +2767,76 @@
     "drawerTitle": "Help for this page",
     "unavailable": "No contextual help available for this page yet.",
     "openFullManual": "Open full manual"
+  },
+  "saasAdmin": {
+    "title": "Platform Administration",
+    "subtitle": "Manage leads, provision clinics, and oversee subscriptions across the entire platform.",
+    "tabs": {
+      "leads": "Leads",
+      "clinics": "Clinics & Subscriptions",
+      "plans": "Pricing Plans"
+    },
+    "leads": {
+      "heading": "Recent leads",
+      "empty": "No leads found.",
+      "expectedUsers": "{count} expected users",
+      "status": {
+        "pending": "Pending",
+        "contacted": "Contacted",
+        "processed": "Processed",
+        "rejected": "Rejected"
+      }
+    },
+    "clinics": {
+      "heading": "Clinic directory",
+      "provision": "Provision clinic",
+      "empty": "No clinics provisioned yet.",
+      "active": "Active",
+      "inactive": "Inactive",
+      "subscriptionCount": "{count} subscription(s)",
+      "grantRenew": "Grant / renew subscription",
+      "grantRenewHelp": "Appends to the current subscription if one is still active; starts immediately otherwise.",
+      "grant": "Grant",
+      "history": "Subscription history",
+      "noHistory": "No subscriptions granted yet.",
+      "subStatus": {
+        "active": "Active",
+        "upcoming": "Scheduled",
+        "expired": "Expired"
+      }
+    },
+    "plans": {
+      "heading": "Pricing plans",
+      "newPlan": "New plan",
+      "empty": "No pricing plans configured.",
+      "durationMonths": "{count} month(s)",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "form": {
+      "clinicName": "Clinic name",
+      "taxId": "Tax ID",
+      "passwordHelp": "Minimum 8 characters. Share this with the clinic admin separately.",
+      "planName": "Plan name",
+      "durationMonths": "Duration (months)",
+      "price": "Price"
+    },
+    "messages": {
+      "tenantProvisioned": "Clinic \"{clinic}\" provisioned successfully",
+      "subscriptionGranted": "Subscription granted",
+      "planCreated": "Pricing plan created"
+    },
+    "errors": {
+      "loadDashboard": "Failed to load the platform dashboard",
+      "updateLead": "Failed to update lead status",
+      "provisionTenant": "Failed to provision clinic",
+      "emailExists": "A user with this email already exists",
+      "tenantConflict": "A clinic or user with these details already exists",
+      "loadHistory": "Failed to load subscription history",
+      "grantSubscription": "Failed to grant subscription",
+      "clinicNotFound": "Clinic not found",
+      "createPlan": "Failed to create pricing plan",
+      "updatePlan": "Failed to update pricing plan"
+    }
   }
 }

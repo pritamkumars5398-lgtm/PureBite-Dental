@@ -16,7 +16,8 @@
     "../backend/app/modules/recalls/frontend",
     "../backend/app/modules/notifications/frontend",
     "../backend/app/modules/patient_timeline/frontend",
-    "../backend/app/modules/reports/frontend"
+    "../backend/app/modules/reports/frontend",
+    "../backend/app/modules/saas/frontend"
   ],
   "modules": [
     {
@@ -86,6 +87,10 @@
     {
       "name": "reports",
       "path": "../backend/app/modules/reports/frontend"
+    },
+    {
+      "name": "saas",
+      "path": "../backend/app/modules/saas/frontend"
     }
   ],
   "version": 1

@@ -47,7 +47,7 @@ export function useApi() {
         signal
       })
     } catch (error: unknown) {
-      const fetchError = error as { name?: string, statusCode?: number, data?: { message?: string } }
+      const fetchError = error as { name?: string, statusCode?: number, data?: { message?: string, detail?: string } }
 
       if (fetchError.name === 'AbortError' || signal?.aborted) {
         throw error
@@ -71,9 +71,14 @@ export function useApi() {
       }
 
       if (fetchError.statusCode === 403) {
+        if (fetchError.data?.message === 'subscription_expired' || fetchError.data?.detail === 'subscription_expired') {
+          navigateTo('/locked')
+          throw error
+        }
+
         toast.add({
           title: t('common.error'),
-          description: t('common.forbidden', 'Acceso denegado'),
+          description: fetchError.data?.message || fetchError.data?.detail || t('common.forbidden', 'Acceso denegado'),
           color: 'error'
         })
         throw error

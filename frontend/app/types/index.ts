@@ -91,12 +91,12 @@ export interface AuthTokens {
 
 export interface AuthResponse extends AuthTokens {
   user: User
-  clinics: Array<{ id: string, name: string, role: string }>
+  clinics: Array<{ id: string, name: string, role: string, subscription_active?: boolean, subscription_end_date?: string | null }>
 }
 
 export interface MeResponse {
   user: User
-  clinics: Array<{ id: string, name: string, role: string }>
+  clinics: Array<{ id: string, name: string, role: string, subscription_active?: boolean, subscription_end_date?: string | null }>
   permissions: string[]
 }
 

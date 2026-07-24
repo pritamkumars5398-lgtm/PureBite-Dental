@@ -122,6 +122,30 @@ async def get_clinic_context(
     # reset — the middleware drops the whole context at request end.
     set_request_context(clinic_id=membership.clinic.id, user_id=current_user.id)
 
+    # Check SaaS Subscription Enforcement
+    from app.modules.saas.constants import is_platform_clinic
+
+    if not is_platform_clinic(membership.clinic.name):
+        from datetime import datetime, timezone
+        from app.modules.saas.models import SaasSubscription
+
+        now = datetime.now(timezone.utc)
+        sub_result = await db.execute(
+            select(SaasSubscription)
+            .where(
+                SaasSubscription.clinic_id == membership.clinic.id,
+                SaasSubscription.end_date > now,
+            )
+            .limit(1)
+        )
+        active_sub = sub_result.scalar_one_or_none()
+        
+        if not active_sub:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="subscription_expired",
+            )
+
     return ClinicContext(
         user=current_user,
         clinic=membership.clinic,

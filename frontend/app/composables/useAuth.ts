@@ -1,4 +1,4 @@
-import type { User, LoginCredentials, AuthResponse, MeResponse, ApiResponse } from '~/types'
+import type { User, LoginCredentials, AuthResponse, AuthTokens, MeResponse, ApiResponse } from '~/types'
 
 // Client-only module-level dedupe slot for the in-flight refresh promise.
 // Storing a Promise inside useState() leaks it into the SSR payload, which
@@ -19,6 +19,7 @@ export function useAuth() {
 
   // State
   const user = useState<User | null>('auth:user', () => null)
+  const clinics = useState<Array<{ id: string, name: string, role: string, subscription_active?: boolean, subscription_end_date?: string | null }>>('auth:clinics', () => [])
   const permissions = useState<string[]>('auth:permissions', () => [])
   // Cookie lifetime matches refresh token; JWT expiry is enforced by the
   // backend, and a 401 triggers refresh in useApi. Matching the access
@@ -44,7 +45,11 @@ export function useAuth() {
     formData.append('username', credentials.email)
     formData.append('password', credentials.password)
 
-    const response = await $fetch<AuthResponse>('/api/v1/auth/login', {
+    // The backend /login endpoint returns raw tokens only (no
+    // user/clinics — see CLAUDE.md's auth-endpoint exception to the
+    // ApiResponse wrapper convention). fetchUser() below is what
+    // actually populates user/clinics/permissions.
+    const response = await $fetch<AuthTokens>('/api/v1/auth/login', {
       baseURL: apiBaseUrl.value,
       method: 'POST',
       body: formData,
@@ -64,6 +69,7 @@ export function useAuth() {
     accessToken.value = null
     refreshToken.value = null
     user.value = null
+    clinics.value = []
     permissions.value = []
     // SSR: skip router.push — calling it from middleware can crash the
     // response. The global auth middleware redirects to /login once it
@@ -110,6 +116,7 @@ export function useAuth() {
           headers: { Authorization: `Bearer ${response.access_token}` }
         })
         user.value = me.data.user
+        clinics.value = me.data.clinics
         permissions.value = me.data.permissions
         return true
       } catch {
@@ -143,6 +150,7 @@ export function useAuth() {
         }
       })
       user.value = response.data.user
+      clinics.value = response.data.clinics
       permissions.value = response.data.permissions
     } catch (error: unknown) {
       const fetchError = error as { statusCode?: number }
@@ -183,6 +191,7 @@ export function useAuth() {
 
   return {
     user: readonly(user),
+    clinics: readonly(clinics),
     permissions: readonly(permissions),
     accessToken: readonly(accessToken),
     isAuthenticated,

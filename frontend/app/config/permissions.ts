@@ -136,5 +136,11 @@ export const PERMISSIONS = {
     historyReadAll: 'copilot.history.read_all',
     supervise: 'copilot.supervise',
     configure: 'copilot.configure'
+  },
+  saas: {
+    leadsRead: 'saas.leads.read',
+    leadsWrite: 'saas.leads.write',
+    subscriptionsRead: 'saas.subscriptions.read',
+    subscriptionsWrite: 'saas.subscriptions.write'
   }
 } as const

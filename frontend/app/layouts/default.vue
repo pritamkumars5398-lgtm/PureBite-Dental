@@ -112,7 +112,7 @@ function isActive(to: string): boolean {
             v-if="!isSidebarCollapsed"
             class="text-h2 text-default truncate font-serif"
           >
-            Nº 1 Dental Studio
+            {{ clinic.clinicName || 'PureBite' }}
           </span>
         </NuxtLink>
       </div>
@@ -196,12 +196,10 @@ function isActive(to: string): boolean {
     >
       <template #content>
         <div class="flex flex-col h-full">
-          <!-- Logo -->
-          <div class="flex items-center justify-between h-14 px-4">
+          <div class="flex items-center justify-between h-14 px-4 border-b border-subtle">
             <NuxtLink
               to="/"
-              class="flex items-center gap-2 overflow-hidden"
-              aria-label="Nº 1 Dental Studio"
+              class="flex items-center gap-2"
               @click="mobileNavOpen = false"
             >
               <img
@@ -211,7 +209,9 @@ function isActive(to: string): boolean {
                 height="32"
                 class="shrink-0"
               >
-              <span class="text-h2 text-default truncate font-serif">Nº 1 Dental Studio</span>
+              <span class="text-h2 text-default font-serif truncate">
+                {{ clinic.clinicName || 'PureBite' }}
+              </span>
             </NuxtLink>
             <UButton
               variant="ghost"

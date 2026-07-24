@@ -13,6 +13,7 @@
  */
 
 import type { ActiveModule, ApiResponse, NavigationItem } from '~/types'
+import { PERMISSIONS } from '~/config/permissions'
 
 // Host shell nav: dashboard + settings belong to the host app, not to
 // any module. Always rendered, even when the modules endpoint fails.
@@ -87,7 +88,20 @@ export function useModules() {
       ? active.value.flatMap(m => m.navigation)
       : []
 
-    return [...HOST_NAV, ...moduleNav]
+    let allItems = [...HOST_NAV, ...moduleNav]
+
+    // Superadmins operate inside the platform-admin workspace and should
+    // never see the standard clinical navigation; regular clinic members
+    // should never see the SaaS admin link. Same permission the route
+    // barricade in auth.global.ts uses, so nav and routing agree.
+    const isSuperadmin = can(PERMISSIONS.saas.leadsRead)
+    if (isSuperadmin) {
+      allItems = allItems.filter(item => item.to === '/settings' || item.to.startsWith('/admin'))
+    } else {
+      allItems = allItems.filter(item => !item.to.startsWith('/admin'))
+    }
+
+    return allItems
       .filter(item => !item.permission || can(item.permission))
       .slice()
       .sort((a, b) => (a.order ?? 999) - (b.order ?? 999))

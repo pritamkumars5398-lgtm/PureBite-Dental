@@ -54,6 +54,8 @@ class ClinicResponse(BaseModel):
     id: UUID
     name: str
     role: str  # User's role in this clinic
+    subscription_active: bool = True
+    subscription_end_date: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

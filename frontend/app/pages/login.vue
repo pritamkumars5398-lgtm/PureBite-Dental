@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { PERMISSIONS } from '~/config/permissions'
+
 definePageMeta({
   layout: 'guest'
 })
@@ -10,6 +12,7 @@ const toast = useToast()
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const isLoading = ref(false)
+const showPassword = ref(false)
 const formState = reactive({
   email: '',
   password: ''
@@ -82,7 +85,11 @@ async function onSubmit() {
       color: 'success'
     })
 
-    await navigateTo('/')
+    if (auth.permissions.value.includes(PERMISSIONS.saas.leadsRead)) {
+      await navigateTo('/admin')
+    } else {
+      await navigateTo('/')
+    }
   } catch (error: unknown) {
     console.error('Login error:', error)
     errorMessage.value = mapError(error)
@@ -162,15 +169,26 @@ watch(() => formState.password, () => {
           name="password"
           :error="passwordError || undefined"
         >
-          <UInput
-            v-model="formState.password"
-            type="password"
-            class="w-full"
-            :placeholder="t('auth.password')"
-            icon="i-lucide-lock"
-            autocomplete="current-password"
-            :disabled="isLoading"
-          />
+          <div class="relative w-full">
+            <UInput
+              v-model="formState.password"
+              :type="showPassword ? 'text' : 'password'"
+              class="w-full"
+              :placeholder="t('auth.password')"
+              icon="i-lucide-lock"
+              autocomplete="current-password"
+              :disabled="isLoading"
+            />
+            <button
+              type="button"
+              class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-700 z-10"
+              @click="showPassword = !showPassword"
+              tabindex="-1"
+              aria-label="Toggle password visibility"
+            >
+              <UIcon :name="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'" class="w-4 h-4" />
+            </button>
+          </div>
         </UFormField>
 
         <UButton

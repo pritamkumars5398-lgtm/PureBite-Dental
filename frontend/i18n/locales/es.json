@@ -23,6 +23,7 @@
     "reports": "Informes",
     "settings": "Configuración",
     "catalog": "Catálogo",
+    "saas_admin": "Plataforma SaaS",
     "menu": "Menú",
     "openMenu": "Abrir menú",
     "close": "Cerrar",
@@ -1027,6 +1028,16 @@
     "editClinicInfo": "Editar información",
     "clinicUpdated": "Información de la clínica actualizada",
     "clinicUpdateError": "Error al actualizar la información",
+    "subscription": {
+      "heading": "Suscripción",
+      "active": "Activa",
+      "expired": "Vencida",
+      "notActivated": "No activada",
+      "endsOn": "Se renueva / vence el {date}",
+      "expiredOn": "Venció el {date}",
+      "notActivatedBody": "Tu administrador de la plataforma aún no ha asignado una suscripción.",
+      "expiringWarning": "Tu suscripción vence en {days} día(s). Contacta a tu administrador de la plataforma para renovarla antes de perder el acceso."
+    },
     "cabinets": "Gabinetes",
     "language": "Idioma",
     "languageDescription": "Selecciona tu idioma preferido",
@@ -2823,5 +2834,76 @@
     "drawerTitle": "Ayuda de esta página",
     "unavailable": "Aún no hay ayuda contextual para esta página.",
     "openFullManual": "Abrir manual completo"
+  },
+  "saasAdmin": {
+    "title": "Administración de la Plataforma",
+    "subtitle": "Gestiona leads, aprovisiona clínicas y supervisa las suscripciones de toda la plataforma.",
+    "tabs": {
+      "leads": "Leads",
+      "clinics": "Clínicas y Suscripciones",
+      "plans": "Planes de Precios"
+    },
+    "leads": {
+      "heading": "Leads recientes",
+      "empty": "No se encontraron leads.",
+      "expectedUsers": "{count} usuarios esperados",
+      "status": {
+        "pending": "Pendiente",
+        "contacted": "Contactado",
+        "processed": "Procesado",
+        "rejected": "Rechazado"
+      }
+    },
+    "clinics": {
+      "heading": "Directorio de clínicas",
+      "provision": "Aprovisionar clínica",
+      "empty": "Aún no se ha aprovisionado ninguna clínica.",
+      "active": "Activa",
+      "inactive": "Inactiva",
+      "subscriptionCount": "{count} suscripción(es)",
+      "grantRenew": "Otorgar / renovar suscripción",
+      "grantRenewHelp": "Se suma a la suscripción actual si sigue activa; en caso contrario, comienza de inmediato.",
+      "grant": "Otorgar",
+      "history": "Historial de suscripciones",
+      "noHistory": "Aún no se ha otorgado ninguna suscripción.",
+      "subStatus": {
+        "active": "Activa",
+        "upcoming": "Programada",
+        "expired": "Vencida"
+      }
+    },
+    "plans": {
+      "heading": "Planes de precios",
+      "newPlan": "Nuevo plan",
+      "empty": "No hay planes de precios configurados.",
+      "durationMonths": "{count} mes(es)",
+      "active": "Activo",
+      "inactive": "Inactivo"
+    },
+    "form": {
+      "clinicName": "Nombre de la clínica",
+      "taxId": "NIF/CIF",
+      "passwordHelp": "Mínimo 8 caracteres. Comparte esto con el administrador de la clínica por separado.",
+      "planName": "Nombre del plan",
+      "durationMonths": "Duración (meses)",
+      "price": "Precio"
+    },
+    "messages": {
+      "tenantProvisioned": "Clínica \"{clinic}\" aprovisionada correctamente",
+      "subscriptionGranted": "Suscripción otorgada",
+      "planCreated": "Plan de precios creado"
+    },
+    "errors": {
+      "loadDashboard": "Error al cargar el panel de la plataforma",
+      "updateLead": "Error al actualizar el estado del lead",
+      "provisionTenant": "Error al aprovisionar la clínica",
+      "emailExists": "Ya existe un usuario con este correo",
+      "tenantConflict": "Ya existe una clínica o usuario con estos datos",
+      "loadHistory": "Error al cargar el historial de suscripciones",
+      "grantSubscription": "Error al otorgar la suscripción",
+      "clinicNotFound": "Clínica no encontrada",
+      "createPlan": "Error al crear el plan de precios",
+      "updatePlan": "Error al actualizar el plan de precios"
+    }
   }
 }
