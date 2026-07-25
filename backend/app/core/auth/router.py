@@ -1,5 +1,6 @@
 """Authentication router with rate limiting."""
 
+from collections.abc import Sequence
 from typing import Annotated
 from uuid import UUID
 
@@ -50,6 +51,52 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 # caps after a handful of reloads.
 _limiter_enabled = settings.ENVIRONMENT == "production" and not settings.TESTING
 limiter = Limiter(key_func=get_remote_address, enabled=_limiter_enabled)
+
+
+async def _build_clinic_responses(
+    db: AsyncSession, memberships: Sequence[ClinicMembership]
+) -> list[ClinicResponse]:
+    """Attach each membership's SaaS subscription status to a `ClinicResponse`.
+
+    Shared by `/me` and `/refresh` so both report the same
+    `subscription_active` / `subscription_end_date` values. The
+    platform-admin workspace has no subscription concept and is always
+    reported active.
+    """
+    from datetime import datetime, timezone
+
+    from app.modules.saas.constants import is_platform_clinic
+    from app.modules.saas.models import SaasSubscription
+
+    now = datetime.now(timezone.utc)
+    clinics: list[ClinicResponse] = []
+    for m in memberships:
+        sub_result = await db.execute(
+            select(SaasSubscription)
+            .where(SaasSubscription.clinic_id == m.clinic.id)
+            .order_by(SaasSubscription.end_date.desc())
+            .limit(1)
+        )
+        latest_sub = sub_result.scalar_one_or_none()
+
+        subscription_active = True
+        subscription_end_date = None
+        if latest_sub:
+            subscription_end_date = latest_sub.end_date.isoformat()
+            subscription_active = latest_sub.end_date > now
+        elif not is_platform_clinic(m.clinic.name):
+            subscription_active = False
+
+        clinics.append(
+            ClinicResponse(
+                id=m.clinic.id,
+                name=m.clinic.name,
+                role=m.role,
+                subscription_active=subscription_active,
+                subscription_end_date=subscription_end_date,
+            )
+        )
+    return clinics
 
 
 async def _refresh_rate_key(request: Request) -> str:
@@ -217,14 +264,7 @@ async def refresh_token(
     )
     memberships = memberships_result.scalars().all()
 
-    clinics = [
-        ClinicResponse(
-            id=m.clinic.id,
-            name=m.clinic.name,
-            role=m.role,
-        )
-        for m in memberships
-    ]
+    clinics = await _build_clinic_responses(db, memberships)
 
     # Get first clinic ID for token
     clinic_id = None
@@ -261,14 +301,7 @@ async def get_me(
     )
     memberships = result.scalars().all()
 
-    clinics = [
-        ClinicResponse(
-            id=m.clinic.id,
-            name=m.clinic.name,
-            role=m.role,
-        )
-        for m in memberships
-    ]
+    clinics = await _build_clinic_responses(db, memberships)
 
     # Compute effective permissions (use first clinic's role for MVP)
     permissions: list[str] = []
@@ -593,8 +626,7 @@ async def update_clinic_metadata(
         clinic.address = {**existing_address, **new_address}
     if data.timezone is not None:
         clinic.timezone = data.timezone
-    if data.currency is not None:
-        clinic.currency = data.currency
+    # currency is deliberately not updatable — see ClinicMetadataUpdate.
 
     await db.commit()
     # Re-query with cabinets eagerly loaded so ClinicMetadataResponse

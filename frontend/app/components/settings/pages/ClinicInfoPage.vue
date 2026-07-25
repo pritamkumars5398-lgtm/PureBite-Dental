@@ -1,12 +1,52 @@
 <script setup lang="ts">
 import type { ClinicAddress, ClinicUpdate } from '~/types'
-import { SUPPORTED_CURRENCIES } from '~/constants/currencies'
 import { PERMISSIONS } from '~/config/permissions'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const clinic = useClinic()
+const auth = useAuth()
 const { can } = usePermissions()
 const canEdit = computed(() => can(PERMISSIONS.admin.clinicWrite))
+
+// Subscription status (§2.3 of the SaaS admin doc): superadmins operate
+// inside the platform-admin workspace, which has no subscription concept,
+// so this section is only meaningful — and only shown — for real clinics.
+const isSuperadmin = computed(() => {
+  const clinic = auth.clinics.value?.[0]
+  return clinic?.name === 'Platform Administration'
+})
+const subscriptionInfo = computed(() => {
+  const clinicId = clinic.currentClinic.value?.id
+  const membership = auth.clinics.value.find(c => c.id === clinicId) ?? auth.clinics.value[0]
+  return membership ?? null
+})
+const subscriptionDaysLeft = computed(() => {
+  const endDate = subscriptionInfo.value?.subscription_end_date
+  if (!endDate) return null
+  const diffMs = new Date(endDate).getTime() - Date.now()
+  return Math.ceil(diffMs / (1000 * 60 * 60 * 24))
+})
+const subscriptionStatusLabel = computed(() => {
+  const info = subscriptionInfo.value
+  if (!info) return ''
+  if (!info.subscription_end_date) return t('settings.subscription.notActivated')
+  return info.subscription_active ? t('settings.subscription.active') : t('settings.subscription.expired')
+})
+const subscriptionStatusColor = computed(() => {
+  const info = subscriptionInfo.value
+  if (!info || !info.subscription_end_date) return 'neutral'
+  return info.subscription_active ? 'success' : 'error'
+})
+function formatSubscriptionDate(value: string): string {
+  return new Intl.DateTimeFormat(locale.value, { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(value))
+}
+// Proactive heads-up before lockout — an admin should never be surprised
+// by the /locked screen. 7 days mirrors typical renewal-notice windows.
+const showExpiringWarning = computed(() => {
+  const info = subscriptionInfo.value
+  const days = subscriptionDaysLeft.value
+  return !!info?.subscription_active && days !== null && days <= 7 && days >= 0
+})
 
 const COUNTRY_CODES = [
   'AD', 'AE', 'AF', 'AG', 'AL', 'AM', 'AO', 'AR', 'AT', 'AU', 'AZ',
@@ -66,21 +106,12 @@ function translateCountry(value: string | undefined | null): string {
   return value
 }
 
-const currencyOptions = computed(() => {
-  let displayNames: Intl.DisplayNames | null = null
-  try {
-    displayNames = new Intl.DisplayNames([currentLocale.value], { type: 'currency' })
-  } catch {
-    displayNames = null
-  }
-  const collator = new Intl.Collator(currentLocale.value, { sensitivity: 'base' })
-  return SUPPORTED_CURRENCIES.map(code => ({
-    value: code,
-    label: displayNames?.of(code) ? `${code} — ${displayNames.of(code)}` : code
-  })).sort((a, b) => collator.compare(a.label, b.label))
-})
+// Currency is set once at seed/provisioning time and is intentionally not
+// editable here (changing it after invoices exist would reinterpret
+// historical totals). It is shown read-only below.
 
 const timezoneOptions = [
+  { label: 'Asia/Kolkata (IST)', value: 'Asia/Kolkata' },
   { label: 'Europe/Madrid', value: 'Europe/Madrid' },
   { label: 'Europe/London', value: 'Europe/London' },
   { label: 'Europe/Paris', value: 'Europe/Paris' },
@@ -110,8 +141,7 @@ const form = ref({
   country: '',
   phone: '',
   email: '',
-  timezone: 'Europe/Madrid',
-  currency: 'EUR'
+  timezone: 'Asia/Kolkata'
 })
 
 function loadForm() {
@@ -126,8 +156,7 @@ function loadForm() {
     country: c?.address?.country || '',
     phone: c?.phone || '',
     email: c?.email || '',
-    timezone: c?.timezone || 'Europe/Madrid',
-    currency: c?.currency || 'EUR'
+    timezone: c?.timezone || 'Asia/Kolkata'
   }
 }
 
@@ -155,8 +184,7 @@ async function save() {
     address,
     phone: form.value.phone || undefined,
     email: form.value.email || undefined,
-    timezone: form.value.timezone || undefined,
-    currency: form.value.currency || undefined
+    timezone: form.value.timezone || undefined
   }
   const result = await clinic.updateClinic(updateData)
   isSaving.value = false
@@ -244,6 +272,45 @@ function formatAddress(address?: Record<string, string>): string {
       />
     </div>
 
+    <!-- Subscription status (superadmin workspace has none) -->
+    <div
+      v-if="!clinic.isLoading.value && !isSuperadmin && subscriptionInfo"
+      class="mt-6 pt-4 border-t border-[var(--color-border-subtle)]"
+    >
+      <div class="flex items-center justify-between gap-3 flex-wrap">
+        <p class="text-caption text-subtle font-medium">
+          {{ t('settings.subscription.heading') }}
+        </p>
+        <UBadge
+          :color="subscriptionStatusColor"
+          variant="subtle"
+        >
+          {{ subscriptionStatusLabel }}
+        </UBadge>
+      </div>
+      <p class="text-caption text-subtle mt-1">
+        <template v-if="!subscriptionInfo.subscription_end_date">
+          {{ t('settings.subscription.notActivatedBody') }}
+        </template>
+        <template v-else-if="subscriptionInfo.subscription_active">
+          {{ t('settings.subscription.endsOn', { date: formatSubscriptionDate(subscriptionInfo.subscription_end_date) }) }}
+        </template>
+        <template v-else>
+          {{ t('settings.subscription.expiredOn', { date: formatSubscriptionDate(subscriptionInfo.subscription_end_date) }) }}
+        </template>
+      </p>
+      <p
+        v-if="showExpiringWarning"
+        class="text-caption text-amber-600 dark:text-amber-500 mt-2 flex items-center gap-1.5"
+      >
+        <UIcon
+          name="i-lucide-alert-triangle"
+          class="w-3.5 h-3.5 shrink-0"
+        />
+        {{ t('settings.subscription.expiringWarning', { days: subscriptionDaysLeft }) }}
+      </p>
+    </div>
+
     <!-- Edit view -->
     <form
       v-else-if="editing"
@@ -309,30 +376,17 @@ function formatAddress(address?: Record<string, string>): string {
         </UFormField>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <UFormField
-          :label="t('settings.timezone')"
-          :help="t('settings.timezoneHelp')"
-        >
-          <USelect
-            v-model="form.timezone"
-            :items="timezoneOptions"
-            value-key="value"
-            label-key="label"
-          />
-        </UFormField>
-        <UFormField
-          :label="t('settings.currency')"
-          :help="t('settings.currencyHelp')"
-        >
-          <USelect
-            v-model="form.currency"
-            :items="currencyOptions"
-            value-key="value"
-            label-key="label"
-          />
-        </UFormField>
-      </div>
+      <UFormField
+        :label="t('settings.timezone')"
+        :help="t('settings.timezoneHelp')"
+      >
+        <USelect
+          v-model="form.timezone"
+          :items="timezoneOptions"
+          value-key="value"
+          label-key="label"
+        />
+      </UFormField>
 
       <div class="flex justify-end gap-2 pt-2">
         <UButton

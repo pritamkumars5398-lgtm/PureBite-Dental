@@ -18,11 +18,37 @@ from uuid import UUID, uuid4
 SupportedLang = Literal["es", "en"]
 LANG: SupportedLang = "en"  # Default language
 
+# Currency for the seeded clinic. The project's current market is India,
+# so this defaults to INR. It is intentionally decoupled from language
+# (currency is a clinic-level setting, not a UI-language concern) and can
+# be overridden at seed time via `set_currency()` — the hook for future
+# non-INR deployments.
+DEFAULT_CURRENCY = "INR"
+CURRENCY: str = DEFAULT_CURRENCY
+
+# Timezone for the seeded clinic. IST by default (India market); drives
+# appointment availability windows and schedule analytics, not just
+# display. Overridable at seed time via `set_timezone()`.
+DEFAULT_TIMEZONE = "Asia/Kolkata"
+TIMEZONE: str = DEFAULT_TIMEZONE
+
 
 def set_language(lang: SupportedLang) -> None:
     """Set the language for seed data."""
     global LANG
     LANG = lang
+
+
+def set_currency(currency: str) -> None:
+    """Override the currency (ISO 4217) used for the seeded clinic."""
+    global CURRENCY
+    CURRENCY = currency.upper()
+
+
+def set_timezone(timezone: str) -> None:
+    """Override the IANA timezone used for the seeded clinic."""
+    global TIMEZONE
+    TIMEZONE = timezone
 
 
 def t(translations: dict[str, str]) -> str:
@@ -91,8 +117,8 @@ def get_clinic_data() -> dict:
         },
         "phone": t({"es": "+34 932 345 678", "en": "+1 (415) 555-0123"}),
         "email": "info@luminous.dental",
-        "currency": t({"es": "EUR", "en": "USD"}),
-        "timezone": t({"es": "Europe/Madrid", "en": "America/Los_Angeles"}),
+        "currency": CURRENCY,
+        "timezone": TIMEZONE,
         "settings": {
             "slot_duration_min": 30,
             "working_hours": {

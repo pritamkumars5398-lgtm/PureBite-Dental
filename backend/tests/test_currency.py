@@ -33,47 +33,37 @@ def test_format_currency_locale_dash_normalized() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Clinic currency PUT
+# Clinic currency — set at seed/provisioning time, NOT editable via the API
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.asyncio
-async def test_clinic_currency_default_is_eur(
+async def test_clinic_currency_default_is_inr(
     db_session: AsyncSession, test_clinic: Clinic
 ) -> None:
     await db_session.refresh(test_clinic)
-    assert test_clinic.currency == "EUR"
+    assert test_clinic.currency == "INR"
 
 
 @pytest.mark.asyncio
-async def test_update_clinic_currency_persists(
+async def test_update_clinic_currency_is_ignored(
     client: AsyncClient,
     auth_headers: dict[str, str],
     test_clinic: Clinic,
     db_session: AsyncSession,
 ) -> None:
+    """Currency is fixed at provisioning time. The clinic-update endpoint
+    silently ignores any ``currency`` in the payload — it is not a settable
+    field — so the stored value is unchanged."""
     response = await client.put(
         "/api/v1/auth/clinics",
         json={"currency": "USD"},
         headers=auth_headers,
     )
     assert response.status_code == 200
-    assert response.json()["data"]["currency"] == "USD"
+    # Response still reflects the original (unchanged) currency.
+    assert response.json()["data"]["currency"] == "INR"
 
     db_session.expire_all()
     await db_session.refresh(test_clinic)
-    assert test_clinic.currency == "USD"
-
-
-@pytest.mark.asyncio
-async def test_update_clinic_currency_rejects_invalid_iso(
-    client: AsyncClient,
-    auth_headers: dict[str, str],
-    test_clinic: Clinic,
-) -> None:
-    response = await client.put(
-        "/api/v1/auth/clinics",
-        json={"currency": "euro"},  # not 3 uppercase letters
-        headers=auth_headers,
-    )
-    assert response.status_code == 422
+    assert test_clinic.currency == "INR"

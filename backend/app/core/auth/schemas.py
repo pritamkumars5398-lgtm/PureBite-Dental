@@ -54,6 +54,8 @@ class ClinicResponse(BaseModel):
     id: UUID
     name: str
     role: str  # User's role in this clinic
+    subscription_active: bool = True
+    subscription_end_date: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -80,7 +82,10 @@ class ClinicMetadataUpdate(BaseModel):
     phone: str | None = Field(default=None, max_length=20)
     email: EmailStr | None = None
     timezone: str | None = Field(default=None, max_length=64)
-    currency: str | None = Field(default=None, pattern="^[A-Z]{3}$")
+    # NOTE: `currency` is intentionally NOT editable here. A clinic's
+    # currency is fixed at provisioning/seed time; changing it after
+    # budgets/invoices exist would silently reinterpret historical totals.
+    # To change it, modify the seed/provisioning currency and re-provision.
 
     @field_validator("timezone")
     @classmethod
@@ -94,7 +99,7 @@ class ClinicMetadataUpdate(BaseModel):
         except ZoneInfoNotFoundError as exc:
             raise ValueError(
                 f"Invalid timezone '{value}'. Must be an IANA id "
-                "(e.g. 'Europe/Madrid', 'America/New_York')."
+                "(e.g. 'Asia/Kolkata', 'Europe/Madrid')."
             ) from exc
         return value
 

@@ -11,3 +11,6 @@ set -e
 
 echo "Seeding demo data..."
 docker compose exec -T backend bash -c "PYTHONPATH=/app python /app/scripts/seed_demo.py $*"
+
+echo "Seeding superadmin data..."
+docker compose exec -T backend bash -c "PYTHONPATH=/app python /app/scripts/seed_superadmin.py"

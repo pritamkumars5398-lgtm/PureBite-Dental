@@ -41,6 +41,16 @@ const isSidebarCollapsed = useState('sidebar:collapsed', () => false)
 // Mobile drawer state (ephemeral — does not persist)
 const mobileNavOpen = ref(false)
 
+// Subscription days remaining
+const daysRemaining = computed(() => {
+  const currentClinic = auth.clinics.value?.[0]
+  if (!currentClinic?.subscription_active || !currentClinic?.subscription_end_date) return null
+  const end = new Date(currentClinic.subscription_end_date)
+  const now = new Date()
+  const diffTime = end.getTime() - now.getTime()
+  return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)))
+})
+
 // Persist sidebar + init density on client
 onMounted(() => {
   const savedState = localStorage.getItem('sidebar:collapsed')
@@ -112,7 +122,7 @@ function isActive(to: string): boolean {
             v-if="!isSidebarCollapsed"
             class="text-h2 text-default truncate font-serif"
           >
-            Nº 1 Dental Studio
+            {{ clinic.clinicName || 'PureBite' }}
           </span>
         </NuxtLink>
       </div>
@@ -165,6 +175,13 @@ function isActive(to: string): boolean {
             <p class="text-caption text-subtle truncate">
               {{ auth.user.value.email }}
             </p>
+            <p 
+              v-if="daysRemaining !== null" 
+              class="text-[11px] mt-0.5 text-primary-600 dark:text-primary-400 font-medium truncate"
+              title="Subscription days remaining"
+            >
+              {{ daysRemaining }} days remaining
+            </p>
           </div>
           <NuxtLink
             v-if="settingsItem"
@@ -196,12 +213,10 @@ function isActive(to: string): boolean {
     >
       <template #content>
         <div class="flex flex-col h-full">
-          <!-- Logo -->
-          <div class="flex items-center justify-between h-14 px-4">
+          <div class="flex items-center justify-between h-14 px-4 border-b border-subtle">
             <NuxtLink
               to="/"
-              class="flex items-center gap-2 overflow-hidden"
-              aria-label="Nº 1 Dental Studio"
+              class="flex items-center gap-2"
               @click="mobileNavOpen = false"
             >
               <img
@@ -211,7 +226,9 @@ function isActive(to: string): boolean {
                 height="32"
                 class="shrink-0"
               >
-              <span class="text-h2 text-default truncate font-serif">Nº 1 Dental Studio</span>
+              <span class="text-h2 text-default font-serif truncate">
+                {{ clinic.clinicName || 'PureBite' }}
+              </span>
             </NuxtLink>
             <UButton
               variant="ghost"

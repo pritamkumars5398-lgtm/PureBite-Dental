@@ -62,6 +62,18 @@ export default defineNuxtPlugin(() => {
 
   // ---- Billing (module-provided pages) ------------------------------
   registerSettingsPage({
+    path: 'subscription',
+    category: 'billing',
+    labelKey: 'settings.subscription.title',
+    descriptionKey: 'settings.subscription.description',
+    icon: 'i-lucide-credit-card',
+    permission: 'saas.subscriptions.read',
+    to: '/settings/billing/subscription',
+    searchKeywords: ['subscription', 'billing', 'plan', 'payment'],
+    order: 5
+  })
+  
+  registerSettingsPage({
     path: 'invoice-series',
     category: 'billing',
     labelKey: 'invoiceSeries.title',
