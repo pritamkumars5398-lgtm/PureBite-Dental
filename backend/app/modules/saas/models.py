@@ -4,7 +4,8 @@ from decimal import Decimal
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, Numeric, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base, TimestampMixin
 
@@ -18,6 +19,7 @@ class SaasLead(Base, TimestampMixin):
     phone: Mapped[str] = mapped_column(String(50), nullable=True)
     email: Mapped[str] = mapped_column(String(255), nullable=False)
     expected_users: Mapped[int] = mapped_column(Integer, nullable=True)
+    message: Mapped[str] = mapped_column(String(2000), nullable=True)
     status: Mapped[str] = mapped_column(String(50), default="pending", nullable=False)
 
 
@@ -41,3 +43,7 @@ class SaasSubscription(Base, TimestampMixin):
     start_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     end_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     status: Mapped[str] = mapped_column(String(50), default="active", nullable=False)
+    plan_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("saas_pricing_plans.id", ondelete="SET NULL"), nullable=True
+    )
+    plan: Mapped["SaasPricingPlan"] = relationship("SaasPricingPlan")

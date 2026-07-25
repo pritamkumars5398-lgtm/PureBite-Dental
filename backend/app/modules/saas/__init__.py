@@ -38,11 +38,32 @@ class SaasModule(BaseModule):
             "layer_path": "frontend",
             "navigation": [
                 {
-                    "label": "nav.saas_admin",
-                    "icon": "i-lucide-globe",
+                    "label": "nav.dashboard",
+                    "icon": "i-lucide-layout-dashboard",
                     "to": "/admin",
-                    "permission": "saas.leads.read", # only superadmin would have this
+                    "permission": "saas.leads.read",
                     "order": 100,
+                },
+                {
+                    "label": "saasAdmin.tabs.plans",
+                    "icon": "i-lucide-tags",
+                    "to": "/admin/plans",
+                    "permission": "saas.leads.read",
+                    "order": 110,
+                },
+                {
+                    "label": "saasAdmin.tabs.clinics",
+                    "icon": "i-lucide-building",
+                    "to": "/admin/clinics",
+                    "permission": "saas.leads.read",
+                    "order": 120,
+                },
+                {
+                    "label": "saasAdmin.tabs.leads",
+                    "icon": "i-lucide-users",
+                    "to": "/admin/leads",
+                    "permission": "saas.leads.read",
+                    "order": 130,
                 },
             ],
         },

@@ -8,6 +8,8 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from sqlalchemy.orm import joinedload
+
 from app.core.auth.dependencies import ClinicContext, get_clinic_context, require_permission
 from app.core.auth.models import Clinic, ClinicMembership, User
 from app.core.auth.service import hash_password
@@ -57,6 +59,8 @@ def _subscription_to_response(sub: SaasSubscription, *, now: datetime | None = N
         end_date=sub.end_date,
         status=sub.status,
         effective_status=effective_status,
+        plan_id=sub.plan_id,
+        plan=sub.plan,
         created_at=sub.created_at,
         updated_at=sub.updated_at,
     )
@@ -116,6 +120,7 @@ async def create_lead(
         phone=lead_in.phone,
         email=lead_in.email,
         expected_users=lead_in.expected_users,
+        message=lead_in.message,
         status="pending",
     )
     db.add(db_lead)
@@ -134,6 +139,9 @@ async def list_leads(
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
     """Superadmin: List all leads."""
+    if not is_platform_clinic(ctx.clinic.name):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only")
+        
     result = await db.execute(select(SaasLead).order_by(SaasLead.created_at.desc()))
     return result.scalars().all()
 
@@ -147,6 +155,9 @@ async def update_lead_status(
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
     """Superadmin: Mark a lead as contacted/processed/rejected."""
+    if not is_platform_clinic(ctx.clinic.name):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only")
+
     result = await db.execute(select(SaasLead).where(SaasLead.id == lead_id))
     lead = result.scalar_one_or_none()
     if not lead:
@@ -166,6 +177,9 @@ async def provision_tenant(
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
     """Superadmin: Provision a new clinic tenant."""
+    if not is_platform_clinic(ctx.clinic.name):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only")
+
     # Check if email exists
     email_check = await db.execute(select(User).where(User.email == req.admin_email))
     if email_check.scalar_one_or_none():
@@ -266,9 +280,13 @@ async def list_clinics(
 @router.get("/plans", response_model=list[PricingPlanResponse])
 async def list_pricing_plans(
     db: Annotated[AsyncSession, Depends(get_db)],
+    include_inactive: bool = False,
 ):
-    """Public/Admin: List active pricing plans (shown on the public landing page)."""
-    result = await db.execute(select(SaasPricingPlan).where(SaasPricingPlan.is_active.is_(True)))
+    """Public/Admin: List pricing plans (shown on the public landing page)."""
+    query = select(SaasPricingPlan)
+    if not include_inactive:
+        query = query.where(SaasPricingPlan.is_active.is_(True))
+    result = await db.execute(query)
     return result.scalars().all()
 
 
@@ -280,6 +298,9 @@ async def create_pricing_plan(
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
     """Superadmin: Create a new pricing plan."""
+    if not is_platform_clinic(ctx.clinic.name):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only")
+
     db_plan = SaasPricingPlan(
         id=uuid.uuid4(),
         name=plan.name,
@@ -302,6 +323,9 @@ async def update_pricing_plan(
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
     """Superadmin: Edit a pricing plan, or retire it via `is_active=false`."""
+    if not is_platform_clinic(ctx.clinic.name):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only")
+
     result = await db.execute(select(SaasPricingPlan).where(SaasPricingPlan.id == plan_id))
     plan = result.scalar_one_or_none()
     if not plan:
@@ -320,7 +344,7 @@ async def list_subscriptions(
     ctx: Annotated[ClinicContext, Depends(get_clinic_context)],
     _: Annotated[None, Depends(require_permission("subscriptions.read"))],
     db: Annotated[AsyncSession, Depends(get_db)],
-    clinic_id: Annotated[uuid.UUID | None, Query()] = None,
+    filter_clinic_id: Annotated[uuid.UUID | None, Query()] = None,
 ):
     """List subscriptions.
 
@@ -331,11 +355,11 @@ async def list_subscriptions(
     per the multi-tenancy rule.
     """
     if is_platform_clinic(ctx.clinic.name):
-        query = select(SaasSubscription)
-        if clinic_id is not None:
-            query = query.where(SaasSubscription.clinic_id == clinic_id)
+        query = select(SaasSubscription).options(joinedload(SaasSubscription.plan))
+        if filter_clinic_id is not None:
+            query = query.where(SaasSubscription.clinic_id == filter_clinic_id)
     else:
-        query = select(SaasSubscription).where(SaasSubscription.clinic_id == ctx.clinic_id)
+        query = select(SaasSubscription).options(joinedload(SaasSubscription.plan)).where(SaasSubscription.clinic_id == ctx.clinic_id)
 
     result = await db.execute(query.order_by(SaasSubscription.end_date.desc()))
     now = datetime.now(timezone.utc)
@@ -350,6 +374,9 @@ async def grant_subscription(
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
     """Superadmin: Grant or renew a subscription for a clinic (Stacking Logic)."""
+    if not is_platform_clinic(ctx.clinic.name):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only")
+
     clinic_result = await db.execute(select(Clinic).where(Clinic.id == req.clinic_id))
     if not clinic_result.scalar_one_or_none():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clinic not found")
@@ -376,11 +403,19 @@ async def grant_subscription(
     db_sub = SaasSubscription(
         id=uuid.uuid4(),
         clinic_id=req.clinic_id,
+        plan_id=req.plan_id,
         start_date=start_date,
         end_date=end_date,
         status="active",
     )
     db.add(db_sub)
     await db.commit()
-    await db.refresh(db_sub)
+    
+    result = await db.execute(
+        select(SaasSubscription)
+        .options(joinedload(SaasSubscription.plan))
+        .where(SaasSubscription.id == db_sub.id)
+    )
+    db_sub = result.scalar_one()
+    
     return _subscription_to_response(db_sub, now=now)

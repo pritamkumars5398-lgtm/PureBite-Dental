@@ -85,7 +85,8 @@ async function onSubmit() {
       color: 'success'
     })
 
-    if (auth.permissions.value.includes(PERMISSIONS.saas.leadsRead)) {
+    const clinic = auth.clinics.value?.[0]
+    if (clinic?.name === 'Platform Administration') {
       await navigateTo('/admin')
     } else {
       await navigateTo('/')

@@ -1029,6 +1029,8 @@
     "clinicUpdated": "Información de la clínica actualizada",
     "clinicUpdateError": "Error al actualizar la información",
     "subscription": {
+      "title": "Suscripción de la clínica",
+      "description": "Ver el estado de la suscripción y el historial de facturación.",
       "heading": "Suscripción",
       "active": "Activa",
       "expired": "Vencida",

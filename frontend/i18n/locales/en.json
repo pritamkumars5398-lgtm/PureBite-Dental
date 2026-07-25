@@ -1008,6 +1008,8 @@
     "clinicUpdated": "Clinic information updated",
     "clinicUpdateError": "Error updating information",
     "subscription": {
+      "title": "Clinic Subscription",
+      "description": "View subscription status and billing history.",
       "heading": "Subscription",
       "active": "Active",
       "expired": "Expired",
@@ -2770,15 +2772,15 @@
   },
   "saasAdmin": {
     "title": "Platform Administration",
-    "subtitle": "Manage leads, provision clinics, and oversee subscriptions across the entire platform.",
+    "subtitle": "Manage requests, provision clinics, and oversee subscriptions across the entire platform.",
     "tabs": {
-      "leads": "Leads",
+      "leads": "Requests",
       "clinics": "Clinics & Subscriptions",
       "plans": "Pricing Plans"
     },
     "leads": {
-      "heading": "Recent leads",
-      "empty": "No leads found.",
+      "heading": "Recent requests",
+      "empty": "No requests found.",
       "expectedUsers": "{count} expected users",
       "status": {
         "pending": "Pending",

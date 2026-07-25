@@ -11,7 +11,10 @@ const canEdit = computed(() => can(PERMISSIONS.admin.clinicWrite))
 // Subscription status (§2.3 of the SaaS admin doc): superadmins operate
 // inside the platform-admin workspace, which has no subscription concept,
 // so this section is only meaningful — and only shown — for real clinics.
-const isSuperadmin = computed(() => can(PERMISSIONS.saas.leadsRead))
+const isSuperadmin = computed(() => {
+  const clinic = auth.clinics.value?.[0]
+  return clinic?.name === 'Platform Administration'
+})
 const subscriptionInfo = computed(() => {
   const clinicId = clinic.currentClinic.value?.id
   const membership = auth.clinics.value.find(c => c.id === clinicId) ?? auth.clinics.value[0]

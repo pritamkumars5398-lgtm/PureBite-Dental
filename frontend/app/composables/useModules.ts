@@ -94,7 +94,8 @@ export function useModules() {
     // never see the standard clinical navigation; regular clinic members
     // should never see the SaaS admin link. Same permission the route
     // barricade in auth.global.ts uses, so nav and routing agree.
-    const isSuperadmin = can(PERMISSIONS.saas.leadsRead)
+    const clinic = auth.clinics.value?.[0]
+    const isSuperadmin = clinic?.name === 'Platform Administration'
     if (isSuperadmin) {
       allItems = allItems.filter(item => item.to === '/settings' || item.to.startsWith('/admin'))
     } else {

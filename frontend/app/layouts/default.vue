@@ -41,6 +41,16 @@ const isSidebarCollapsed = useState('sidebar:collapsed', () => false)
 // Mobile drawer state (ephemeral — does not persist)
 const mobileNavOpen = ref(false)
 
+// Subscription days remaining
+const daysRemaining = computed(() => {
+  const currentClinic = auth.clinics.value?.[0]
+  if (!currentClinic?.subscription_active || !currentClinic?.subscription_end_date) return null
+  const end = new Date(currentClinic.subscription_end_date)
+  const now = new Date()
+  const diffTime = end.getTime() - now.getTime()
+  return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)))
+})
+
 // Persist sidebar + init density on client
 onMounted(() => {
   const savedState = localStorage.getItem('sidebar:collapsed')
@@ -164,6 +174,13 @@ function isActive(to: string): boolean {
             </p>
             <p class="text-caption text-subtle truncate">
               {{ auth.user.value.email }}
+            </p>
+            <p 
+              v-if="daysRemaining !== null" 
+              class="text-[11px] mt-0.5 text-primary-600 dark:text-primary-400 font-medium truncate"
+              title="Subscription days remaining"
+            >
+              {{ daysRemaining }} days remaining
             </p>
           </div>
           <NuxtLink

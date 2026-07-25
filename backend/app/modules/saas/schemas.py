@@ -14,6 +14,7 @@ class LeadCreate(BaseModel):
     phone: str | None = Field(None, max_length=50)
     email: EmailStr
     expected_users: int | None = Field(None, ge=1)
+    message: str | None = Field(None, max_length=2000)
 
 
 class LeadResponse(BaseModel):
@@ -23,6 +24,7 @@ class LeadResponse(BaseModel):
     phone: str | None
     email: str
     expected_users: int | None
+    message: str | None
     status: str
     created_at: datetime
     updated_at: datetime
@@ -76,11 +78,14 @@ class TenantProvisionResponse(BaseModel):
 class SubscriptionCreate(BaseModel):
     clinic_id: UUID
     duration_months: int = Field(..., ge=1)
+    plan_id: UUID | None = None
 
 
 class SubscriptionResponse(BaseModel):
     id: UUID
     clinic_id: UUID
+    plan_id: UUID | None = None
+    plan: PricingPlanResponse | None = None
     start_date: datetime
     end_date: datetime
     status: str

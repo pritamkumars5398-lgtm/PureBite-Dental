@@ -11,6 +11,7 @@ export interface SaasLead {
   phone: string | null
   email: string
   expected_users: number | null
+  message: string | null
   status: 'pending' | 'contacted' | 'processed' | 'rejected'
   created_at: string
   updated_at: string
@@ -29,6 +30,8 @@ export interface SaasPricingPlan {
 export interface SaasSubscription {
   id: string
   clinic_id: string
+  plan_id?: string
+  plan?: SaasPricingPlan
   start_date: string
   end_date: string
   status: string
@@ -79,7 +82,7 @@ export function useSaasAdmin() {
       const [leadsRes, clinicsRes, plansRes] = await Promise.all([
         api.get<SaasLead[]>('/api/v1/saas/leads'),
         api.get<SaasClinicDirectoryEntry[]>('/api/v1/saas/clinics'),
-        api.get<SaasPricingPlan[]>('/api/v1/saas/plans')
+        api.get<SaasPricingPlan[]>('/api/v1/saas/plans?include_inactive=true')
       ])
       leads.value = leadsRes
       clinics.value = clinicsRes
@@ -144,7 +147,7 @@ export function useSaasAdmin() {
   async function fetchClinicSubscriptions(clinicId: string): Promise<SaasSubscription[]> {
     try {
       return await api.get<SaasSubscription[]>(
-        `/api/v1/saas/subscriptions?clinic_id=${clinicId}`
+        `/api/v1/saas/subscriptions?filter_clinic_id=${clinicId}`
       )
     } catch (e) {
       toast.add({
@@ -157,11 +160,12 @@ export function useSaasAdmin() {
     }
   }
 
-  async function grantSubscription(clinicId: string, durationMonths: number): Promise<SaasSubscription | null> {
+  async function grantSubscription(clinicId: string, durationMonths: number, planId?: string): Promise<SaasSubscription | null> {
     try {
       const sub = await api.post<SaasSubscription>('/api/v1/saas/subscriptions', {
         clinic_id: clinicId,
-        duration_months: durationMonths
+        duration_months: durationMonths,
+        plan_id: planId && planId !== 'custom' ? planId : undefined
       })
       toast.add({
         title: t('common.success'),

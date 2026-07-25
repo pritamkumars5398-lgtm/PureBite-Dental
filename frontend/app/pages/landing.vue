@@ -15,13 +15,15 @@ definePageMeta({
 })
 
 const toast = useToast()
+const config = useRuntimeConfig()
 
 const formState = reactive({
   contact_name: '',
   clinic_name: '',
   phone: '',
   email: '',
-  expected_users: null as number | null
+  expected_users: null as number | null,
+  message: ''
 })
 
 const isSubmitting = ref(false)
@@ -42,9 +44,9 @@ const pricingPlans = ref<PublicPricingPlan[]>([])
 
 function formatPlanPrice(price: number): string {
   try {
-    return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(price)
+    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(price)
   } catch {
-    return `$${price}`
+    return `₹${price}`
   }
 }
 
@@ -75,8 +77,11 @@ async function submitLead() {
 
   isSubmitting.value = true
   try {
-    const api = useApi()
-    await api.post('/api/v1/saas/leads', formState)
+    await $fetch('/api/v1/saas/leads', {
+      method: 'POST',
+      baseURL: config.public.apiBaseUrl,
+      body: formState
+    })
     isSuccess.value = true
     toast.add({
       title: 'Request sent',
@@ -84,10 +89,22 @@ async function submitLead() {
       color: 'success'
     })
   } catch (err: unknown) {
-    const fetchError = err as { data?: { message?: string, detail?: string } }
+    const fetchError = err as { data?: { message?: string, detail?: string | Array<{ msg: string }> } }
+    let errorMessage = 'The server did not respond. Try again in a moment.'
+    
+    if (fetchError.data?.detail) {
+      if (Array.isArray(fetchError.data.detail)) {
+        errorMessage = fetchError.data.detail.map(d => d.msg).join(', ')
+      } else if (typeof fetchError.data.detail === 'string') {
+        errorMessage = fetchError.data.detail
+      }
+    } else if (fetchError.data?.message) {
+      errorMessage = fetchError.data.message
+    }
+
     toast.add({
       title: 'Request not sent',
-      description: fetchError.data?.message || fetchError.data?.detail || 'The server did not respond. Try again in a moment.',
+      description: errorMessage,
       color: 'error'
     })
   } finally {
@@ -121,12 +138,12 @@ const features = [
 ]
 
 const included = [
-  'Every patient, no per-record fee',
-  'Every staff account included',
-  'Full-mouth odontogram with treatment history',
-  'Data export whenever you ask for it',
-  'Support from people who know the software',
-  'Onboarding and record migration'
+  'Unlimited users, staff accounts, and role-based access',
+  'Unlimited patients and clinical records (no per-patient fees)',
+  'Smart odontogram, treatment planning, and medical history',
+  'Advanced schedule management with multi-cabinet support',
+  'Integrated billing, quoting, and invoice generation',
+  'Data export and full platform support'
 ]
 </script>
 
@@ -276,7 +293,7 @@ const included = [
             <p class="eyebrow">Request access</p>
             <h2 class="sect__title">Tell us about your practice.</h2>
             <p class="lede lede--tight">
-              We read every one of these ourselves and reply within one business day.
+              Fill out this form to request registration for your clinic, ask for a quote, or just ask us a question. Once reviewed and approved by our administrators, your clinic will be provisioned and officially listed on the platform. We read every one of these ourselves and reply within one business day.
             </p>
           </div>
 
@@ -358,6 +375,16 @@ const included = [
                     placeholder="e.g. 5"
                   />
                 </div>
+              </div>
+
+              <div class="field mt-4">
+                <label for="pb-message" class="field__label">Message (Optional)</label>
+                <textarea
+                  id="pb-message"
+                  v-model="formState.message"
+                  class="field__input min-h-[100px] resize-y"
+                  placeholder="Tell us about your needs..."
+                ></textarea>
               </div>
 
               <button type="submit" :disabled="isSubmitting" class="btn btn--ink btn--block btn--lg">
@@ -566,13 +593,24 @@ const included = [
 .quote__fine { font-size: 12px; color: var(--ink-30); margin: 14px 0 0; text-align: center; }
 
 /* ───────── real pricing plans (superadmin-managed) ───────── */
-.plans { list-style: none; margin: 0 0 22px; padding: 0; }
+.plans { 
+  list-style: none; margin: 0 0 22px; padding: 0; 
+  max-height: 280px; overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--rule) transparent;
+  padding-right: 8px; /* space for scrollbar */
+}
+.plans::-webkit-scrollbar { width: 4px; }
+.plans::-webkit-scrollbar-track { background: transparent; }
+.plans::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 4px; }
+
 .plans__item {
-  display: flex; align-items: baseline; gap: 6px;
+  display: flex; align-items: baseline; gap: 8px;
   padding: 12px 0; border-bottom: 1px solid var(--rule);
 }
 .plans__item:first-child { padding-top: 0; }
-.plans__name { font-size: 14px; color: var(--ink); flex: 1; }
+.plans__item:last-child { border-bottom: none; }
+.plans__name { font-size: 14px; color: var(--ink); flex: 1; word-wrap: break-word; line-height: 1.3; }
 .plans__price {
   font-family: 'Fraunces', Georgia, serif; font-weight: 500;
   font-size: 20px; letter-spacing: -0.02em; color: var(--ink);
