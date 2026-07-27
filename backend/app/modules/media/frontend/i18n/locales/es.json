@@ -1,0 +1,84 @@
+{
+  "photoGallery": {
+    "title": "Galería del paciente",
+    "photoTitle": "Título",
+    "titlePlaceholder": "Frontal intraoral — 02/05",
+    "add": "Añadir foto",
+    "upload": "Subir foto",
+    "uploading": "Subiendo...",
+    "uploadHelp": "Clasifica la imagen para que aparezca en la categoría correcta",
+    "dropHere": "Arrastra una foto o haz clic aquí",
+    "category": "Categoría",
+    "subtype": "Vista",
+    "capturedAt": "Fecha",
+    "exifHint": "Auto desde EXIF",
+    "empty": "Sin photos aún",
+    "uploadFirst": "Subir la primera",
+    "showingOf": "Mostrando {count} de {total}",
+    "paired": "Emparejada antes/después",
+    "fetchError": "Error al cargar las fotos",
+    "uploadSuccess": "Foto subida",
+    "uploadError": "Error al subir la foto",
+    "cat": {
+      "all": "Todas",
+      "intraoral": "Intraoral",
+      "extraoral": "Extraoral",
+      "xray": "Radiografía",
+      "clinical": "Antes/Después",
+      "other": "Otra"
+    },
+    "catDesc": {
+      "intraoral": "Dentro de la boca",
+      "extraoral": "Cara y perfil",
+      "xray": "Imagen radiológica",
+      "clinical": "Comparativa de tratamiento",
+      "other": "Sin clasificar"
+    },
+    "sub": {
+      "frontal": "Frontal",
+      "lateral_left": "Lateral izda",
+      "lateral_right": "Lateral dcha",
+      "occlusal_upper": "Oclusal sup",
+      "occlusal_lower": "Oclusal inf",
+      "palatal": "Palatal",
+      "lingual": "Lingual",
+      "smile": "Sonrisa",
+      "rest": "Reposo",
+      "frontal_face": "Frontal",
+      "profile_left": "Perfil izdo",
+      "profile_right": "Perfil dcho",
+      "three_quarter_left": "3/4 izdo",
+      "three_quarter_right": "3/4 dcho",
+      "panoramic": "Panorámica",
+      "periapical": "Periapical",
+      "bitewing": "Aleta",
+      "ceph_lat": "Cefalo lateral",
+      "ceph_pa": "Cefalo PA",
+      "cbct": "CBCT",
+      "occlusal_xray": "Oclusal Rx",
+      "before": "Antes",
+      "after": "Después",
+      "progress": "Progreso",
+      "reference": "Referencia",
+      "portrait": "Retrato",
+      "document_scan": "Documento",
+      "model_photo": "Modelo"
+    },
+    "compare": {
+      "before": "Antes",
+      "after": "Después"
+    },
+    "pair": {
+      "pickHint": "Elige la foto a emparejar:",
+      "noCandidates": "Sin fotos disponibles. Sube otra primero.",
+      "paired": "Emparejada",
+      "exitCompare": "Salir de la comparativa",
+      "compare": "Comparar",
+      "unpair": "Quitar",
+      "pair": "Emparejar antes/después"
+    }
+  },
+  "attachments": {
+    "linkError": "Error al vincular el archivo"
+  }
+}

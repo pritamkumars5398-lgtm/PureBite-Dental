@@ -53,7 +53,8 @@
     "save": "Guardar",
     "create": "Crear",
     "delete": "Eliminar",
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "change": "Cambiar"
   },
   "patients": {
     "title": "Pacientes",
@@ -344,7 +345,8 @@
       "budgets": "Presupuestos",
       "billing": "Facturación",
       "payments": "Pagos",
-      "documents": "Documentos"
+      "documents": "Documentos",
+      "gallery": "Galería"
     },
     "historyPlaceholder": "Notas clínicas disponibles en futura versión",
     "noAppointments": "Este paciente no tiene citas",
@@ -1215,6 +1217,9 @@
     "hide": "Ocultar",
     "forbidden": "Acceso denegado",
     "confirm": "Confirmar",
+    "optional": "Opcional",
+    "download": "Descargar",
+    "uploading": "Subiendo...",
     "yes": "Sí",
     "no": "No",
     "actions": "Acciones",
@@ -2804,6 +2809,14 @@
       "referral": "Derivación",
       "other": "Otro"
     },
+    "typeDesc": {
+      "consent": "Documento firmado",
+      "id_scan": "DNI / pasaporte",
+      "insurance": "Póliza o tarjeta",
+      "report": "Reporte clínico",
+      "referral": "Carta de remisión",
+      "other": "Sin clasificar"
+    },
     "fields": {
       "type": "Tipo",
       "title": "Título",
@@ -2821,6 +2834,21 @@
       "title": "Eliminar documento",
       "message": "¿Estás seguro de que deseas eliminar este documento? Esta acción no se puede deshacer."
     },
+    "errors": {
+      "mime": "Tipo no permitido. Solo PDF, JPG o PNG.",
+      "size": "El archivo supera los 10 MB."
+    },
+    "pdfPreviewHint": "Vista previa tras subir",
+    "viewer": {
+      "loading": "Cargando documento...",
+      "error": "No se pudo cargar el documento",
+      "downloadInstead": "Descargar en su lugar",
+      "unsupported": "Vista previa no disponible para este tipo de archivo",
+      "zoomIn": "Acercar",
+      "zoomOut": "Alejar",
+      "resetZoom": "Restablecer zoom",
+      "zoomHint": "Ctrl + scroll para hacer zoom"
+    },
     "fetchError": "Error al cargar documentos",
     "uploadSuccess": "Documento subido correctamente",
     "uploadError": "Error al subir documento",
@@ -2828,7 +2856,8 @@
     "deleteSuccess": "Documento eliminado",
     "deleteError": "Error al eliminar documento",
     "updateSuccess": "Documento actualizado",
-    "updateError": "Error al actualizar documento"
+    "updateError": "Error al actualizar documento",
+    "viewError": "Error al cargar el documento"
   },
   "help": {
     "label": "Ayuda",
@@ -2877,6 +2906,9 @@
     "plans": {
       "heading": "Planes de precios",
       "newPlan": "Nuevo plan",
+      "editPlan": "Editar plan de precios",
+      "deletePlan": "Eliminar plan de precios",
+      "deleteConfirmMessage": "¿Estás seguro de que deseas eliminar el plan \"{name}\"? Esta acción no se puede deshacer.",
       "empty": "No hay planes de precios configurados.",
       "durationMonths": "{count} mes(es)",
       "active": "Activo",
@@ -2893,7 +2925,9 @@
     "messages": {
       "tenantProvisioned": "Clínica \"{clinic}\" aprovisionada correctamente",
       "subscriptionGranted": "Suscripción otorgada",
-      "planCreated": "Plan de precios creado"
+      "planCreated": "Plan de precios creado",
+      "planUpdated": "Plan de precios actualizado",
+      "planDeleted": "Plan de precios eliminado"
     },
     "errors": {
       "loadDashboard": "Error al cargar el panel de la plataforma",
@@ -2905,7 +2939,8 @@
       "grantSubscription": "Error al otorgar la suscripción",
       "clinicNotFound": "Clínica no encontrada",
       "createPlan": "Error al crear el plan de precios",
-      "updatePlan": "Error al actualizar el plan de precios"
+      "updatePlan": "Error al actualizar el plan de precios",
+      "deletePlan": "Error al eliminar el plan de precios"
     }
   }
 }

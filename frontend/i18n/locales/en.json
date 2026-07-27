@@ -53,7 +53,8 @@
     "save": "Save",
     "create": "Create",
     "delete": "Delete",
-    "close": "Close"
+    "close": "Close",
+    "change": "Change"
   },
   "patients": {
     "title": "Patients",
@@ -316,7 +317,8 @@
       "budgets": "Budgets",
       "billing": "Billing",
       "payments": "Payments",
-      "documents": "Documents"
+      "documents": "Documents",
+      "gallery": "Gallery"
     },
     "historyPlaceholder": "Clinical notes available in future version",
     "noAppointments": "This patient has no appointments",
@@ -1193,6 +1195,9 @@
     "hide": "Hide",
     "forbidden": "Access denied",
     "confirm": "Confirm",
+    "optional": "Optional",
+    "download": "Download",
+    "uploading": "Uploading...",
     "yes": "Yes",
     "no": "No",
     "actions": "Actions",
@@ -2737,6 +2742,14 @@
       "referral": "Referral",
       "other": "Other"
     },
+    "typeDesc": {
+      "consent": "Signed document",
+      "id_scan": "ID / Passport",
+      "insurance": "Policy or card",
+      "report": "Clinical report",
+      "referral": "Referral letter",
+      "other": "Unclassified"
+    },
     "fields": {
       "type": "Type",
       "title": "Title",
@@ -2754,6 +2767,21 @@
       "title": "Delete Document",
       "message": "Are you sure you want to delete this document? This action cannot be undone."
     },
+    "errors": {
+      "mime": "Unsupported file type. Only PDF, JPG, or PNG are allowed.",
+      "size": "File size exceeds 10 MB limit."
+    },
+    "pdfPreviewHint": "Preview after upload",
+    "viewer": {
+      "loading": "Loading document...",
+      "error": "Could not load document",
+      "downloadInstead": "Download instead",
+      "unsupported": "Preview not available for this file type",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "resetZoom": "Reset to 100%",
+      "zoomHint": "Ctrl + scroll to zoom"
+    },
     "fetchError": "Error loading documents",
     "uploadSuccess": "Document uploaded successfully",
     "uploadError": "Error uploading document",
@@ -2761,7 +2789,8 @@
     "deleteSuccess": "Document deleted",
     "deleteError": "Error deleting document",
     "updateSuccess": "Document updated",
-    "updateError": "Error updating document"
+    "updateError": "Error updating document",
+    "viewError": "Error loading document"
   },
   "help": {
     "label": "Help",
@@ -2810,6 +2839,9 @@
     "plans": {
       "heading": "Pricing plans",
       "newPlan": "New plan",
+      "editPlan": "Edit pricing plan",
+      "deletePlan": "Delete pricing plan",
+      "deleteConfirmMessage": "Are you sure you want to delete the plan \"{name}\"? This action cannot be undone.",
       "empty": "No pricing plans configured.",
       "durationMonths": "{count} month(s)",
       "active": "Active",
@@ -2826,7 +2858,9 @@
     "messages": {
       "tenantProvisioned": "Clinic \"{clinic}\" provisioned successfully",
       "subscriptionGranted": "Subscription granted",
-      "planCreated": "Pricing plan created"
+      "planCreated": "Pricing plan created",
+      "planUpdated": "Pricing plan updated",
+      "planDeleted": "Pricing plan deleted"
     },
     "errors": {
       "loadDashboard": "Failed to load the platform dashboard",
@@ -2838,7 +2872,8 @@
       "grantSubscription": "Failed to grant subscription",
       "clinicNotFound": "Clinic not found",
       "createPlan": "Failed to create pricing plan",
-      "updatePlan": "Failed to update pricing plan"
+      "updatePlan": "Failed to update pricing plan",
+      "deletePlan": "Failed to delete pricing plan"
     }
   }
 }

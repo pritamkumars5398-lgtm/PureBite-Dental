@@ -339,6 +339,27 @@ async def update_pricing_plan(
     return plan
 
 
+@router.delete("/plans/{plan_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_pricing_plan(
+    plan_id: uuid.UUID,
+    ctx: Annotated[ClinicContext, Depends(get_clinic_context)],
+    _: Annotated[None, Depends(require_permission("subscriptions.write"))],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    """Superadmin: Delete a pricing plan."""
+    if not is_platform_clinic(ctx.clinic.name):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only")
+
+    result = await db.execute(select(SaasPricingPlan).where(SaasPricingPlan.id == plan_id))
+    plan = result.scalar_one_or_none()
+    if not plan:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pricing plan not found")
+
+    await db.delete(plan)
+    await db.commit()
+    return None
+
+
 @router.get("/subscriptions", response_model=list[SubscriptionResponse])
 async def list_subscriptions(
     ctx: Annotated[ClinicContext, Depends(get_clinic_context)],

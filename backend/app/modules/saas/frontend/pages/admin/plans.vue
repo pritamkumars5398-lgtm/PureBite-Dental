@@ -16,32 +16,75 @@ const {
   isLoading,
   fetchAll,
   createPlan,
-  togglePlanActive
+  updatePlan,
+  togglePlanActive,
+  deletePlan
 } = useSaasAdmin()
 
 onMounted(fetchAll)
 
-const showNewPlan = ref(false)
-const isCreatingPlan = ref(false)
+const showPlanModal = ref(false)
+const isSavingPlan = ref(false)
+const isEditing = ref(false)
+const editingPlanId = ref<string | null>(null)
 const planForm = ref({ name: '', duration_months: 1, price: 0, is_active: true })
 const togglingPlanId = ref<string | null>(null)
 
+const showDeleteConfirm = ref(false)
+const deletingPlan = ref<SaasPricingPlan | null>(null)
+const isDeletingPlan = ref(false)
+
 function openNewPlan() {
+  isEditing.value = false
+  editingPlanId.value = null
   planForm.value = { name: '', duration_months: 1, price: 0, is_active: true }
-  showNewPlan.value = true
+  showPlanModal.value = true
 }
 
-async function handleCreatePlan() {
-  isCreatingPlan.value = true
-  const ok = await createPlan(planForm.value)
-  isCreatingPlan.value = false
-  if (ok) showNewPlan.value = false
+function openEditPlan(plan: SaasPricingPlan) {
+  isEditing.value = true
+  editingPlanId.value = plan.id
+  planForm.value = {
+    name: plan.name,
+    duration_months: plan.duration_months,
+    price: plan.price,
+    is_active: plan.is_active
+  }
+  showPlanModal.value = true
+}
+
+async function handleSavePlan() {
+  isSavingPlan.value = true
+  let ok = false
+  if (isEditing.value && editingPlanId.value) {
+    ok = await updatePlan(editingPlanId.value, planForm.value)
+  } else {
+    ok = await createPlan(planForm.value)
+  }
+  isSavingPlan.value = false
+  if (ok) showPlanModal.value = false
 }
 
 async function handleTogglePlan(plan: SaasPricingPlan) {
   togglingPlanId.value = plan.id
   await togglePlanActive(plan)
   togglingPlanId.value = null
+}
+
+function confirmDeletePlan(plan: SaasPricingPlan) {
+  deletingPlan.value = plan
+  showDeleteConfirm.value = true
+}
+
+async function handleDeletePlan() {
+  if (!deletingPlan.value) return
+  isDeletingPlan.value = true
+  const ok = await deletePlan(deletingPlan.value.id)
+  isDeletingPlan.value = false
+  if (ok) {
+    showDeleteConfirm.value = false
+    deletingPlan.value = null
+  }
 }
 </script>
 
@@ -97,23 +140,39 @@ async function handleTogglePlan(plan: SaasPricingPlan) {
                 {{ t('saasAdmin.plans.durationMonths', { count: plan.duration_months }) }} · {{ formatRupees(plan.price) }}
               </p>
             </div>
-            <UButton
-              :icon="plan.is_active ? 'i-lucide-toggle-right' : 'i-lucide-toggle-left'"
-              :color="plan.is_active ? 'success' : 'neutral'"
-              variant="ghost"
-              size="sm"
-              :loading="togglingPlanId === plan.id"
-              @click="handleTogglePlan(plan)"
-            >
-              {{ plan.is_active ? t('saasAdmin.plans.active') : t('saasAdmin.plans.inactive') }}
-            </UButton>
+            <div class="flex items-center gap-2">
+              <UButton
+                :icon="plan.is_active ? 'i-lucide-toggle-right' : 'i-lucide-toggle-left'"
+                :color="plan.is_active ? 'success' : 'neutral'"
+                variant="ghost"
+                size="sm"
+                :loading="togglingPlanId === plan.id"
+                @click="handleTogglePlan(plan)"
+              >
+                {{ plan.is_active ? t('saasAdmin.plans.active') : t('saasAdmin.plans.inactive') }}
+              </UButton>
+              <UButton
+                icon="i-lucide-edit"
+                variant="ghost"
+                color="neutral"
+                size="sm"
+                @click="openEditPlan(plan)"
+              />
+              <UButton
+                icon="i-lucide-trash"
+                variant="ghost"
+                color="error"
+                size="sm"
+                @click="confirmDeletePlan(plan)"
+              />
+            </div>
           </div>
         </div>
       </div>
     </UCard>
 
-    <!-- New pricing plan modal -->
-    <UModal v-model:open="showNewPlan">
+    <!-- Pricing plan modal (Create/Edit) -->
+    <UModal v-model:open="showPlanModal">
       <template #content>
         <UCard>
           <template #header>
@@ -123,14 +182,14 @@ async function handleTogglePlan(plan: SaasPricingPlan) {
                 class="w-5 h-5 text-primary-accent"
               />
               <h3 class="font-semibold text-default">
-                {{ t('saasAdmin.plans.newPlan') }}
+                {{ isEditing ? t('saasAdmin.plans.editPlan') : t('saasAdmin.plans.newPlan') }}
               </h3>
             </div>
           </template>
 
           <form
             class="space-y-4"
-            @submit.prevent="handleCreatePlan"
+            @submit.prevent="handleSavePlan"
           >
             <UFormField :label="t('saasAdmin.form.planName')">
               <UInput
@@ -169,18 +228,57 @@ async function handleTogglePlan(plan: SaasPricingPlan) {
             <div class="flex justify-end gap-2 pt-4">
               <UButton
                 variant="ghost"
-                @click="showNewPlan = false"
+                @click="showPlanModal = false"
               >
                 {{ t('common.cancel') }}
               </UButton>
               <UButton
                 type="submit"
-                :loading="isCreatingPlan"
+                :loading="isSavingPlan"
               >
-                {{ t('saasAdmin.plans.newPlan') }}
+                {{ isEditing ? t('common.save') : t('saasAdmin.plans.newPlan') }}
               </UButton>
             </div>
           </form>
+        </UCard>
+      </template>
+    </UModal>
+
+    <!-- Delete confirmation modal -->
+    <UModal v-model:open="showDeleteConfirm">
+      <template #content>
+        <UCard>
+          <template #header>
+            <div class="flex items-center gap-2">
+              <UIcon
+                name="i-lucide-trash"
+                class="w-5 h-5 text-error"
+              />
+              <h3 class="font-semibold text-default">
+                {{ t('saasAdmin.plans.deletePlan') }}
+              </h3>
+            </div>
+          </template>
+
+          <p class="text-sm text-muted">
+            {{ t('saasAdmin.plans.deleteConfirmMessage', { name: deletingPlan?.name }) }}
+          </p>
+
+          <div class="flex justify-end gap-2 pt-4">
+            <UButton
+              variant="ghost"
+              @click="showDeleteConfirm = false"
+            >
+              {{ t('common.cancel') }}
+            </UButton>
+            <UButton
+              color="error"
+              :loading="isDeletingPlan"
+              @click="handleDeletePlan"
+            >
+              {{ t('common.delete') }}
+            </UButton>
+          </div>
         </UCard>
       </template>
     </UModal>

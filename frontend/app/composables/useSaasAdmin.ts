@@ -228,6 +228,51 @@ export function useSaasAdmin() {
     }
   }
 
+  async function updatePlan(
+    planId: string,
+    data: Partial<{ name: string, duration_months: number, price: number, is_active: boolean }>
+  ): Promise<boolean> {
+    try {
+      await api.patch(`/api/v1/saas/plans/${planId}`, data)
+      toast.add({
+        title: t('common.success'),
+        description: t('saasAdmin.messages.planUpdated'),
+        color: 'success'
+      })
+      await fetchAll()
+      return true
+    } catch (e) {
+      toast.add({
+        title: t('common.error'),
+        description: errorDescription(e, t('saasAdmin.errors.updatePlan')),
+        color: 'error'
+      })
+      console.error('Failed to update pricing plan:', e)
+      return false
+    }
+  }
+
+  async function deletePlan(planId: string): Promise<boolean> {
+    try {
+      await api.del(`/api/v1/saas/plans/${planId}`)
+      toast.add({
+        title: t('common.success'),
+        description: t('saasAdmin.messages.planDeleted'),
+        color: 'success'
+      })
+      await fetchAll()
+      return true
+    } catch (e) {
+      toast.add({
+        title: t('common.error'),
+        description: errorDescription(e, t('saasAdmin.errors.deletePlan')),
+        color: 'error'
+      })
+      console.error('Failed to delete pricing plan:', e)
+      return false
+    }
+  }
+
   return {
     leads: readonly(leads),
     clinics: readonly(clinics),
@@ -239,6 +284,8 @@ export function useSaasAdmin() {
     fetchClinicSubscriptions,
     grantSubscription,
     createPlan,
-    togglePlanActive
+    togglePlanActive,
+    updatePlan,
+    deletePlan
   }
 }

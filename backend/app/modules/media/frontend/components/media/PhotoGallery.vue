@@ -143,7 +143,7 @@ function handleUploaded() {
       v-if="total > photos.length"
       class="text-xs text-muted"
     >
-      {{ t('photoGallery.showingOf', `Showing ${photos.length} of ${total}`) }}
+      {{ t('photoGallery.showingOf', { count: photos.length, total: total }) }}
     </p>
 
     <!-- Upload modal -->

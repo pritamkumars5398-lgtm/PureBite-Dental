@@ -1,0 +1,84 @@
+{
+  "photoGallery": {
+    "title": "Patient gallery",
+    "photoTitle": "Title",
+    "titlePlaceholder": "Frontal intraoral — 02/05",
+    "add": "Add photo",
+    "upload": "Upload photo",
+    "uploading": "Uploading...",
+    "uploadHelp": "Classify the image to show it in the correct category",
+    "dropHere": "Drag a photo or click here",
+    "category": "Category",
+    "subtype": "View",
+    "capturedAt": "Date",
+    "exifHint": "Auto from EXIF",
+    "empty": "No photos yet",
+    "uploadFirst": "Upload the first one",
+    "showingOf": "Showing {count} of {total}",
+    "paired": "Before/after paired",
+    "fetchError": "Error loading photos",
+    "uploadSuccess": "Photo uploaded",
+    "uploadError": "Error uploading photo",
+    "cat": {
+      "all": "All",
+      "intraoral": "Intraoral",
+      "extraoral": "Extraoral",
+      "xray": "X-ray",
+      "clinical": "Before/After",
+      "other": "Other"
+    },
+    "catDesc": {
+      "intraoral": "Inside the mouth",
+      "extraoral": "Face and profile",
+      "xray": "X-ray image",
+      "clinical": "Treatment comparison",
+      "other": "Unclassified"
+    },
+    "sub": {
+      "frontal": "Frontal",
+      "lateral_left": "Left lateral",
+      "lateral_right": "Right lateral",
+      "occlusal_upper": "Upper occlusal",
+      "occlusal_lower": "Lower occlusal",
+      "palatal": "Palatal",
+      "lingual": "Lingual",
+      "smile": "Smile",
+      "rest": "Rest",
+      "frontal_face": "Frontal",
+      "profile_left": "Left profile",
+      "profile_right": "Right profile",
+      "three_quarter_left": "3/4 left",
+      "three_quarter_right": "3/4 right",
+      "panoramic": "Panoramic",
+      "periapical": "Periapical",
+      "bitewing": "Bitewing",
+      "ceph_lat": "Cephalometric lateral",
+      "ceph_pa": "Cephalometric PA",
+      "cbct": "CBCT",
+      "occlusal_xray": "Occlusal X-ray",
+      "before": "Before",
+      "after": "After",
+      "progress": "Progress",
+      "reference": "Reference",
+      "portrait": "Portrait",
+      "document_scan": "Document",
+      "model_photo": "Model"
+    },
+    "compare": {
+      "before": "Before",
+      "after": "After"
+    },
+    "pair": {
+      "pickHint": "Choose the photo to pair:",
+      "noCandidates": "No photos available. Upload another one first.",
+      "paired": "Paired",
+      "exitCompare": "Exit comparison",
+      "compare": "Compare",
+      "unpair": "Remove",
+      "pair": "Pair before/after"
+    }
+  },
+  "attachments": {
+    "linkError": "Error linking attachment"
+  }
+}

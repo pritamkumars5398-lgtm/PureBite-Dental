@@ -311,7 +311,7 @@ async function submit() {
     <!-- ===== Step 4 — title + optional date ===== -->
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto]">
       <UFormField
-        :label="t('photoGallery.title', 'Título')"
+        :label="t('photoGallery.photoTitle', 'Título')"
         required
         size="sm"
       >
@@ -343,7 +343,7 @@ async function submit() {
         trailing
         @click="submit"
       >
-        {{ uploading ? t('common.uploading', 'Subiendo…') : t('common.upload', 'Subir foto') }}
+        {{ uploading ? t('photoGallery.uploading', 'Subiendo…') : t('photoGallery.upload', 'Subir foto') }}
       </UButton>
     </div>
   </div>
