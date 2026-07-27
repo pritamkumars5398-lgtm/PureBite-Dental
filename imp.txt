@@ -5,3 +5,25 @@ assistant@demo.clinic
 receptionist@demo.clinic
 
 
+cd backend
+source venv/bin/activate
+
+
+pip install -e .
+
+Start the backend:
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+
+cd frontend
+pnpm install
+# or: npm install
+
+
+
+superadmin@purebite.com
+superadmin123
+
+
+pushpendra@dental.com
+pushpendra@123
