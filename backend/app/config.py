@@ -54,6 +54,11 @@ class Settings(BaseSettings):
     STORAGE_MAX_FILE_SIZE: int = 10 * 1024 * 1024  # 10MB
     STORAGE_ALLOWED_MIME_TYPES: str = "application/pdf,image/jpeg,image/png"
 
+    # Cloudinary configuration
+    CLOUDINARY_CLOUD_NAME: str = ""
+    CLOUDINARY_API_KEY: str = ""
+    CLOUDINARY_API_SECRET: str = ""
+
     @property
     def storage_allowed_mime_types_list(self) -> list[str]:
         """Parse allowed MIME types as list."""

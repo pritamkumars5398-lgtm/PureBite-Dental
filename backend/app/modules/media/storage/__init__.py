@@ -38,5 +38,13 @@ def get_storage_backend() -> StorageBackend:
             return LocalStorageBackend(path)
         path = _test_storage_path or settings.STORAGE_LOCAL_PATH
         return LocalStorageBackend(path)
+    elif backend == "cloudinary":
+        from .cloudinary import CloudinaryStorageBackend
+
+        return CloudinaryStorageBackend(
+            cloud_name=settings.CLOUDINARY_CLOUD_NAME,
+            api_key=settings.CLOUDINARY_API_KEY,
+            api_secret=settings.CLOUDINARY_API_SECRET,
+        )
 
     raise ValueError(f"Unknown storage backend: {backend}")

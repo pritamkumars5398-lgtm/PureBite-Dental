@@ -48,6 +48,7 @@ dependencies = [
     # (app/core/llm/). The Provider protocol is vendor-agnostic, so
     # Anthropic/Ollama slot in later without touching callers.
     "openai>=1.40",
+    "cloudinary>=1.36.0",
 ]
 
 [project.optional-dependencies]
