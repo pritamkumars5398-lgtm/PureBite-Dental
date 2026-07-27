@@ -3,7 +3,6 @@
 
 import argparse
 import asyncio
-import sys
 from uuid import uuid4
 
 from sqlalchemy import select
@@ -30,7 +29,9 @@ async def seed_superadmin(
     _register_all_models()
     async with async_session_maker() as db:
         # Check if user already exists
-        result = await db.execute(select(User).options(selectinload(User.memberships)).where(User.email == email))
+        result = await db.execute(
+            select(User).options(selectinload(User.memberships)).where(User.email == email)
+        )
         user = result.scalar_one_or_none()
 
         if user:
@@ -53,7 +54,9 @@ async def seed_superadmin(
             await db.flush()
 
         # Check if superadmin clinic exists (required for ClinicContext)
-        clinic_result = await db.execute(select(Clinic).where(Clinic.name == "Platform Administration"))
+        clinic_result = await db.execute(
+            select(Clinic).where(Clinic.name == "Platform Administration")
+        )
         clinic = clinic_result.scalar_one_or_none()
 
         if not clinic:
@@ -99,7 +102,9 @@ async def seed_superadmin(
 
 def main():
     parser = argparse.ArgumentParser(description="Seed the superadmin user.")
-    parser.add_argument("--email", default="superadmin@purebite.com", help="Email of the superadmin")
+    parser.add_argument(
+        "--email", default="superadmin@purebite.com", help="Email of the superadmin"
+    )
     parser.add_argument("--password", default="superadmin123", help="Password for the superadmin")
     parser.add_argument("--first-name", default="Super", help="Admin first name")
     parser.add_argument("--last-name", default="Admin", help="Admin last name")

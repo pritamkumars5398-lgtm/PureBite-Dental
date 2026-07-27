@@ -1,6 +1,7 @@
 """Cloudinary storage backend."""
 
 import io
+
 import cloudinary
 import cloudinary.uploader
 import httpx

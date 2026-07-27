@@ -11,7 +11,6 @@ Create Date: 2026-07-24
 from collections.abc import Sequence
 
 import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql
 
 from alembic import op
 
@@ -67,7 +66,9 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_saas_subscriptions_clinic_id"), "saas_subscriptions", ["clinic_id"], unique=False)
+    op.create_index(
+        op.f("ix_saas_subscriptions_clinic_id"), "saas_subscriptions", ["clinic_id"], unique=False
+    )
 
 
 def downgrade() -> None:

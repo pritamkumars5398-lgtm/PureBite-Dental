@@ -20,9 +20,14 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-DATABASE_URL = os.environ.get("DATABASE_URL") or open(
-    os.path.join(os.path.dirname(__file__), "..", ".env")
-).read().split("DATABASE_URL=")[1].split("\n")[0].strip()
+DATABASE_URL = (
+    os.environ.get("DATABASE_URL")
+    or open(os.path.join(os.path.dirname(__file__), "..", ".env"))
+    .read()
+    .split("DATABASE_URL=")[1]
+    .split("\n")[0]
+    .strip()
+)
 
 
 async def backfill():

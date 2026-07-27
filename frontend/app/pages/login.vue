@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { PERMISSIONS } from '~/config/permissions'
-
 definePageMeta({
   layout: 'guest'
 })
@@ -183,11 +181,14 @@ watch(() => formState.password, () => {
             <button
               type="button"
               class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-700 z-10"
-              @click="showPassword = !showPassword"
               tabindex="-1"
               aria-label="Toggle password visibility"
+              @click="showPassword = !showPassword"
             >
-              <UIcon :name="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'" class="w-4 h-4" />
+              <UIcon
+                :name="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                class="w-4 h-4"
+              />
             </button>
           </div>
         </UFormField>

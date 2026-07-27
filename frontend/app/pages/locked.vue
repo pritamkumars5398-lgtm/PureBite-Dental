@@ -19,10 +19,10 @@ const neverHadSubscription = computed(() => {
 const lastSubscriptionDate = computed(() => {
   if (clinicInfo.value?.subscription_end_date) {
     try {
-      return new Intl.DateTimeFormat('en-US', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
+      return new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
       }).format(new Date(clinicInfo.value.subscription_end_date))
     } catch {
       return null
@@ -60,12 +60,17 @@ async function handleLogout() {
 <template>
   <div class="expired-wrapper">
     <div class="expired">
-      <div class="expired__mark" aria-hidden="true">
-        <span class="expired__dot"></span>
-        <span class="expired__ring"></span>
+      <div
+        class="expired__mark"
+        aria-hidden="true"
+      >
+        <span class="expired__dot" />
+        <span class="expired__ring" />
       </div>
 
-      <h1 class="expired__title">{{ pageTitle }}</h1>
+      <h1 class="expired__title">
+        {{ pageTitle }}
+      </h1>
 
       <p class="expired__body">
         {{ pageBody }}
@@ -110,13 +115,13 @@ async function handleLogout() {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   color: var(--ink);
-  
+
   background: rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(220, 217, 208, 0.5);
   border-radius: 16px;
   box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.05);
-  
+
   animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   opacity: 0;
   transform: translateY(10px);
@@ -225,7 +230,7 @@ async function handleLogout() {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .expired *, .expired-wrapper * { 
+  .expired *, .expired-wrapper * {
     transition-duration: .01ms !important;
     animation-duration: .01ms !important;
   }

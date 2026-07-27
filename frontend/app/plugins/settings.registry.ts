@@ -72,7 +72,7 @@ export default defineNuxtPlugin(() => {
     searchKeywords: ['subscription', 'billing', 'plan', 'payment'],
     order: 5
   })
-  
+
   registerSettingsPage({
     path: 'invoice-series',
     category: 'billing',

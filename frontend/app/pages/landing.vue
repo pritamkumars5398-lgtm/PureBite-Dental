@@ -91,7 +91,7 @@ async function submitLead() {
   } catch (err: unknown) {
     const fetchError = err as { data?: { message?: string, detail?: string | Array<{ msg: string }> } }
     let errorMessage = 'The server did not respond. Try again in a moment.'
-    
+
     if (fetchError.data?.detail) {
       if (Array.isArray(fetchError.data.detail)) {
         errorMessage = fetchError.data.detail.map(d => d.msg).join(', ')
@@ -152,23 +152,52 @@ const included = [
     <!-- ─────────────────────── NAV ─────────────────────── -->
     <header class="nav">
       <div class="nav__inner">
-        <a href="#top" class="mark">
-          <span class="mark__glyph" aria-hidden="true">
-            <svg viewBox="0 0 24 28" fill="none" stroke="currentColor" stroke-width="1.4">
-              <path d="M12 5.5C9.5 2.5 4 2.8 2.8 7c-1.1 3.9 1 7.2 2 11.4.7 3 1.3 6.4 3.2 6.4 1.7 0 1.8-3.2 2.3-5.6.3-1.4.6-2.4 1.7-2.4s1.4 1 1.7 2.4c.5 2.4.6 5.6 2.3 5.6 1.9 0 2.5-3.4 3.2-6.4 1-4.2 3.1-7.5 2-11.4C20 2.8 14.5 2.5 12 5.5Z" stroke-linejoin="round"/>
+        <a
+          href="#top"
+          class="mark"
+        >
+          <span
+            class="mark__glyph"
+            aria-hidden="true"
+          >
+            <svg
+              viewBox="0 0 24 28"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.4"
+            >
+              <path
+                d="M12 5.5C9.5 2.5 4 2.8 2.8 7c-1.1 3.9 1 7.2 2 11.4.7 3 1.3 6.4 3.2 6.4 1.7 0 1.8-3.2 2.3-5.6.3-1.4.6-2.4 1.7-2.4s1.4 1 1.7 2.4c.5 2.4.6 5.6 2.3 5.6 1.9 0 2.5-3.4 3.2-6.4 1-4.2 3.1-7.5 2-11.4C20 2.8 14.5 2.5 12 5.5Z"
+                stroke-linejoin="round"
+              />
             </svg>
           </span>
           <span class="mark__word">PureBite</span>
         </a>
 
         <nav class="nav__links">
-          <a href="#chart" class="nav__link">What it does</a>
-          <a href="#price" class="nav__link">Pricing</a>
-          <NuxtLink to="/login" class="nav__link flex items-center gap-1.5">
-            <UIcon name="i-lucide-log-in" class="w-4 h-4" />
+          <a
+            href="#chart"
+            class="nav__link"
+          >What it does</a>
+          <a
+            href="#price"
+            class="nav__link"
+          >Pricing</a>
+          <NuxtLink
+            to="/login"
+            class="nav__link flex items-center gap-1.5"
+          >
+            <UIcon
+              name="i-lucide-log-in"
+              class="w-4 h-4"
+            />
             Log in
           </NuxtLink>
-          <a href="#request" class="btn btn--ink">Request access</a>
+          <a
+            href="#request"
+            class="btn btn--ink"
+          >Request access</a>
         </nav>
       </div>
     </header>
@@ -177,7 +206,9 @@ const included = [
       <!-- ─────────────────────── HERO ─────────────────────── -->
       <section class="hero">
         <div class="hero__inner">
-          <p class="eyebrow">Practice management &middot; est. for dentists</p>
+          <p class="eyebrow">
+            Practice management &middot; est. for dentists
+          </p>
 
           <h1 class="hero__title">
             The chart,
@@ -191,61 +222,93 @@ const included = [
               to the same chart, in the same place, at the same time.
             </p>
             <div class="hero__actions">
-              <a href="#request" class="btn btn--ink btn--lg">Request access</a>
-              <a href="#chart" class="btn btn--ghost btn--lg">See what it does</a>
+              <a
+                href="#request"
+                class="btn btn--ink btn--lg"
+              >Request access</a>
+              <a
+                href="#chart"
+                class="btn btn--ghost btn--lg"
+              >See what it does</a>
             </div>
           </div>
         </div>
 
         <!-- SIGNATURE: full dental arch, drawn in FDI notation. -->
-        <div class="arch" role="img" aria-label="Upper and lower dental arch labelled in FDI notation">
+        <div
+          class="arch"
+          role="img"
+          aria-label="Upper and lower dental arch labelled in FDI notation"
+        >
           <div class="arch__label">
             <span class="mono">FDI</span>
             <span class="arch__labeltext">Two-digit notation &mdash; quadrant, then tooth</span>
           </div>
           <div class="arch__row">
             <span
-              v-for="n in ['18','17','16','15','14','13','12','11','21','22','23','24','25','26','27','28']"
+              v-for="n in ['18', '17', '16', '15', '14', '13', '12', '11', '21', '22', '23', '24', '25', '26', '27', '28']"
               :key="n"
               class="tooth"
-              :class="{ 'tooth--on': ['16','11','21','26'].includes(n) }"
+              :class="{ 'tooth--on': ['16', '11', '21', '26'].includes(n) }"
             >{{ n }}</span>
           </div>
           <div class="arch__row arch__row--lower">
             <span
-              v-for="n in ['48','47','46','45','44','43','42','41','31','32','33','34','35','36','37','38']"
+              v-for="n in ['48', '47', '46', '45', '44', '43', '42', '41', '31', '32', '33', '34', '35', '36', '37', '38']"
               :key="n"
               class="tooth"
-              :class="{ 'tooth--on': ['46','41','31','36'].includes(n) }"
+              :class="{ 'tooth--on': ['46', '41', '31', '36'].includes(n) }"
             >{{ n }}</span>
           </div>
         </div>
       </section>
 
       <!-- ─────────────────────── CHART / FEATURES ─────────────────────── -->
-      <section id="chart" class="chart">
+      <section
+        id="chart"
+        class="chart"
+      >
         <div class="wrap">
           <header class="sect">
-            <p class="eyebrow">The chart</p>
-            <h2 class="sect__title">Four things, done properly.</h2>
+            <p class="eyebrow">
+              The chart
+            </p>
+            <h2 class="sect__title">
+              Four things, done properly.
+            </h2>
           </header>
 
           <ol class="rows">
-            <li v-for="f in features" :key="f.code" class="row">
+            <li
+              v-for="f in features"
+              :key="f.code"
+              class="row"
+            >
               <span class="row__code mono">{{ f.code }}</span>
-              <h3 class="row__name">{{ f.name }}</h3>
-              <p class="row__desc">{{ f.description }}</p>
+              <h3 class="row__name">
+                {{ f.name }}
+              </h3>
+              <p class="row__desc">
+                {{ f.description }}
+              </p>
             </li>
           </ol>
         </div>
       </section>
 
       <!-- ─────────────────────── PRICING ─────────────────────── -->
-      <section id="price" class="price">
+      <section
+        id="price"
+        class="price"
+      >
         <div class="wrap price__grid">
           <div class="price__left">
-            <p class="eyebrow">Pricing</p>
-            <h2 class="sect__title">One subscription. The whole practice.</h2>
+            <p class="eyebrow">
+              Pricing
+            </p>
+            <h2 class="sect__title">
+              One subscription. The whole practice.
+            </h2>
             <p class="lede lede--tight">
               You pay for time, not for patients or seats. A two-chair practice
               and a twelve-chair practice pay differently, so tell us which you are
@@ -253,65 +316,123 @@ const included = [
             </p>
 
             <ul class="incl">
-              <li v-for="i in included" :key="i" class="incl__item">
-                <span class="incl__rule" aria-hidden="true"></span>
+              <li
+                v-for="i in included"
+                :key="i"
+                class="incl__item"
+              >
+                <span
+                  class="incl__rule"
+                  aria-hidden="true"
+                />
                 {{ i }}
               </li>
             </ul>
           </div>
 
-          <aside v-if="pricingPlans.length > 0" class="quote quote--plans">
-            <p class="quote__eyebrow mono">Plans</p>
+          <aside
+            v-if="pricingPlans.length > 0"
+            class="quote quote--plans"
+          >
+            <p class="quote__eyebrow mono">
+              Plans
+            </p>
             <ul class="plans">
-              <li v-for="plan in pricingPlans" :key="plan.id" class="plans__item">
+              <li
+                v-for="plan in pricingPlans"
+                :key="plan.id"
+                class="plans__item"
+              >
                 <span class="plans__name">{{ plan.name }}</span>
                 <span class="plans__price">{{ formatPlanPrice(plan.price) }}</span>
                 <span class="plans__duration">/ {{ plan.duration_months }} mo</span>
               </li>
             </ul>
-            <a href="#request" class="btn btn--ink btn--block">Request access</a>
-            <p class="quote__fine">No card required to talk to us.</p>
+            <a
+              href="#request"
+              class="btn btn--ink btn--block"
+            >Request access</a>
+            <p class="quote__fine">
+              No card required to talk to us.
+            </p>
           </aside>
 
-          <aside v-else class="quote">
-            <p class="quote__eyebrow mono">Quote</p>
-            <p class="quote__figure">Per&nbsp;clinic</p>
+          <aside
+            v-else
+            class="quote"
+          >
+            <p class="quote__eyebrow mono">
+              Quote
+            </p>
+            <p class="quote__figure">
+              Per&nbsp;clinic
+            </p>
             <p class="quote__note">
               Scaled to your chair count and how many clinicians work them.
               No per-patient charge, ever.
             </p>
-            <a href="#request" class="btn btn--ink btn--block">Get a quote</a>
-            <p class="quote__fine">No card required to talk to us.</p>
+            <a
+              href="#request"
+              class="btn btn--ink btn--block"
+            >Get a quote</a>
+            <p class="quote__fine">
+              No card required to talk to us.
+            </p>
           </aside>
         </div>
       </section>
 
       <!-- ─────────────────────── FORM ─────────────────────── -->
-      <section id="request" class="req">
+      <section
+        id="request"
+        class="req"
+      >
         <div class="wrap req__grid">
           <div class="req__intro">
-            <p class="eyebrow">Request access</p>
-            <h2 class="sect__title">Tell us about your practice.</h2>
+            <p class="eyebrow">
+              Request access
+            </p>
+            <h2 class="sect__title">
+              Tell us about your practice.
+            </h2>
             <p class="lede lede--tight">
               Fill out this form to request registration for your clinic, ask for a quote, or just ask us a question. Once reviewed and approved by our administrators, your clinic will be provisioned and officially listed on the platform. We read every one of these ourselves and reply within one business day.
             </p>
           </div>
 
           <div class="req__panel">
-            <div v-if="isSuccess" class="done">
-              <span class="done__rule" aria-hidden="true"></span>
-              <h3 class="done__title">Request sent.</h3>
+            <div
+              v-if="isSuccess"
+              class="done"
+            >
+              <span
+                class="done__rule"
+                aria-hidden="true"
+              />
+              <h3 class="done__title">
+                Request sent.
+              </h3>
               <p class="done__body">
                 It is with our team now. Expect a reply at
                 <strong>{{ formState.email }}</strong> within one business day.
               </p>
             </div>
 
-            <form v-else class="form" @submit.prevent="submitLead">
+            <form
+              v-else
+              class="form"
+              @submit.prevent="submitLead"
+            >
               <div class="form__pair">
                 <div class="field">
-                  <label for="pb-name" class="field__label">
-                    Your name <span class="field__req" aria-hidden="true">required</span>
+                  <label
+                    for="pb-name"
+                    class="field__label"
+                  >
+                    Your name <span
+                      class="field__req"
+                      aria-hidden="true"
+                    >required</span>
                   </label>
                   <input
                     id="pb-name"
@@ -320,12 +441,18 @@ const included = [
                     type="text"
                     class="field__input"
                     placeholder="Enter your name"
-                  />
+                  >
                 </div>
 
                 <div class="field">
-                  <label for="pb-clinic" class="field__label">
-                    Clinic name <span class="field__req" aria-hidden="true">required</span>
+                  <label
+                    for="pb-clinic"
+                    class="field__label"
+                  >
+                    Clinic name <span
+                      class="field__req"
+                      aria-hidden="true"
+                    >required</span>
                   </label>
                   <input
                     id="pb-clinic"
@@ -334,13 +461,19 @@ const included = [
                     type="text"
                     class="field__input"
                     placeholder="Enter your clinic name"
-                  />
+                  >
                 </div>
               </div>
 
               <div class="field">
-                <label for="pb-email" class="field__label">
-                  Email <span class="field__req" aria-hidden="true">required</span>
+                <label
+                  for="pb-email"
+                  class="field__label"
+                >
+                  Email <span
+                    class="field__req"
+                    aria-hidden="true"
+                  >required</span>
                 </label>
                 <input
                   id="pb-email"
@@ -349,23 +482,29 @@ const included = [
                   type="email"
                   class="field__input"
                   placeholder="Enter your email address"
-                />
+                >
               </div>
 
               <div class="form__pair">
                 <div class="field">
-                  <label for="pb-phone" class="field__label">Phone</label>
+                  <label
+                    for="pb-phone"
+                    class="field__label"
+                  >Phone</label>
                   <input
                     id="pb-phone"
                     v-model="formState.phone"
                     type="tel"
                     class="field__input"
                     placeholder="Enter your phone number"
-                  />
+                  >
                 </div>
 
                 <div class="field">
-                  <label for="pb-users" class="field__label">People who will use it</label>
+                  <label
+                    for="pb-users"
+                    class="field__label"
+                  >People who will use it</label>
                   <input
                     id="pb-users"
                     v-model="formState.expected_users"
@@ -373,24 +512,37 @@ const included = [
                     min="1"
                     class="field__input"
                     placeholder="e.g. 5"
-                  />
+                  >
                 </div>
               </div>
 
               <div class="field mt-4">
-                <label for="pb-message" class="field__label">Message (Optional)</label>
+                <label
+                  for="pb-message"
+                  class="field__label"
+                >Message (Optional)</label>
                 <textarea
                   id="pb-message"
                   v-model="formState.message"
                   class="field__input min-h-[100px] resize-y"
                   placeholder="Tell us about your needs..."
-                ></textarea>
+                />
               </div>
 
-              <button type="submit" :disabled="isSubmitting" class="btn btn--ink btn--block btn--lg">
+              <button
+                type="submit"
+                :disabled="isSubmitting"
+                class="btn btn--ink btn--block btn--lg"
+              >
                 <span v-if="!isSubmitting">Send request</span>
-                <span v-else class="sending">
-                  <span class="sending__dot" aria-hidden="true"></span>
+                <span
+                  v-else
+                  class="sending"
+                >
+                  <span
+                    class="sending__dot"
+                    aria-hidden="true"
+                  />
                   Sending
                 </span>
               </button>
@@ -405,7 +557,9 @@ const included = [
           <span class="mark mark--sm">
             <span class="mark__word">PureBite</span>
           </span>
-          <p class="foot__meta mono">&copy; {{ new Date().getFullYear() }} PureBite Dental</p>
+          <p class="foot__meta mono">
+            &copy; {{ new Date().getFullYear() }} PureBite Dental
+          </p>
         </div>
       </footer>
     </main>
@@ -593,8 +747,8 @@ const included = [
 .quote__fine { font-size: 12px; color: var(--ink-30); margin: 14px 0 0; text-align: center; }
 
 /* ───────── real pricing plans (superadmin-managed) ───────── */
-.plans { 
-  list-style: none; margin: 0 0 22px; padding: 0; 
+.plans {
+  list-style: none; margin: 0 0 22px; padding: 0;
   max-height: 280px; overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--rule) transparent;

@@ -27,6 +27,7 @@ Maintained by `backend/scripts/generate_catalogs.py`. CI fails if a manifest cha
 | `periodontogram` | 0.1.0 | official | patients, odontogram | manual | yes | 2 | 1 | 2 | yes |
 | `recalls` | 0.1.0 | official | patients, agenda | auto | yes | 3 | 4 | 5 | yes |
 | `reports` | 0.1.0 | official | patients, agenda, catalog, budget, billing, payments | auto | no | 3 | 0 | 0 | yes |
+| `saas` | 0.1.0 | official | — | auto | no | 4 | 0 | 0 | yes |
 | `schedules` | 0.1.0 | official | agenda | auto | yes | 8 | 0 | 3 | yes |
 | `treatment_plan` | 0.1.0 | official | patients, agenda, odontogram, catalog, budget, media | auto | no | 5 | 22 | 5 | yes |
 | `verifactu` | 0.1.0 | official | billing, catalog | manual | yes | 5 | 1 | 1 | yes |
@@ -450,6 +451,24 @@ Cross-module reporting: billing, budgets, scheduling.
 - **Events emitted:** —
 - **Events consumed:** —
 - **Module CLAUDE.md:** [`backend/app/modules/reports/CLAUDE.md`](../backend/app/modules/reports/CLAUDE.md)
+
+### `saas` — v0.1.0
+
+Platform administration, leads, and subscriptions.
+
+- **Author:** DentalPin Core Team
+- **License:** BSL-1.1
+- **Category:** official
+- **Install policy:** installable=True · auto_install=True · removable=False
+- **Depends:** —
+- **Frontend layer:** `frontend`
+- **Permissions:**
+  - `saas.leads.read`
+  - `saas.leads.write`
+  - `saas.subscriptions.read`
+  - `saas.subscriptions.write`
+- **Events emitted:** —
+- **Events consumed:** —
 
 ### `schedules` — v0.1.0
 

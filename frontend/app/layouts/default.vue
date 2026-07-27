@@ -175,8 +175,8 @@ function isActive(to: string): boolean {
             <p class="text-caption text-subtle truncate">
               {{ auth.user.value.email }}
             </p>
-            <p 
-              v-if="daysRemaining !== null" 
+            <p
+              v-if="daysRemaining !== null"
               class="text-[11px] mt-0.5 text-primary-600 dark:text-primary-400 font-medium truncate"
               title="Subscription days remaining"
             >

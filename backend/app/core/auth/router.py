@@ -1,6 +1,7 @@
 """Authentication router with rate limiting."""
 
 from collections.abc import Sequence
+from datetime import UTC
 from typing import Annotated
 from uuid import UUID
 
@@ -63,12 +64,12 @@ async def _build_clinic_responses(
     platform-admin workspace has no subscription concept and is always
     reported active.
     """
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     from app.modules.saas.constants import is_platform_clinic
     from app.modules.saas.models import SaasSubscription
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     clinics: list[ClinicResponse] = []
     for m in memberships:
         sub_result = await db.execute(

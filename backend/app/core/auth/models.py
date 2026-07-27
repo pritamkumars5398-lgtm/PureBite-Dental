@@ -29,9 +29,7 @@ class Clinic(Base, TimestampMixin):
     # IANA timezone id (e.g. "Asia/Kolkata"). Single source of truth
     # for any module that needs local-time semantics — schedules,
     # reports, future billing date-windows, etc.
-    timezone: Mapped[str] = mapped_column(
-        String(64), nullable=False, server_default="Asia/Kolkata"
-    )
+    timezone: Mapped[str] = mapped_column(String(64), nullable=False, server_default="Asia/Kolkata")
     # ISO 4217 currency code. Single source of truth for any module
     # that renders money — budgets, invoices, catalog, reports.
     # Set once at provisioning/seed time; NOT editable via the admin API

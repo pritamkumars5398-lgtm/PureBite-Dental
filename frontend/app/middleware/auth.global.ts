@@ -1,5 +1,3 @@
-import { PERMISSIONS } from '~/config/permissions'
-
 export default defineNuxtRouteMiddleware(async (to, from) => {
   const auth = useAuth()
 
@@ -31,7 +29,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     const clinic = auth.clinics.value?.[0]
     const isSuperadmin = clinic?.name === 'Platform Administration'
     const isAdminRoute = to.path === '/admin' || to.path.startsWith('/admin/')
-    
+
     const isAuthOrLanding = to.path === '/login' || to.path === '/landing'
 
     // Superadmins can only access /admin, /settings, and public routes
@@ -50,10 +48,10 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
       if (isAdminRoute) {
         return navigateTo('/')
       }
-      
+
       // Prevent dashboard flicker if subscription is expired/not activated
       const subscriptionActive = clinic?.subscription_active ?? true
-      
+
       if (!subscriptionActive) {
         if (!isLockedRoute && !isPublicRoute) {
           return navigateTo('/locked')

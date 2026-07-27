@@ -17,7 +17,6 @@ export function useApi() {
   const { t } = useI18n()
   const toast = useToast()
 
-
   const apiBaseUrl = computed(() =>
     import.meta.server ? config.apiBaseUrlServer : config.public.apiBaseUrl
   )

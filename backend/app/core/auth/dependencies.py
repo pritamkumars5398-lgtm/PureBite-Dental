@@ -1,6 +1,7 @@
 """Authentication dependencies for FastAPI."""
 
 from collections.abc import Callable
+from datetime import UTC
 from typing import Annotated
 from uuid import UUID
 
@@ -126,10 +127,11 @@ async def get_clinic_context(
     from app.modules.saas.constants import is_platform_clinic
 
     if not is_platform_clinic(membership.clinic.name):
-        from datetime import datetime, timezone
+        from datetime import datetime
+
         from app.modules.saas.models import SaasSubscription
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         sub_result = await db.execute(
             select(SaasSubscription)
             .where(
@@ -139,7 +141,7 @@ async def get_clinic_context(
             .limit(1)
         )
         active_sub = sub_result.scalar_one_or_none()
-        
+
         if not active_sub:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,

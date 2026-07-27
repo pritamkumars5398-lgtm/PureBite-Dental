@@ -628,9 +628,7 @@ Examples:
     return parser.parse_args()
 
 
-async def main(
-    lang: str = "en", currency: str = "INR", timezone: str = "Asia/Kolkata"
-) -> None:
+async def main(lang: str = "en", currency: str = "INR", timezone: str = "Asia/Kolkata") -> None:
     """Seed the full demo clinical workflow."""
     set_language(lang)
     set_currency(currency)

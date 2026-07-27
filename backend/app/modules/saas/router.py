@@ -1,13 +1,12 @@
 import logging
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from sqlalchemy.orm import joinedload
 
 from app.core.auth.dependencies import ClinicContext, get_clinic_context, require_permission
@@ -36,7 +35,9 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["saas"])
 
 
-def _subscription_to_response(sub: SaasSubscription, *, now: datetime | None = None) -> SubscriptionResponse:
+def _subscription_to_response(
+    sub: SaasSubscription, *, now: datetime | None = None
+) -> SubscriptionResponse:
     """Derive `effective_status` from start/end vs. now.
 
     The stored `status` column is written as "active" at creation time
@@ -44,7 +45,7 @@ def _subscription_to_response(sub: SaasSubscription, *, now: datetime | None = N
     starts in the future), so callers that need "is this actually active
     right now" must use this instead of the raw column.
     """
-    now = now or datetime.now(timezone.utc)
+    now = now or datetime.now(UTC)
     if sub.end_date <= now:
         effective_status = "expired"
     elif sub.start_date > now:
@@ -82,7 +83,9 @@ async def _notify_superadmins_of_lead(db: AsyncSession, lead: SaasLead) -> None:
         )
         recipient_emails = [row[0] for row in result.all()]
         if not recipient_emails:
-            logger.warning("New SaaS lead submitted but no active platform-admin user exists to notify")
+            logger.warning(
+                "New SaaS lead submitted but no active platform-admin user exists to notify"
+            )
             return
 
         body_html = (
@@ -140,8 +143,10 @@ async def list_leads(
 ):
     """Superadmin: List all leads."""
     if not is_platform_clinic(ctx.clinic.name):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only")
-        
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only"
+        )
+
     result = await db.execute(select(SaasLead).order_by(SaasLead.created_at.desc()))
     return result.scalars().all()
 
@@ -156,7 +161,9 @@ async def update_lead_status(
 ):
     """Superadmin: Mark a lead as contacted/processed/rejected."""
     if not is_platform_clinic(ctx.clinic.name):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only"
+        )
 
     result = await db.execute(select(SaasLead).where(SaasLead.id == lead_id))
     lead = result.scalar_one_or_none()
@@ -178,7 +185,9 @@ async def provision_tenant(
 ):
     """Superadmin: Provision a new clinic tenant."""
     if not is_platform_clinic(ctx.clinic.name):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only"
+        )
 
     # Check if email exists
     email_check = await db.execute(select(User).where(User.email == req.admin_email))
@@ -246,11 +255,15 @@ async def list_clinics(
     tenants would violate multi-tenancy for non-admin roles.
     """
     if not is_platform_clinic(ctx.clinic.name):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only"
+        )
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     result = await db.execute(
-        select(Clinic).where(Clinic.name != PLATFORM_ADMIN_CLINIC_NAME).order_by(Clinic.created_at.desc())
+        select(Clinic)
+        .where(Clinic.name != PLATFORM_ADMIN_CLINIC_NAME)
+        .order_by(Clinic.created_at.desc())
     )
     clinics = result.scalars().all()
 
@@ -299,7 +312,9 @@ async def create_pricing_plan(
 ):
     """Superadmin: Create a new pricing plan."""
     if not is_platform_clinic(ctx.clinic.name):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only"
+        )
 
     db_plan = SaasPricingPlan(
         id=uuid.uuid4(),
@@ -324,7 +339,9 @@ async def update_pricing_plan(
 ):
     """Superadmin: Edit a pricing plan, or retire it via `is_active=false`."""
     if not is_platform_clinic(ctx.clinic.name):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only"
+        )
 
     result = await db.execute(select(SaasPricingPlan).where(SaasPricingPlan.id == plan_id))
     plan = result.scalar_one_or_none()
@@ -348,7 +365,9 @@ async def delete_pricing_plan(
 ):
     """Superadmin: Delete a pricing plan."""
     if not is_platform_clinic(ctx.clinic.name):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only"
+        )
 
     result = await db.execute(select(SaasPricingPlan).where(SaasPricingPlan.id == plan_id))
     plan = result.scalar_one_or_none()
@@ -380,10 +399,14 @@ async def list_subscriptions(
         if filter_clinic_id is not None:
             query = query.where(SaasSubscription.clinic_id == filter_clinic_id)
     else:
-        query = select(SaasSubscription).options(joinedload(SaasSubscription.plan)).where(SaasSubscription.clinic_id == ctx.clinic_id)
+        query = (
+            select(SaasSubscription)
+            .options(joinedload(SaasSubscription.plan))
+            .where(SaasSubscription.clinic_id == ctx.clinic_id)
+        )
 
     result = await db.execute(query.order_by(SaasSubscription.end_date.desc()))
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     return [_subscription_to_response(sub, now=now) for sub in result.scalars().all()]
 
 
@@ -396,14 +419,16 @@ async def grant_subscription(
 ):
     """Superadmin: Grant or renew a subscription for a clinic (Stacking Logic)."""
     if not is_platform_clinic(ctx.clinic.name):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only"
+        )
 
     clinic_result = await db.execute(select(Clinic).where(Clinic.id == req.clinic_id))
     if not clinic_result.scalar_one_or_none():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clinic not found")
 
     # Find current active subscription to handle stacking
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     current_sub_result = await db.execute(
         select(SaasSubscription)
         .where(SaasSubscription.clinic_id == req.clinic_id, SaasSubscription.end_date > now)
@@ -415,6 +440,7 @@ async def grant_subscription(
     start_date = current_sub.end_date if current_sub else now
 
     import calendar
+
     month = start_date.month - 1 + req.duration_months
     year = start_date.year + month // 12
     month = month % 12 + 1
@@ -431,12 +457,12 @@ async def grant_subscription(
     )
     db.add(db_sub)
     await db.commit()
-    
+
     result = await db.execute(
         select(SaasSubscription)
         .options(joinedload(SaasSubscription.plan))
         .where(SaasSubscription.id == db_sub.id)
     )
     db_sub = result.scalar_one()
-    
+
     return _subscription_to_response(db_sub, now=now)

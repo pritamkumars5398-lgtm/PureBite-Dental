@@ -13,7 +13,6 @@
  */
 
 import type { ActiveModule, ApiResponse, NavigationItem } from '~/types'
-import { PERMISSIONS } from '~/config/permissions'
 
 // Host shell nav: dashboard + settings belong to the host app, not to
 // any module. Always rendered, even when the modules endpoint fails.

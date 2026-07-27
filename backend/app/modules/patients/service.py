@@ -272,7 +272,6 @@ class PatientService:
         )
         return patient
 
-
     @staticmethod
     async def update_patient(db: AsyncSession, patient: Patient, data: dict) -> Patient:
         """Update an existing patient.

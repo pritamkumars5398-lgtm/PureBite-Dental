@@ -42,7 +42,9 @@ class Patient(Base, TimestampMixin):
     # Format: PT-{FIRST3}-{6-digit-seq}  e.g. PT-AMA-000123
     # Nullable so that rows created before this feature was added are not broken.
     # New patients always receive a value in PatientService.create_patient().
-    patient_number: Mapped[str | None] = mapped_column(String(20), unique=True, index=True, default=None)
+    patient_number: Mapped[str | None] = mapped_column(
+        String(20), unique=True, index=True, default=None
+    )
 
     # Operational opt-out: when true, recalls / outreach modules must
     # exclude the patient from active call lists and surface them in a
