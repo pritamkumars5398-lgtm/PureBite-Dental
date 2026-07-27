@@ -469,6 +469,7 @@ Platform administration, leads, and subscriptions.
   - `saas.subscriptions.write`
 - **Events emitted:** —
 - **Events consumed:** —
+- **Module CLAUDE.md:** [`backend/app/modules/saas/CLAUDE.md`](../backend/app/modules/saas/CLAUDE.md)
 
 ### `schedules` — v0.1.0
 
