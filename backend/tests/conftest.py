@@ -99,8 +99,10 @@ TEST_DATABASE_URL = settings.DATABASE_URL
 @pytest_asyncio.fixture
 async def db_session() -> AsyncGenerator[AsyncSession, None]:
     """Create a fresh database session for each test."""
+    from sqlalchemy.pool import NullPool
+
     # Create a new engine for each test to avoid connection conflicts
-    test_engine = create_async_engine(TEST_DATABASE_URL, echo=False)
+    test_engine = create_async_engine(TEST_DATABASE_URL, echo=False, poolclass=NullPool)
     test_session_maker = async_sessionmaker(
         test_engine, class_=AsyncSession, expire_on_commit=False
     )

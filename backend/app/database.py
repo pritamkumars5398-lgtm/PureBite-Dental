@@ -17,15 +17,24 @@ from app.config import settings
 # generic "connection lost". ``pool_recycle=3600`` ages connections out
 # proactively so we don't accumulate idle ones a proxy might silently
 # close.
-engine = create_async_engine(
-    settings.DATABASE_URL,
-    pool_size=10,
-    max_overflow=20,
-    pool_timeout=30,
-    pool_recycle=3600,
-    pool_pre_ping=True,
-    echo=settings.ENVIRONMENT == "development",
-)
+if settings.TESTING:
+    from sqlalchemy.pool import NullPool
+
+    engine = create_async_engine(
+        settings.DATABASE_URL,
+        poolclass=NullPool,
+        echo=False,
+    )
+else:
+    engine = create_async_engine(
+        settings.DATABASE_URL,
+        pool_size=10,
+        max_overflow=20,
+        pool_timeout=30,
+        pool_recycle=3600,
+        pool_pre_ping=True,
+        echo=settings.ENVIRONMENT == "development",
+    )
 
 # ``expire_on_commit=False`` keeps ORM objects hydrated after a commit
 # so the router can serialise the response without an extra refresh
