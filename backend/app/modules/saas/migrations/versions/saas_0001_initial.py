@@ -54,6 +54,7 @@ def upgrade() -> None:
         "saas_subscriptions",
         sa.Column("id", sa.UUID(), nullable=False),
         sa.Column("clinic_id", sa.UUID(), nullable=False),
+        sa.Column("plan_id", sa.UUID(), nullable=True),
         sa.Column("start_date", sa.DateTime(timezone=True), nullable=False),
         sa.Column("end_date", sa.DateTime(timezone=True), nullable=False),
         sa.Column("status", sa.String(length=50), nullable=False),
@@ -63,6 +64,11 @@ def upgrade() -> None:
             ["clinic_id"],
             ["clinics.id"],
             ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
+            ["plan_id"],
+            ["saas_pricing_plans.id"],
+            ondelete="SET NULL",
         ),
         sa.PrimaryKeyConstraint("id"),
     )
