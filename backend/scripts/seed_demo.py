@@ -162,6 +162,52 @@ def _print_status_counts(header: str, rows: list[dict], status_key: str = "statu
 # ---------------------------------------------------------------------------
 
 
+async def seed_saas_subscription_if_needed(db: AsyncSession, clinic_id) -> None:
+    """Ensure the seeded clinic has a valid SaaS subscription so it can be accessed in E2E/dev."""
+    try:
+        import uuid
+        from datetime import UTC, datetime, timedelta
+
+        from app.modules.saas.models import SaasPricingPlan, SaasSubscription
+
+        # Check if subscription already exists
+        sub_check = await db.execute(
+            select(SaasSubscription).where(SaasSubscription.clinic_id == clinic_id)
+        )
+        if sub_check.scalar_one_or_none():
+            return
+
+        # Get or create a pricing plan
+        plan_check = await db.execute(select(SaasPricingPlan).limit(1))
+        plan = plan_check.scalar_one_or_none()
+        if not plan:
+            plan = SaasPricingPlan(
+                id=uuid.uuid4(),
+                name="Standard Plan",
+                duration_months=12,
+                price=99.0,
+                is_active=True,
+            )
+            db.add(plan)
+            await db.flush()
+
+        # Create subscription valid for 10 years
+        subscription = SaasSubscription(
+            id=uuid.uuid4(),
+            clinic_id=clinic_id,
+            plan_id=plan.id,
+            start_date=datetime.now(UTC) - timedelta(days=30),
+            end_date=datetime.now(UTC) + timedelta(days=365 * 10),
+            status="active",
+        )
+        db.add(subscription)
+        await db.flush()
+        print(f"  Created SaaS subscription for clinic {clinic_id}")
+    except ImportError:
+        # SaaS module not present or installed
+        pass
+
+
 async def seed_clinic(db: AsyncSession) -> Clinic:
     """Create the demo clinic + its cabinets."""
     from uuid import uuid4
@@ -197,6 +243,7 @@ async def seed_clinic(db: AsyncSession) -> Clinic:
     await db.flush()
 
     print(f"  Created clinic: {clinic.name}")
+    await seed_saas_subscription_if_needed(db, clinic.id)
     return clinic
 
 

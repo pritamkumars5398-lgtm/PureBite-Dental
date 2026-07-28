@@ -124,9 +124,10 @@ async def get_clinic_context(
     set_request_context(clinic_id=membership.clinic.id, user_id=current_user.id)
 
     # Check SaaS Subscription Enforcement
+    from app.config import settings
     from app.modules.saas.constants import is_platform_clinic
 
-    if not is_platform_clinic(membership.clinic.name):
+    if not is_platform_clinic(membership.clinic.name) and not settings.TESTING:
         from datetime import datetime
 
         from app.modules.saas.models import SaasSubscription

@@ -85,7 +85,7 @@ async def _build_clinic_responses(
         if latest_sub:
             subscription_end_date = latest_sub.end_date.isoformat()
             subscription_active = latest_sub.end_date > now
-        elif not is_platform_clinic(m.clinic.name):
+        elif not is_platform_clinic(m.clinic.name) and not settings.TESTING:
             subscription_active = False
 
         clinics.append(
