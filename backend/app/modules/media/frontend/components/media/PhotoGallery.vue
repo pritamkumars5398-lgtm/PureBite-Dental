@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Document, MediaCategory } from '~~/app/types'
 import { PERMISSIONS } from '~~/app/config/permissions'
+import { ref, computed, watch } from 'vue'
 
 interface Props {
   patientId: string
@@ -152,8 +153,8 @@ function handleUploaded() {
       :ui="{ content: 'sm:max-w-2xl' }"
     >
       <template #content>
-        <div class="bg-default rounded-lg overflow-hidden">
-          <header class="flex items-center gap-3 border-b border-default px-5 py-4">
+        <div class="bg-default rounded-lg overflow-hidden flex flex-col max-h-[90vh]">
+          <header class="flex items-center gap-3 border-b border-default px-5 py-4 shrink-0">
             <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <UIcon
                 name="i-lucide-image-plus"
@@ -176,7 +177,7 @@ function handleUploaded() {
               @click="showUpload = false"
             />
           </header>
-          <div class="px-5 py-4">
+          <div class="px-5 py-4 overflow-y-auto">
             <PhotoUpload
               :patient-id="patientId"
               @uploaded="handleUploaded"

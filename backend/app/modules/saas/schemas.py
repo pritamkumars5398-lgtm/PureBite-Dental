@@ -107,3 +107,11 @@ class ClinicDirectoryResponse(BaseModel):
     subscription_active: bool
     subscription_end_date: datetime | None
     subscription_count: int
+
+
+class ClinicUpdate(BaseModel):
+    name: str | None = Field(None, max_length=255)
+    tax_id: str | None = Field(None, max_length=50)
+    currency: str | None = None
+    timezone: str | None = None
+

@@ -13,7 +13,9 @@ const {
   provisionTenant,
   fetchClinicSubscriptions,
   grantSubscription,
-  plans
+  plans,
+  updateClinic,
+  deleteClinic
 } = useSaasAdmin()
 
 const route = useRoute()
@@ -83,6 +85,52 @@ async function handleProvision() {
   const ok = await provisionTenant(provisionForm.value)
   isProvisioning.value = false
   if (ok) showProvision.value = false
+}
+
+// ───────────────────────── Edit & Delete Clinic ─────────────────────────
+const showEditClinic = ref(false)
+const isEditingClinic = ref(false)
+const editClinicForm = ref({ id: '', name: '', tax_id: '' })
+
+function openEditClinic(clinic: SaasClinicDirectoryEntry) {
+  editClinicForm.value = {
+    id: clinic.id,
+    name: clinic.name,
+    tax_id: clinic.tax_id
+  }
+  showEditClinic.value = true
+}
+
+async function handleEditClinic() {
+  isEditingClinic.value = true
+  const ok = await updateClinic(editClinicForm.value.id, {
+    name: editClinicForm.value.name,
+    tax_id: editClinicForm.value.tax_id
+  })
+  isEditingClinic.value = false
+  if (ok) showEditClinic.value = false
+}
+
+const showDeleteClinic = ref(false)
+const isDeletingClinic = ref(false)
+const deleteClinicTarget = ref<SaasClinicDirectoryEntry | null>(null)
+
+function confirmDeleteClinic(clinic: SaasClinicDirectoryEntry) {
+  deleteClinicTarget.value = clinic
+  showDeleteClinic.value = true
+}
+
+async function handleDeleteClinic() {
+  if (!deleteClinicTarget.value) return
+  isDeletingClinic.value = true
+  const ok = await deleteClinic(deleteClinicTarget.value.id)
+  isDeletingClinic.value = false
+  if (ok) {
+    showDeleteClinic.value = false
+    if (selectedClinic.value?.id === deleteClinicTarget.value.id) {
+      showClinicDetail.value = false
+    }
+  }
 }
 
 // ───────────────────────── Clinic directory + history ─────────────────────────
@@ -215,6 +263,29 @@ const subStatusColor: Record<SaasSubscription['effective_status'], 'success' | '
                 {{ clinic.subscription_active ? t('saasAdmin.clinics.active') : t('saasAdmin.clinics.inactive') }}
               </UBadge>
               <span class="text-caption text-subtle">{{ fmtDate(clinic.subscription_end_date) }}</span>
+              <UButton
+                label="Renew"
+                variant="soft"
+                color="primary"
+                size="xs"
+                class="ml-2"
+                @click.stop="openClinicDetail(clinic)"
+              />
+              <UButton
+                icon="i-lucide-pencil"
+                variant="ghost"
+                color="neutral"
+                size="sm"
+                class="ml-2"
+                @click.stop="openEditClinic(clinic)"
+              />
+              <UButton
+                icon="i-lucide-trash-2"
+                variant="ghost"
+                color="error"
+                size="sm"
+                @click.stop="confirmDeleteClinic(clinic)"
+              />
               <UIcon
                 name="i-lucide-chevron-right"
                 class="w-4 h-4 text-subtle"
@@ -329,6 +400,97 @@ const subStatusColor: Record<SaasSubscription['effective_status'], 'success' | '
               </UButton>
             </div>
           </form>
+        </UCard>
+      </template>
+    </UModal>
+
+    <!-- Edit clinic modal -->
+    <UModal v-model:open="showEditClinic">
+      <template #content>
+        <UCard>
+          <template #header>
+            <div class="flex items-center gap-2">
+              <UIcon
+                name="i-lucide-pencil"
+                class="w-5 h-5 text-primary-accent"
+              />
+              <h3 class="font-semibold text-default">
+                Edit Clinic
+              </h3>
+            </div>
+          </template>
+
+          <form
+            class="space-y-4"
+            @submit.prevent="handleEditClinic"
+          >
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <UFormField :label="t('saasAdmin.form.clinicName')">
+                <UInput
+                  v-model="editClinicForm.name"
+                  required
+                />
+              </UFormField>
+              <UFormField :label="t('saasAdmin.form.taxId')">
+                <UInput
+                  v-model="editClinicForm.tax_id"
+                  required
+                />
+              </UFormField>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-4">
+              <UButton
+                variant="ghost"
+                @click="showEditClinic = false"
+              >
+                {{ t('common.cancel') }}
+              </UButton>
+              <UButton
+                type="submit"
+                :loading="isEditingClinic"
+              >
+                Save Changes
+              </UButton>
+            </div>
+          </form>
+        </UCard>
+      </template>
+    </UModal>
+
+    <!-- Delete Clinic Confirmation Modal -->
+    <UModal v-model:open="showDeleteClinic">
+      <template #content>
+        <UCard>
+          <template #header>
+            <div class="flex items-center gap-2">
+              <UIcon name="i-lucide-alert-triangle" class="w-5 h-5 text-error-500" />
+              <h3 class="font-semibold text-error-500">Danger: Delete Clinic</h3>
+            </div>
+          </template>
+          
+          <div class="py-2 space-y-4">
+            <p class="text-sm text-subtle">
+              Are you absolutely sure you want to delete <strong>{{ deleteClinicTarget?.name }}</strong>?
+            </p>
+            <div class="p-3 bg-error-50 dark:bg-error-500/10 rounded-md text-sm text-error-600 dark:text-error-400 border border-error-200 dark:border-error-500/20">
+              <p class="font-medium mb-1">This action is highly destructive.</p>
+              <ul class="list-disc pl-4 space-y-1">
+                <li>All users associated with this clinic will lose access.</li>
+                <li>All patients, budgets, and clinical records will be permanently erased.</li>
+                <li>This action cannot be undone.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-2 pt-4">
+            <UButton variant="ghost" color="neutral" @click="showDeleteClinic = false">
+              Cancel
+            </UButton>
+            <UButton color="error" @click="handleDeleteClinic" :loading="isDeletingClinic">
+              Yes, Delete Clinic
+            </UButton>
+          </div>
         </UCard>
       </template>
     </UModal>

@@ -19,6 +19,7 @@ from .constants import PLATFORM_ADMIN_CLINIC_NAME, is_platform_clinic
 from .models import SaasLead, SaasPricingPlan, SaasSubscription
 from .schemas import (
     ClinicDirectoryResponse,
+    ClinicUpdate,
     LeadCreate,
     LeadResponse,
     LeadStatusUpdate,
@@ -466,3 +467,83 @@ async def grant_subscription(
     db_sub = result.scalar_one()
 
     return _subscription_to_response(db_sub, now=now)
+
+
+@router.patch("/clinics/{clinic_id}", response_model=ClinicDirectoryResponse)
+async def update_clinic(
+    clinic_id: uuid.UUID,
+    payload: ClinicUpdate,
+    ctx: Annotated[ClinicContext, Depends(get_clinic_context)],
+    _: Annotated[None, Depends(require_permission("subscriptions.write"))],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    """Superadmin: Update a clinic's core details."""
+    if not is_platform_clinic(ctx.clinic.name):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only"
+        )
+    if clinic_id == ctx.clinic_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot modify the platform admin clinic"
+        )
+
+    result = await db.execute(select(Clinic).where(Clinic.id == clinic_id))
+    clinic = result.scalar_one_or_none()
+    if not clinic:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clinic not found")
+
+    for field, value in payload.model_dump(exclude_unset=True).items():
+        setattr(clinic, field, value)
+
+    await db.commit()
+    await db.refresh(clinic)
+
+    # Re-fetch subscription info for the response
+    subs_result = await db.execute(
+        select(SaasSubscription)
+        .where(SaasSubscription.clinic_id == clinic.id)
+        .order_by(SaasSubscription.end_date.desc())
+    )
+    subs = subs_result.scalars().all()
+    latest = subs[0] if subs else None
+    
+    return ClinicDirectoryResponse(
+        id=clinic.id,
+        name=clinic.name,
+        tax_id=clinic.tax_id,
+        created_at=clinic.created_at,
+        subscription_active=bool(latest and latest.end_date > datetime.now(UTC)),
+        subscription_end_date=latest.end_date if latest else None,
+        subscription_count=len(subs),
+    )
+
+
+@router.delete("/clinics/{clinic_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_clinic(
+    clinic_id: uuid.UUID,
+    ctx: Annotated[ClinicContext, Depends(get_clinic_context)],
+    _: Annotated[None, Depends(require_permission("subscriptions.write"))],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    """Superadmin: Permanently delete a clinic (Hard Delete).
+    
+    This cascades and wipes all data associated with this clinic.
+    """
+    if not is_platform_clinic(ctx.clinic.name):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only"
+        )
+    if clinic_id == ctx.clinic_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot delete the platform admin clinic"
+        )
+
+    result = await db.execute(select(Clinic).where(Clinic.id == clinic_id))
+    clinic = result.scalar_one_or_none()
+    if not clinic:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clinic not found")
+
+    await db.delete(clinic)
+    await db.commit()
+    return None
+

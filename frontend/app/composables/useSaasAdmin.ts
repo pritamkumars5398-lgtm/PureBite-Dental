@@ -273,6 +273,51 @@ export function useSaasAdmin() {
     }
   }
 
+  async function updateClinic(
+    clinicId: string,
+    data: Partial<{ name: string, tax_id: string, currency: string, timezone: string }>
+  ): Promise<boolean> {
+    try {
+      await api.patch(`/api/v1/saas/clinics/${clinicId}`, data)
+      toast.add({
+        title: t('common.success'),
+        description: 'Clinic updated successfully',
+        color: 'success'
+      })
+      await fetchAll()
+      return true
+    } catch (e) {
+      toast.add({
+        title: t('common.error'),
+        description: errorDescription(e, 'Failed to update clinic'),
+        color: 'error'
+      })
+      console.error('Failed to update clinic:', e)
+      return false
+    }
+  }
+
+  async function deleteClinic(clinicId: string): Promise<boolean> {
+    try {
+      await api.del(`/api/v1/saas/clinics/${clinicId}`)
+      toast.add({
+        title: t('common.success'),
+        description: 'Clinic deleted successfully',
+        color: 'success'
+      })
+      await fetchAll()
+      return true
+    } catch (e) {
+      toast.add({
+        title: t('common.error'),
+        description: errorDescription(e, 'Failed to delete clinic'),
+        color: 'error'
+      })
+      console.error('Failed to delete clinic:', e)
+      return false
+    }
+  }
+
   return {
     leads: readonly(leads),
     clinics: readonly(clinics),
@@ -286,6 +331,8 @@ export function useSaasAdmin() {
     createPlan,
     togglePlanActive,
     updatePlan,
-    deletePlan
+    deletePlan,
+    updateClinic,
+    deleteClinic
   }
 }

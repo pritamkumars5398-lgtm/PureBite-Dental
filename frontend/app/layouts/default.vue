@@ -217,7 +217,7 @@ function isActive(to: string): boolean {
             <NuxtLink
               to="/"
               class="flex items-center gap-2"
-              @click="mobileNavOpen = false"
+              @click="() => { mobileNavOpen = false }"
             >
               <img
                 src="/logo-icon.svg"
@@ -236,7 +236,7 @@ function isActive(to: string): boolean {
               size="sm"
               icon="i-lucide-x"
               :aria-label="t('nav.close', 'Cerrar')"
-              @click="mobileNavOpen = false"
+              @click="() => { mobileNavOpen = false }"
             />
           </div>
 
@@ -320,7 +320,7 @@ function isActive(to: string): boolean {
           size="sm"
           icon="i-lucide-menu"
           :aria-label="t('nav.openMenu', 'Abrir menú')"
-          @click="mobileNavOpen = true"
+          @click="() => { mobileNavOpen = true }"
         />
 
         <!-- Desktop sidebar toggle -->

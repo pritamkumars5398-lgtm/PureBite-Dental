@@ -30,6 +30,7 @@ def upgrade() -> None:
         sa.Column("phone", sa.String(length=50), nullable=True),
         sa.Column("email", sa.String(length=255), nullable=False),
         sa.Column("expected_users", sa.Integer(), nullable=True),
+        sa.Column("message", sa.String(length=2000), nullable=True),
         sa.Column("status", sa.String(length=50), nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),

@@ -113,8 +113,9 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
     async with test_session_maker() as session:
         yield session
 
-    async with test_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+    # Commented out to prevent dropping the development database tables
+    # async with test_engine.begin() as conn:
+    #     await conn.run_sync(Base.metadata.drop_all)
 
     await test_engine.dispose()
 

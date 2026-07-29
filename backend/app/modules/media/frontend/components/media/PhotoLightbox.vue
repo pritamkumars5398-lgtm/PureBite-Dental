@@ -227,7 +227,7 @@ function toggleCompare() {
             v-if="comparing && partner"
             class="grid h-full w-full grid-cols-1 gap-2 p-2 sm:grid-cols-2"
           >
-            <figure class="relative flex flex-col items-center">
+            <figure class="relative flex flex-col items-center justify-center h-full w-full">
               <span class="absolute top-2 left-2 z-10 rounded bg-primary px-2 py-0.5 text-[11px] font-semibold text-inverted shadow">
                 {{ current?.media_subtype === 'after'
                   ? t('photoGallery.compare.after', 'Después')
@@ -237,11 +237,11 @@ function toggleCompare() {
                 v-if="blobUrl"
                 :src="blobUrl"
                 :alt="current?.title"
-                class="max-h-full max-w-full object-contain"
+                class="h-full w-full object-contain"
                 draggable="false"
               >
             </figure>
-            <figure class="relative flex flex-col items-center">
+            <figure class="relative flex flex-col items-center justify-center h-full w-full">
               <span class="absolute top-2 left-2 z-10 rounded bg-primary px-2 py-0.5 text-[11px] font-semibold text-inverted shadow">
                 {{ partner?.media_subtype === 'before'
                   ? t('photoGallery.compare.before', 'Antes')
@@ -251,7 +251,7 @@ function toggleCompare() {
                 v-if="partnerBlobUrl"
                 :src="partnerBlobUrl"
                 :alt="partner?.title"
-                class="max-h-full max-w-full object-contain"
+                class="h-full w-full object-contain"
                 draggable="false"
               >
               <div
@@ -270,7 +270,7 @@ function toggleCompare() {
             v-else-if="blobUrl"
             :src="blobUrl"
             :alt="current?.title"
-            class="max-h-full max-w-full select-none object-contain"
+            class="h-full w-full select-none object-contain"
             draggable="false"
           >
           <div
