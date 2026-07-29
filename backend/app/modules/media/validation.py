@@ -1,6 +1,6 @@
 """File validation utilities."""
 
-from fastapi import HTTPException, UploadFile
+from fastapi import HTTPException, UploadFile, status
 
 from app.config import settings
 
@@ -24,6 +24,12 @@ _PHOTO_MIME_EXTRA = frozenset(
 def validate_file_size(file: UploadFile, content_length: int | None = None) -> None:
     """Validate file size against limit.
 
+    Falls back to ``UploadFile.size`` (populated by the multipart
+    parser) when the caller has no Content-Length to offer. Both call
+    sites pass only the file, so relying on ``content_length`` alone
+    made this a silent no-op and let oversized uploads through to the
+    storage backend, where they surfaced as an opaque 500.
+
     Args:
         file: Uploaded file
         content_length: Content-Length header value (if available)
@@ -32,10 +38,11 @@ def validate_file_size(file: UploadFile, content_length: int | None = None) -> N
         HTTPException: If file exceeds size limit
     """
     max_size = settings.STORAGE_MAX_FILE_SIZE
+    size = content_length if content_length is not None else file.size
 
-    if content_length and content_length > max_size:
+    if size is not None and size > max_size:
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail=f"File size exceeds limit of {max_size // (1024 * 1024)}MB",
         )
 

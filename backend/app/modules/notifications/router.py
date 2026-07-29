@@ -27,7 +27,11 @@ from .schemas import (
     TestEmailRequest,
     TestEmailResponse,
 )
-from .service import NotificationService
+from .service import (
+    NotificationService,
+    resolve_clinic_communication_locale,
+    smtp_test_copy,
+)
 
 router = APIRouter()
 
@@ -590,10 +594,12 @@ async def test_smtp_settings(
         to_email=data.to_email,
     )
 
+    locale = await resolve_clinic_communication_locale(db, ctx.clinic_id)
+
     return ApiResponse(
         data=TestEmailResponse(
             success=result.is_success,
-            message="Conexión SMTP exitosa. Email de prueba enviado."
+            message=smtp_test_copy(locale)["success"]
             if result.is_success
             else f"Error: {result.error_message}",
             provider="smtp",

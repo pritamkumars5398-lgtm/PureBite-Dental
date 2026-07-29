@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- fix(smtp): the SMTP connection-test email was hardcoded Spanish copy
+  signed "DentalPin", ignoring the clinic's communication language. It
+  now resolves the locale via ``resolve_clinic_communication_locale``
+  (es/en, falling back to the default) and signs with the clinic's own
+  ``from_name`` or name. The API success message is localised the same
+  way. Copy lives in ``_SMTP_TEST_COPY`` rather than a Jinja template
+  because the test runs before template resolution is known to work.
+
 - refactor(scheduler): declare the ``appointment_reminders`` interval job
   via ``get_scheduled_jobs()`` instead of being imported by name in
   ``app/core/scheduler.py``.

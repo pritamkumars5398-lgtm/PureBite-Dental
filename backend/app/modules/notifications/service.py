@@ -51,6 +51,54 @@ async def resolve_clinic_communication_locale(
     return lang or DEFAULT_COMMUNICATION_LOCALE
 
 
+# Fallback sender/branding name when the clinic row is missing.
+DEFAULT_SENDER_NAME = "DentalPin"
+
+
+async def resolve_clinic_display_name(db: AsyncSession, clinic_id: UUID) -> str:
+    """Return the clinic's own name for use as email branding.
+
+    Outbound mail should be signed with the clinic's name, not the
+    product's — patients recognise their dentist, not DentalPin.
+    """
+    row = (
+        await db.execute(
+            text("SELECT name FROM clinics WHERE id = :id"),
+            {"id": clinic_id},
+        )
+    ).first()
+    return (row.name if row else None) or DEFAULT_SENDER_NAME
+
+
+# Copy for the SMTP connection test email. This one message can't come
+# from the Jinja templates like the patient-facing mail does: it is sent
+# while verifying credentials, before any template resolution is known
+# to work, so it has to stay self-contained. Keep every locale in sync.
+_SMTP_TEST_COPY: dict[str, dict[str, str]] = {
+    "es": {
+        "subject": "Test de conexión SMTP",
+        "heading": "Conexión SMTP exitosa",
+        "intro": "Este es un email de prueba de la configuración SMTP de tu clínica.",
+        "confirmation": "Si has recibido este mensaje, la configuración está funcionando correctamente.",
+        "footer": "Enviado desde",
+        "success": "Conexión SMTP exitosa. Email de prueba enviado.",
+    },
+    "en": {
+        "subject": "SMTP connection test",
+        "heading": "SMTP connection successful",
+        "intro": "This is a test email from your clinic's SMTP configuration.",
+        "confirmation": "If you received this message, the configuration is working correctly.",
+        "footer": "Sent from",
+        "success": "SMTP connection successful. Test email sent.",
+    },
+}
+
+
+def smtp_test_copy(locale: str) -> dict[str, str]:
+    """Return SMTP-test copy for ``locale``, falling back to the default."""
+    return _SMTP_TEST_COPY.get(locale) or _SMTP_TEST_COPY[DEFAULT_COMMUNICATION_LOCALE]
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -422,6 +470,17 @@ class NotificationService:
             if settings and settings.password_encrypted:
                 actual_password = decrypt_password(settings.password_encrypted)
 
+        # Copy follows the clinic's communication language, and the
+        # branding uses the clinic's own name rather than the product's.
+        # ``from_name`` on the saved settings wins when the clinic has
+        # explicitly chosen a sender label.
+        locale = await resolve_clinic_communication_locale(db, clinic_id)
+        copy = smtp_test_copy(locale)
+        saved = await NotificationService.get_smtp_settings(db, clinic_id)
+        sender_name = (saved.from_name if saved else None) or await resolve_clinic_display_name(
+            db, clinic_id
+        )
+
         # Create a temporary SMTP provider with the test settings
         provider = SMTPProvider(
             host=host,
@@ -431,27 +490,26 @@ class NotificationService:
             use_tls=use_tls,
             use_ssl=use_ssl,
             default_from_email=from_email,
-            default_from_name="DentalPin",
+            default_from_name=sender_name,
         )
 
-        # Send test email
         message = EmailMessage(
             to_email=to_email,
-            subject="DentalPin - Test de conexión SMTP",
-            body_html="""
+            subject=f"{sender_name} - {copy['subject']}",
+            body_html=f"""
             <html>
             <body style="font-family: sans-serif; padding: 20px;">
-                <h2>Conexión SMTP exitosa</h2>
-                <p>Este es un email de prueba de la configuración SMTP de tu clínica.</p>
-                <p>Si has recibido este mensaje, la configuración está funcionando correctamente.</p>
+                <h2>{copy["heading"]}</h2>
+                <p>{copy["intro"]}</p>
+                <p>{copy["confirmation"]}</p>
                 <hr>
                 <p style="color: #666; font-size: 12px;">
-                    Enviado desde DentalPin
+                    {copy["footer"]} {sender_name}
                 </p>
             </body>
             </html>
             """,
-            body_text="Conexión SMTP exitosa. La configuración está funcionando correctamente.",
+            body_text=f"{copy['heading']}. {copy['confirmation']}",
             from_email=from_email,
         )
 

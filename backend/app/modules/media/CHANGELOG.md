@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- fix(validation): ``validate_file_size`` only checked the optional
+  ``content_length`` argument, which neither upload route passes — so
+  the ``STORAGE_MAX_FILE_SIZE`` limit never applied and oversized files
+  reached the storage backend, failing as an opaque 500. It now falls
+  back to ``UploadFile.size`` and returns 413, matching the
+  ``migration_import`` module's convention.
+
 - perf(lists): drop the ``select_from(query.subquery())`` count
   anti-pattern in ``DocumentService.list_documents`` and
   ``PhotoService.list_photos``; both lists now count via a direct
