@@ -58,7 +58,7 @@ def _decorate(doc) -> DocumentResponse:
     """Build a DocumentResponse with thumb / medium / full URLs."""
     response = DocumentResponse.model_validate(doc)
     response.full_url = _download_url(doc.id)
-    if is_thumbnailable(doc.mime_type) and doc.media_kind in {"photo", "xray"}:
+    if is_thumbnailable(doc.mime_type) or doc.media_kind == "video":
         response.thumb_url = _download_url(doc.id, "thumb")
         response.medium_url = _download_url(doc.id, "medium")
     return response
@@ -170,6 +170,7 @@ async def upload_photo(
     captured_at: Annotated[datetime | None, Form()] = None,
     paired_document_id: Annotated[UUID | None, Form()] = None,
     description: Annotated[str | None, Form(max_length=2000)] = None,
+    thumb_file: Annotated[UploadFile | None, File()] = None,
     ctx: Annotated[ClinicContext, Depends(get_clinic_context)] = None,
     _: Annotated[None, Depends(require_permission("media.documents.write"))] = None,
     db: Annotated[AsyncSession, Depends(get_db)] = None,
@@ -204,6 +205,7 @@ async def upload_photo(
         media_subtype=media_subtype,
         captured_at=captured_at,
         paired_document_id=paired_document_id,
+        thumb_data=await thumb_file.read() if thumb_file else None,
     )
     return ApiResponse(data=_decorate(document))
 
@@ -291,10 +293,11 @@ async def download_document(
 
     path: str
     media_type: str
-    if variant == "thumb" and is_thumbnailable(document.mime_type):
+    is_video = document.media_kind == "video"
+    if variant == "thumb" and (is_thumbnailable(document.mime_type) or is_video):
         path = f"{base_path}{THUMB_SUFFIX}"
         media_type = "image/jpeg"
-    elif variant == "medium" and is_thumbnailable(document.mime_type):
+    elif variant == "medium" and (is_thumbnailable(document.mime_type) or is_video):
         path = f"{base_path}{MEDIUM_SUFFIX}"
         media_type = "image/jpeg"
     else:

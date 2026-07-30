@@ -20,9 +20,10 @@ const apiBaseUrl = computed(() =>
 // relative `/api/v1/...` path; we render it with an Authorization header
 // via a fetched blob URL so <img> works without exposing credentials.
 const thumbBlobUrl = ref<string | null>(null)
+const isVideo = computed(() => props.document.media_kind === 'video' || props.document.mime_type?.startsWith('video/'))
 
 async function loadThumb() {
-  const path = props.document.thumb_url ?? props.document.full_url
+  const path = props.document.thumb_url ?? (isVideo.value ? null : props.document.full_url)
   if (!path) return
   try {
     const response = await $fetch<Blob>(path, {
@@ -69,9 +70,19 @@ const subtypeLabel = computed(() => props.document.media_subtype ?? props.docume
       class="flex h-full w-full items-center justify-center text-muted"
     >
       <UIcon
-        name="i-lucide-image"
+        :name="isVideo ? 'i-lucide-video' : 'i-lucide-image'"
         class="h-8 w-8"
       />
+    </div>
+
+    <!-- Play icon overlay for videos -->
+    <div
+      v-if="isVideo"
+      class="pointer-events-none absolute inset-0 flex items-center justify-center"
+    >
+      <div class="flex h-12 w-12 items-center justify-center rounded-full bg-black/40 text-white shadow-sm backdrop-blur-[2px] transition-transform duration-300 group-hover:scale-110 group-hover:bg-black/60">
+        <UIcon name="i-lucide-play" class="ml-1 h-6 w-6 opacity-90" />
+      </div>
     </div>
 
     <!-- Subtype + date overlay -->

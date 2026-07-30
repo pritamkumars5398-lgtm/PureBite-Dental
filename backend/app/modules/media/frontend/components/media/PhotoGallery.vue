@@ -69,11 +69,11 @@ function handleUploaded() {
       </h3>
       <UButton
         v-if="canWrite && mode === 'browse'"
-        icon="i-lucide-image-plus"
+        icon="i-lucide-plus"
         size="sm"
         @click="showUpload = true"
       >
-        {{ t('photoGallery.add', 'Add photo') }}
+        {{ t('photoGallery.add', 'Add media') }}
       </UButton>
     </div>
 
@@ -113,7 +113,7 @@ function handleUploaded() {
         class="mx-auto h-10 w-10"
       />
       <p class="mt-2 text-sm">
-        {{ t('photoGallery.empty', 'No photos yet') }}
+        {{ t('photoGallery.empty', 'No media yet') }}
       </p>
       <UButton
         v-if="canWrite && mode === 'browse'"
@@ -162,8 +162,8 @@ function handleUploaded() {
               />
             </div>
             <div class="flex-1">
-              <h3 class="text-base font-semibold leading-tight">
-                {{ t('photoGallery.upload', 'Subir foto') }}
+              <h3 class="text-base font-semibold">
+                {{ t('photoGallery.upload', 'Subir archivo') }}
               </h3>
               <p class="text-xs text-muted">
                 {{ t('photoGallery.uploadHelp', 'Clasifica para que aparezca en la categoría correcta') }}

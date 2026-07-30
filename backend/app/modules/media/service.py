@@ -18,6 +18,7 @@ from .models import Document, MediaAttachment
 from .photo_taxonomy import (
     MEDIA_KIND_PHOTO,
     MEDIA_KIND_XRAY,
+    MEDIA_KIND_VIDEO,
     validate_media_classification,
 )
 from .storage import get_storage_backend
@@ -110,6 +111,7 @@ class DocumentService:
         captured_at: datetime | None = None,
         tags: list[str] | None = None,
         paired_document_id: UUID | None = None,
+        thumb_data: bytes | None = None,
     ) -> Document:
         """Store the file (+thumbnails) and create the DB record.
 
@@ -132,7 +134,10 @@ class DocumentService:
         is_image_kind = media_kind in (MEDIA_KIND_PHOTO, MEDIA_KIND_XRAY)
         if is_image_kind and captured_at is None:
             captured_at = extract_captured_at(file_data)
-        if is_image_kind and is_thumbnailable(mime_type):
+            
+        if thumb_data is not None:
+            await store_thumbnails(storage, storage_path, thumb_data, "image/jpeg")
+        elif is_image_kind and is_thumbnailable(mime_type):
             await store_thumbnails(storage, storage_path, file_data, mime_type)
 
         document = Document(
@@ -273,7 +278,7 @@ class PhotoService:
         # Default kind filter: gallery shows photos AND xrays; documents
         # have their own list endpoint.
         kind_filter = (
-            Document.media_kind.in_([MEDIA_KIND_PHOTO, MEDIA_KIND_XRAY])
+            Document.media_kind.in_([MEDIA_KIND_PHOTO, MEDIA_KIND_XRAY, MEDIA_KIND_VIDEO])
             if media_kind is None
             else (Document.media_kind == media_kind)
         )

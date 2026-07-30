@@ -102,7 +102,7 @@ def validate_media_classification(
             detail=f"Invalid media_kind '{media_kind}'. Allowed: {', '.join(MEDIA_KINDS)}",
         )
 
-    if media_kind in (MEDIA_KIND_DOCUMENT, MEDIA_KIND_SCAN, MEDIA_KIND_VIDEO):
+    if media_kind in (MEDIA_KIND_DOCUMENT, MEDIA_KIND_SCAN):
         if media_category is not None or media_subtype is not None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -117,16 +117,16 @@ def validate_media_classification(
                 detail="media_kind 'xray' requires media_category='xray' or null",
             )
         category = "xray"
-    else:  # photo
+    else:  # photo or video
         if media_category is None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="media_kind 'photo' requires media_category",
+                detail=f"media_kind '{media_kind}' requires media_category",
             )
         if media_category == "xray":
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Use media_kind='xray' for radiographs, not photo+category=xray",
+                detail=f"Use media_kind='xray' for radiographs, not {media_kind}+category=xray",
             )
         if media_category not in MEDIA_CATEGORIES:
             raise HTTPException(
