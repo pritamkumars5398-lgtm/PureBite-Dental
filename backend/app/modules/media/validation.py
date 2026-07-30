@@ -17,6 +17,9 @@ _PHOTO_MIME_EXTRA = frozenset(
         "image/heif",
         "image/webp",
         "image/gif",
+        "video/mp4",
+        "video/webm",
+        "video/quicktime",
     }
 )
 

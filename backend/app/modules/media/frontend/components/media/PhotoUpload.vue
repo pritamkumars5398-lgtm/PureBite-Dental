@@ -16,6 +16,9 @@ const file = ref<File | null>(null)
 const previewUrl = ref<string | null>(null)
 const dragging = ref(false)
 const fileInputRef = ref<HTMLInputElement | null>(null)
+const videoPreviewRef = ref<HTMLVideoElement | null>(null)
+
+const isVideo = computed(() => file.value?.type.startsWith('video/'))
 
 function pickFile() {
   fileInputRef.value?.click()
@@ -159,15 +162,87 @@ const fileSizeLabel = computed(() => {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`
 })
 
+async function extractVideoFrame(): Promise<Blob | null> {
+  if (!videoPreviewRef.value || !isVideo.value) return null
+  const video = videoPreviewRef.value
+
+  // 1. Wait for metadata with a 1-second timeout to prevent hanging on invalid/unsupported videos
+  if (video.readyState < 1) {
+    await new Promise((resolve) => {
+      const timeout = setTimeout(resolve, 1000)
+      const onReady = () => { clearTimeout(timeout); resolve(null) }
+      video.addEventListener('loadedmetadata', onReady, { once: true })
+      video.addEventListener('error', onReady, { once: true })
+    })
+  }
+
+  if (video.readyState < 1) return null // Still not ready, give up
+
+  // 2. Seek and capture with a timeout
+  return new Promise((resolve) => {
+    const originalTime = video.currentTime
+    let targetTime = video.duration / 2
+    if (isNaN(targetTime) || !isFinite(targetTime)) targetTime = 0.1
+    else targetTime = Math.min(1, targetTime)
+
+    const capture = () => {
+      try {
+        const canvas = document.createElement('canvas')
+        canvas.width = video.videoWidth || 640
+        canvas.height = video.videoHeight || 480
+        const ctx = canvas.getContext('2d')
+        if (ctx) {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+          canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.8)
+        } else {
+          resolve(null)
+        }
+      } catch {
+        resolve(null)
+      } finally {
+        video.currentTime = originalTime
+      }
+    }
+
+    if (video.currentTime !== targetTime) {
+      const timeout = setTimeout(() => {
+        video.removeEventListener('seeked', capture)
+        resolve(null)
+      }, 1000)
+      
+      const onSeeked = () => {
+        clearTimeout(timeout)
+        capture()
+      }
+      
+      video.addEventListener('seeked', onSeeked, { once: true })
+      video.addEventListener('error', () => {
+        clearTimeout(timeout)
+        resolve(null)
+      }, { once: true })
+      video.currentTime = targetTime
+    } else {
+      capture()
+    }
+  })
+}
+
 async function submit() {
   if (!file.value || !canSubmit.value) return
+  
+  let thumb_file: Blob | undefined
+  if (isVideo.value) {
+    thumb_file = (await extractVideoFrame()) || undefined
+  }
+  
   const result = await uploadPhoto(props.patientId, {
     file: file.value,
     title: title.value.trim(),
-    media_kind: activeCategory.value.kind,
+    media_kind: isVideo.value ? 'video' : activeCategory.value.kind,
     media_category: activeCategoryKey.value,
     media_subtype: activeSubtype.value,
-    captured_at: capturedAt.value || undefined
+    captured_at: capturedAt.value || undefined,
+    thumb_file
   })
   if (result) {
     clearFile()
@@ -200,16 +275,16 @@ async function submit() {
       </div>
       <div>
         <p class="text-base font-medium text-default">
-          {{ t('photoGallery.dropHere', 'Arrastra una foto o haz clic') }}
+          {{ t('photoGallery.dropHere', 'Arrastra un archivo o haz clic') }}
         </p>
         <p class="text-xs text-muted mt-1">
-          JPG · PNG · HEIC · WebP — hasta 10 MB
+          JPG · PNG · HEIC · WebP · MP4 — hasta 10 MB
         </p>
       </div>
       <input
         ref="fileInputRef"
         type="file"
-        accept="image/*"
+        accept="image/*,video/*"
         capture="environment"
         class="absolute inset-0 cursor-pointer opacity-0"
         @change="onSelect"
@@ -220,7 +295,15 @@ async function submit() {
       v-else
       class="relative overflow-hidden rounded-xl border border-default bg-elevated"
     >
+      <video
+        v-if="isVideo"
+        ref="videoPreviewRef"
+        :src="previewUrl ?? undefined"
+        controls
+        class="block max-h-[280px] w-full bg-black object-contain"
+      />
       <img
+        v-else
         :src="previewUrl ?? undefined"
         :alt="file.name"
         class="block max-h-[280px] w-full object-contain bg-checker"
@@ -254,7 +337,7 @@ async function submit() {
       <input
         ref="fileInputRef"
         type="file"
-        accept="image/*"
+        accept="image/*,video/*"
         class="hidden"
         @change="onSelect"
       >
@@ -343,7 +426,7 @@ async function submit() {
         trailing
         @click="submit"
       >
-        {{ uploading ? t('photoGallery.uploading', 'Subiendo…') : t('photoGallery.upload', 'Subir foto') }}
+        {{ uploading ? t('photoGallery.uploading', 'Subiendo…') : t('photoGallery.upload', 'Subir archivo') }}
       </UButton>
     </div>
   </div>

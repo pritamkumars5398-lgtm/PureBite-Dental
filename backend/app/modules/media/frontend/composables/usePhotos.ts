@@ -41,6 +41,7 @@ interface PhotoUploadInput {
   captured_at?: string
   paired_document_id?: string
   description?: string
+  thumb_file?: Blob
 }
 
 export function usePhotos() {
@@ -100,6 +101,7 @@ export function usePhotos() {
         formData.append('paired_document_id', input.paired_document_id)
       }
       if (input.description) formData.append('description', input.description)
+      if (input.thumb_file) formData.append('thumb_file', input.thumb_file, 'thumb.jpg')
 
       const response = await api.post<ApiResponse<Document>>(
         `/api/v1/media/patients/${patientId}/photos`,

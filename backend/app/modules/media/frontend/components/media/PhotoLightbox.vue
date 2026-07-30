@@ -47,6 +47,9 @@ const partner = computed<Document | null>(() => {
   return props.documents.find(d => d.id === id) ?? null
 })
 
+const isVideo = computed(() => current.value?.media_kind === 'video' || current.value?.mime_type?.startsWith('video/'))
+const partnerIsVideo = computed(() => partner.value?.media_kind === 'video' || partner.value?.mime_type?.startsWith('video/'))
+
 const blobUrl = ref<string | null>(null)
 const partnerBlobUrl = ref<string | null>(null)
 
@@ -65,7 +68,7 @@ async function fetchBlob(path: string): Promise<string | null> {
 
 async function loadCurrent() {
   if (!current.value) return
-  const path = current.value.medium_url ?? current.value.full_url
+  const path = isVideo.value ? current.value.full_url : (current.value.medium_url ?? current.value.full_url)
   if (!path) return
   if (blobUrl.value) URL.revokeObjectURL(blobUrl.value)
   blobUrl.value = await fetchBlob(path)
@@ -77,7 +80,7 @@ async function loadPartner() {
     partnerBlobUrl.value = null
   }
   if (!comparing.value || !partner.value) return
-  const path = partner.value.medium_url ?? partner.value.full_url
+  const path = partnerIsVideo.value ? partner.value.full_url : (partner.value.medium_url ?? partner.value.full_url)
   if (!path) return
   partnerBlobUrl.value = await fetchBlob(path)
 }
@@ -144,7 +147,7 @@ const pairCandidates = computed<Document[]>(() => {
   return props.documents.filter(d =>
     d.id !== current.value!.id
     && !d.paired_document_id
-    && (d.media_kind === 'photo' || d.media_kind === 'xray')
+    && (d.media_kind === 'photo' || d.media_kind === 'xray' || d.media_kind === 'video')
   )
 })
 
@@ -233,8 +236,14 @@ function toggleCompare() {
                   ? t('photoGallery.compare.after', 'Después')
                   : t('photoGallery.compare.before', 'Antes') }}
               </span>
+              <video
+                v-if="blobUrl && isVideo"
+                :src="blobUrl"
+                controls
+                class="h-full w-full object-contain bg-black"
+              />
               <img
-                v-if="blobUrl"
+                v-else-if="blobUrl"
                 :src="blobUrl"
                 :alt="current?.title"
                 class="h-full w-full object-contain"
@@ -247,8 +256,14 @@ function toggleCompare() {
                   ? t('photoGallery.compare.before', 'Antes')
                   : t('photoGallery.compare.after', 'Después') }}
               </span>
+              <video
+                v-if="partnerBlobUrl && partnerIsVideo"
+                :src="partnerBlobUrl"
+                controls
+                class="h-full w-full object-contain bg-black"
+              />
               <img
-                v-if="partnerBlobUrl"
+                v-else-if="partnerBlobUrl"
                 :src="partnerBlobUrl"
                 :alt="partner?.title"
                 class="h-full w-full object-contain"
@@ -266,6 +281,13 @@ function toggleCompare() {
             </figure>
           </div>
 
+          <video
+            v-else-if="blobUrl && isVideo"
+            :src="blobUrl"
+            controls
+            autoplay
+            class="h-full w-full select-none object-contain bg-black"
+          />
           <img
             v-else-if="blobUrl"
             :src="blobUrl"
