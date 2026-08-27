@@ -35,6 +35,8 @@ const {
 } = useBudgets()
 
 const hasActiveInvoice = ref(false)
+const isDownloadingPdf = ref(false)
+const downloadProgress = ref(0)
 
 // Check if budget can be invoiced (budget accepted and has uninvoiced items)
 function canInvoice(): boolean {
@@ -317,14 +319,19 @@ async function handleDuplicate() {
 async function handleDownloadPDF() {
   if (!currentBudget.value) return
 
+  isDownloadingPdf.value = true
+  downloadProgress.value = 10
   try {
-    await downloadPDF(currentBudget.value.id, locale.value)
-  } catch {
-    toast.add({
-      title: t('common.error'),
-      description: t('budget.pdf.downloadError'),
-      color: 'error'
+    await downloadPDF(currentBudget.value.id, locale.value, (pct) => {
+      downloadProgress.value = pct
     })
+  } catch {
+    // Handled in composable toast
+  } finally {
+    isDownloadingPdf.value = false
+    setTimeout(() => {
+      downloadProgress.value = 0
+    }, 1200)
   }
 }
 
@@ -411,14 +418,18 @@ const primaryActions = computed<EntityAction[]>(() => {
   return actions
 })
 
-const overflowActions = computed<EntityAction[]>(() => {
+  const overflowActions = computed<EntityAction[]>(() => {
   const budget = currentBudget.value
   if (!budget) return []
   const actions: EntityAction[] = [
     {
       key: 'downloadPdf',
-      label: t('budget.actions.downloadPdf'),
-      icon: 'i-lucide-download',
+      label: isDownloadingPdf.value
+        ? `${t('budget.actions.downloadPdf')} (${downloadProgress.value}%)`
+        : t('budget.actions.downloadPdf'),
+      icon: isDownloadingPdf.value ? 'i-lucide-loader-2' : 'i-lucide-download',
+      loading: isDownloadingPdf.value,
+      disabled: isDownloadingPdf.value,
       onClick: handleDownloadPDF
     }
   ]

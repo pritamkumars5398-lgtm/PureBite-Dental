@@ -66,6 +66,9 @@ class TenantProvisionRequest(BaseModel):
     admin_last_name: str = Field(..., max_length=100)
     currency: str = "USD"
     timezone: str = "UTC"
+    logo_url: str | None = None
+    primary_color: str | None = None
+    theme_preset: str | None = None
 
 
 class TenantProvisionResponse(BaseModel):
@@ -107,6 +110,9 @@ class ClinicDirectoryResponse(BaseModel):
     subscription_active: bool
     subscription_end_date: datetime | None
     subscription_count: int
+    logo_url: str | None = None
+    primary_color: str | None = None
+    theme_preset: str | None = None
 
 
 class ClinicUpdate(BaseModel):
@@ -114,4 +120,8 @@ class ClinicUpdate(BaseModel):
     tax_id: str | None = Field(None, max_length=50)
     currency: str | None = None
     timezone: str | None = None
+    logo_url: str | None = None
+    primary_color: str | None = None
+    theme_preset: str | None = None
+
 

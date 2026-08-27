@@ -272,6 +272,39 @@ function formatAddress(address?: Record<string, string>): string {
       />
     </div>
 
+    <!-- Branding & Logo Quick Link -->
+    <div
+      v-if="!clinic.isLoading.value && clinic.currentClinic.value"
+      class="mt-6 p-4 rounded-token-md bg-surface-muted border border-subtle flex items-center justify-between gap-4"
+    >
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-token-md bg-primary-50 dark:bg-primary-950/40 border border-primary/20 flex items-center justify-center text-primary">
+          <UIcon
+            name="i-lucide-palette"
+            class="w-5 h-5"
+          />
+        </div>
+        <div>
+          <p class="text-caption font-semibold text-default">
+            {{ t('settings.branding.title') }}
+          </p>
+          <p class="text-[11px] text-muted">
+            {{ isSuperadmin ? t('settings.branding.description') : t('settings.branding.managedByAdmin') }}
+          </p>
+        </div>
+      </div>
+      <UButton
+        to="/settings/general/branding"
+        size="xs"
+        color="primary"
+        variant="soft"
+        icon="i-lucide-arrow-right"
+        trailing
+      >
+        {{ t('settings.branding.title') }}
+      </UButton>
+    </div>
+
     <!-- Subscription status (superadmin workspace has none) -->
     <div
       v-if="!clinic.isLoading.value && !isSuperadmin && subscriptionInfo"

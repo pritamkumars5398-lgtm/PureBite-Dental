@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Nº 1 Dental Studio",
+    "name": "PureBite Dental",
     "tagline": "Dental clinic management"
   },
   "demo": {
@@ -852,7 +852,7 @@
       "afternoon": "Good afternoon",
       "evening": "Good evening"
     },
-    "welcome": "Welcome to DentalPin",
+    "welcome": "Welcome to PureBite Dental",
     "welcomeMessage": "Start by creating your first patient.",
     "quickActions": {
       "newAppointment": "New appointment",
@@ -1009,6 +1009,57 @@
     "editClinicInfo": "Edit information",
     "clinicUpdated": "Clinic information updated",
     "clinicUpdateError": "Error updating information",
+    "branding": {
+      "title": "Branding & Appearance",
+      "description": "Customize your clinic's logo, primary color theme, and appearance across the entire platform.",
+      "liveTheme": "Live Preview Active",
+      "managedByAdmin": "Managed by Platform Administrator",
+      "managedByAdminDesc": "Your clinic's logo and color theme are managed centrally by the Platform Administrator. Contact your system administrator to request updates.",
+      "goToAdminClinics": "Manage Clinics in Platform Admin",
+      "logoSectionTitle": "Clinic Logo",
+      "logoSectionDesc": "Upload or provide an image URL for your clinic's logo. It will appear on navigation bars, patient portals, and documents.",
+      "customLogoSet": "Custom Logo Configured",
+      "defaultLogoInUse": "Default PureBite Logo In Use",
+      "logoRecommendation": "Recommended size: 256x256px or vector SVG/PNG with transparent background.",
+      "uploadImage": "Upload Image",
+      "logoUrlLabel": "Direct Logo Image URL",
+      "orUseSample": "Or choose from demo sample logos:",
+      "invalidImage": "Please select a valid image file (PNG, JPG, SVG, WebP).",
+      "themeSectionTitle": "Color Theme & Palette",
+      "themeSectionDesc": "Select a curated medical/dental theme preset or pick a custom brand color. The entire platform will dynamically adopt this palette.",
+      "curatedPresets": "Curated Clinical Presets",
+      "customColorOption": "Custom Brand Color",
+      "customSelected": "Custom Color Selected",
+      "pickCustomColor": "Click swatch or enter HEX",
+      "computedPalette": "Dynamic 50–950 Computed Color Palette",
+      "previewTitle": "Real-time Platform Preview",
+      "previewDesc": "Live preview of how UI components, buttons, tabs, and inputs look with your chosen theme.",
+      "livePreview": "Interactive",
+      "saveChanges": "Apply & Save Branding",
+      "resetChanges": "Discard Changes",
+      "toast": {
+        "saved": "Clinic branding and theme saved successfully",
+        "saveError": "Failed to save clinic branding"
+      },
+      "presets": {
+        "oceanBlue": "Ocean Blue",
+        "oceanBlueDesc": "Modern & fresh clinical sky blue",
+        "emerald": "Emerald Green",
+        "emeraldDesc": "Calm, natural medical green",
+        "gold": "Nº 1 Gold/Taupe",
+        "goldDesc": "Luxury, warm boutique aesthetic",
+        "indigo": "Royal Indigo",
+        "indigoDesc": "High-trust professional deep indigo",
+        "violet": "Modern Violet",
+        "violetDesc": "Contemporary vibrant purple",
+        "amber": "Sunset Amber",
+        "amberDesc": "Warm, welcoming energetic amber",
+        "rose": "Rose Magenta",
+        "roseDesc": "Gentle, approachable healthcare pink",
+        "teal": "Teal Dental",
+        "tealDesc": "Clean hygienic dental turquoise"
+      }
+    },
     "subscription": {
       "title": "Clinic Subscription",
       "description": "View subscription status and billing history.",

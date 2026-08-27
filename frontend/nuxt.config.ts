@@ -67,8 +67,8 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    // Server-side only (for SSR inside Docker)
-    apiBaseUrlServer: (process.env.API_BASE_URL_SERVER || 'http://backend:8000').replace(/\/$/, ''),
+    // Server-side only (for SSR inside Docker or local dev)
+    apiBaseUrlServer: (process.env.API_BASE_URL_SERVER || process.env.API_BASE_URL || 'http://localhost:8000').replace(/\/$/, ''),
     public: {
       // Client-side (browser)
       apiBaseUrl: (process.env.API_BASE_URL || 'http://localhost:8000').replace(/\/$/, ''),

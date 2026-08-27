@@ -139,11 +139,14 @@ async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
 @pytest_asyncio.fixture
 async def auth_headers(client: AsyncClient) -> dict[str, str]:
     """Register a test user and return auth headers."""
+    from uuid import uuid4
+
+    unique_email = f"test_{uuid4().hex[:8]}@example.com"
     # Register user
     response = await client.post(
         "/api/v1/auth/register",
         json={
-            "email": "test@example.com",
+            "email": unique_email,
             "password": "TestPass1234",
             "first_name": "Test",
             "last_name": "User",

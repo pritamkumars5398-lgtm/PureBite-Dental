@@ -234,7 +234,11 @@ async function handleDelete() {
     </div>
 
     <!-- Create modal -->
-    <UModal v-model:open="showCreate">
+    <UModal
+      v-model:open="showCreate"
+      :title="t('settings.createUser')"
+      description="Create a new clinic user or professional"
+    >
       <template #content>
         <UCard>
           <template #header>
@@ -315,7 +319,11 @@ async function handleDelete() {
     </UModal>
 
     <!-- Edit modal -->
-    <UModal v-model:open="showEdit">
+    <UModal
+      v-model:open="showEdit"
+      :title="t('settings.editUser')"
+      description="Update clinic user account details"
+    >
       <template #content>
         <UCard>
           <template #header>
@@ -401,7 +409,11 @@ async function handleDelete() {
     </UModal>
 
     <!-- Delete modal -->
-    <UModal v-model:open="showDelete">
+    <UModal
+      v-model:open="showDelete"
+      :title="t('settings.deleteUser')"
+      description="Remove user from this clinic"
+    >
       <template #content>
         <UCard>
           <template #header>

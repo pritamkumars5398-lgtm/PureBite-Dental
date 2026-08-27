@@ -2,6 +2,7 @@
 const { t } = useI18n()
 const auth = useAuth()
 const clinic = useClinic()
+const theme = useClinicTheme()
 const { navigationItems, ensureLoaded } = useModules()
 const { init: initDensity } = useDensity()
 const { isTablet } = useBreakpoint()
@@ -112,11 +113,11 @@ function isActive(to: string): boolean {
           aria-label="Nº 1 Dental Studio"
         >
           <img
-            src="/logo-icon.svg"
+            :src="theme.clinicLogo.value || '/logo-icon.svg'"
             alt=""
             width="32"
             height="32"
-            class="shrink-0"
+            class="shrink-0 w-8 h-8 object-contain rounded-sm"
           >
           <span
             v-if="!isSidebarCollapsed"
@@ -220,11 +221,11 @@ function isActive(to: string): boolean {
               @click="() => { mobileNavOpen = false }"
             >
               <img
-                src="/logo-icon.svg"
+                :src="theme.clinicLogo.value || '/logo-icon.svg'"
                 alt=""
                 width="32"
                 height="32"
-                class="shrink-0"
+                class="shrink-0 w-8 h-8 object-contain rounded-sm"
               >
               <span class="text-h2 text-default font-serif truncate">
                 {{ clinic.clinicName || 'PureBite' }}

@@ -24,6 +24,8 @@ from .models import Clinic, ClinicMembership, User
 from .permissions import CORE_PERMISSIONS, ROLES, expand_permissions, get_role_permissions
 from .schemas import (
     AuthResponse,
+    BrandingSettingsPatch,
+    BrandingSettingsResponse,
     ClinicMetadataResponse,
     ClinicMetadataUpdate,
     ClinicResponse,
@@ -627,6 +629,21 @@ async def update_clinic_metadata(
         clinic.address = {**existing_address, **new_address}
     if data.timezone is not None:
         clinic.timezone = data.timezone
+    if data.logo_url is not None or data.branding is not None:
+        from app.modules.saas.constants import is_platform_clinic
+
+        if is_platform_clinic(ctx.clinic.name):
+            current_settings = dict(clinic.settings or {})
+            branding_dict = dict(current_settings.get("branding") or {})
+            if data.logo_url is not None:
+                branding_dict["logo_url"] = data.logo_url
+                current_settings["logo_url"] = data.logo_url
+            if data.branding is not None:
+                for k, v in data.branding.model_dump(exclude_unset=True).items():
+                    branding_dict[k] = v
+                    current_settings[k] = v
+            current_settings["branding"] = branding_dict
+            clinic.settings = current_settings
     # currency is deliberately not updatable — see ClinicMetadataUpdate.
 
     await db.commit()
@@ -769,3 +786,77 @@ async def update_communications_settings(
     await db.commit()
     await db.refresh(clinic)
     return ApiResponse(data=_read_communications_settings(clinic.settings))
+
+
+# ---------------------------------------------------------------------------
+# Clinic Branding & Appearance Settings (Logo, Primary Color, Theme Preset)
+# ---------------------------------------------------------------------------
+
+
+def _read_branding_settings(raw: dict | None) -> BrandingSettingsResponse:
+    raw = raw or {}
+    branding_sub = raw.get("branding") if isinstance(raw.get("branding"), dict) else {}
+    logo_url = branding_sub.get("logo_url") or raw.get("logo_url")
+    primary_color = (
+        branding_sub.get("primary_color") or raw.get("primary_color") or "#0284c7"
+    )
+    theme_preset = (
+        branding_sub.get("theme_preset") or raw.get("theme_preset") or "ocean_blue"
+    )
+    dark_mode_pref = (
+        branding_sub.get("dark_mode_preference")
+        or raw.get("dark_mode_preference")
+        or "system"
+    )
+    return BrandingSettingsResponse(
+        logo_url=logo_url,
+        primary_color=primary_color,
+        theme_preset=theme_preset,
+        dark_mode_preference=dark_mode_pref,
+    )
+
+
+@router.get(
+    "/clinic/settings/branding",
+    response_model=ApiResponse[BrandingSettingsResponse],
+)
+async def get_branding_settings(
+    ctx: Annotated[ClinicContext, Depends(get_clinic_context)],
+    _: Annotated[None, Depends(require_permission("admin.clinic.read"))],
+) -> ApiResponse[BrandingSettingsResponse]:
+    """Read the clinic branding and theme settings."""
+    return ApiResponse(data=_read_branding_settings(ctx.clinic.settings))
+
+
+@router.patch(
+    "/clinic/settings/branding",
+    response_model=ApiResponse[BrandingSettingsResponse],
+)
+async def update_branding_settings(
+    data: BrandingSettingsPatch,
+    ctx: Annotated[ClinicContext, Depends(get_clinic_context)],
+    _: Annotated[None, Depends(require_permission("admin.clinic.write"))],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> ApiResponse[BrandingSettingsResponse]:
+    """Update clinic branding and theme settings (Platform Administrator only)."""
+    from app.modules.saas.constants import is_platform_clinic
+
+    if not is_platform_clinic(ctx.clinic.name):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Clinic logo and color theme are managed exclusively by the platform administrator.",
+        )
+
+    clinic = ctx.clinic
+    current = dict(clinic.settings or {})
+    branding_dict = dict(current.get("branding") or {})
+    payload = data.model_dump(exclude_unset=True)
+    branding_dict.update(payload)
+    current["branding"] = branding_dict
+    for k, v in payload.items():
+        current[k] = v
+    clinic.settings = current
+    await db.commit()
+    await db.refresh(clinic)
+    return ApiResponse(data=_read_branding_settings(clinic.settings))
+

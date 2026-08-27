@@ -47,6 +47,13 @@ export interface ClinicAddress {
   country?: string
 }
 
+export interface ClinicBrandingSettings {
+  logo_url?: string | null
+  primary_color?: string
+  theme_preset?: string
+  dark_mode_preference?: string
+}
+
 export interface ClinicUpdate {
   name?: string
   tax_id?: string
@@ -55,6 +62,8 @@ export interface ClinicUpdate {
   phone?: string
   email?: string
   timezone?: string
+  logo_url?: string | null
+  branding?: ClinicBrandingSettings
   // currency is intentionally omitted — it is fixed at seed/provisioning
   // time and not editable via the clinic-update endpoint.
 }
@@ -71,6 +80,12 @@ export interface Clinic {
   currency: string
   settings: {
     slot_duration_min?: number
+    logo_url?: string | null
+    primary_color?: string
+    theme_preset?: string
+    dark_mode_preference?: string
+    branding?: ClinicBrandingSettings
+    [key: string]: unknown
   }
   cabinets: Cabinet[]
   created_at: string

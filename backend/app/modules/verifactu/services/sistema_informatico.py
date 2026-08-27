@@ -61,9 +61,9 @@ def from_settings(settings: VerifactuSettings) -> SistemaInformatico:
 
     defaults = producer_defaults()
     return SistemaInformatico(
-        nombre_razon=settings.producer_name or defaults["name"] or "DentalPin",
+        nombre_razon=settings.producer_name or defaults["name"] or "PureBite Dental",
         nif=settings.producer_nif or defaults["nif"] or "",
-        nombre_sistema=os.environ.get("VERIFACTU_SOFTWARE_NAME", "DentalPin"),
+        nombre_sistema=os.environ.get("VERIFACTU_SOFTWARE_NAME", "PureBite Dental"),
         id_sistema=settings.producer_id_sistema or defaults["id_sistema"],
         version=settings.producer_version or defaults["version"],
         numero_instalacion=settings.numero_instalacion,

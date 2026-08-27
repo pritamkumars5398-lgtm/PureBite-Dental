@@ -22,6 +22,18 @@ export default defineNuxtPlugin(() => {
     order: 10
   })
 
+  registerSettingsPage({
+    path: 'branding',
+    category: 'general',
+    labelKey: 'settings.branding.title',
+    descriptionKey: 'settings.branding.description',
+    icon: 'i-lucide-palette',
+    permission: 'admin.clinic.read',
+    component: () => import('~/components/settings/pages/BrandingPage.vue'),
+    searchKeywords: ['logo', 'branding', 'tema', 'theme', 'color', 'colores', 'palette', 'apariencia', 'appearance', 'personalizacion'],
+    order: 20
+  })
+
   // ---- Workspace -----------------------------------------------------
   registerSettingsPage({
     path: 'cabinets',

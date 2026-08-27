@@ -48,6 +48,9 @@ export interface SaasClinicDirectoryEntry {
   subscription_active: boolean
   subscription_end_date: string | null
   subscription_count: number
+  logo_url?: string | null
+  primary_color?: string | null
+  theme_preset?: string | null
 }
 
 export interface TenantProvisionPayload {
@@ -59,6 +62,9 @@ export interface TenantProvisionPayload {
   admin_last_name: string
   currency: string
   timezone: string
+  logo_url?: string | null
+  primary_color?: string | null
+  theme_preset?: string | null
 }
 
 function errorDescription(e: unknown, fallback: string): string {
@@ -275,7 +281,7 @@ export function useSaasAdmin() {
 
   async function updateClinic(
     clinicId: string,
-    data: Partial<{ name: string, tax_id: string, currency: string, timezone: string }>
+    data: Partial<{ name: string, tax_id: string, currency: string, timezone: string, logo_url: string | null, primary_color: string | null, theme_preset: string | null }>
   ): Promise<boolean> {
     try {
       await api.patch(`/api/v1/saas/clinics/${clinicId}`, data)

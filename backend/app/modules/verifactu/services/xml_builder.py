@@ -36,8 +36,8 @@ _env = Environment(
 class SistemaInformatico:
     nombre_razon: str
     nif: str
-    nombre_sistema: str = "DentalPin"
-    id_sistema: str = "DP"
+    nombre_sistema: str = "PureBite Dental"
+    id_sistema: str = "PB"
     version: str = "0.1.0"
     numero_instalacion: str = ""
     tipo_uso_solo_verifactu: str = "S"

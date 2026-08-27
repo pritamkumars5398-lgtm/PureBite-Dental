@@ -323,42 +323,37 @@ export function useBudgets() {
   // PDF
   // ============================================================================
 
-  async function downloadPDF(id: string, locale: string = 'es'): Promise<void> {
-    await downloadPDFAt(`/api/v1/budget/budgets/${id}/pdf?locale=${locale}`, `presupuesto_${id}.pdf`)
+  const { downloadFile } = useDownload()
+
+  async function downloadPDF(
+    id: string,
+    locale: string = 'es',
+    onProgress?: (pct: number) => void
+  ): Promise<void> {
+    await downloadPDFAt(`/api/v1/budget/budgets/${id}/pdf?locale=${locale}`, `presupuesto_${id}.pdf`, onProgress)
   }
 
-  async function downloadSignedPDF(id: string, locale: string = 'es'): Promise<void> {
+  async function downloadSignedPDF(
+    id: string,
+    locale: string = 'es',
+    onProgress?: (pct: number) => void
+  ): Promise<void> {
     await downloadPDFAt(
       `/api/v1/budget/budgets/${id}/pdf/signed?locale=${locale}`,
-      `presupuesto_${id}_firmado.pdf`
+      `presupuesto_${id}_firmado.pdf`,
+      onProgress
     )
   }
 
-  async function downloadPDFAt(path: string, fallbackName: string): Promise<void> {
-    const baseUrl = config.public.apiBaseUrl
-    const token = auth.accessToken.value
-
-    const response = await fetch(`${baseUrl}${path}`, {
-      headers: { Authorization: `Bearer ${token}` }
+  async function downloadPDFAt(
+    path: string,
+    fallbackName: string,
+    onProgress?: (pct: number) => void
+  ): Promise<void> {
+    await downloadFile(path, fallbackName, {
+      title: 'Downloading Quote PDF',
+      onProgress
     })
-
-    if (!response.ok) {
-      throw new Error('Failed to download PDF')
-    }
-
-    const blob = await response.blob()
-    const url = window.URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-
-    const contentDisposition = response.headers.get('Content-Disposition')
-    const filenameMatch = contentDisposition?.match(/filename="?(.+)"?/)
-    link.download = filenameMatch?.[1] || fallbackName
-
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    window.URL.revokeObjectURL(url)
   }
 
   function getPDFPreviewUrl(id: string, locale: string = 'es'): string {

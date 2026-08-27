@@ -154,7 +154,11 @@ async function handleDelete() {
     </div>
 
     <!-- Create modal -->
-    <UModal v-model:open="showCreate">
+    <UModal
+      v-model:open="showCreate"
+      :title="t('settings.newCabinet')"
+      description="Create a new dental cabinet or operatory"
+    >
       <template #content>
         <UCard>
           <template #header>
@@ -214,7 +218,11 @@ async function handleDelete() {
     </UModal>
 
     <!-- Edit modal -->
-    <UModal v-model:open="showEdit">
+    <UModal
+      v-model:open="showEdit"
+      :title="t('settings.editCabinet')"
+      description="Update dental cabinet details"
+    >
       <template #content>
         <UCard>
           <template #header>
@@ -274,7 +282,11 @@ async function handleDelete() {
     </UModal>
 
     <!-- Delete modal -->
-    <UModal v-model:open="showDelete">
+    <UModal
+      v-model:open="showDelete"
+      :title="t('settings.deleteCabinet')"
+      description="Delete dental cabinet operatory"
+    >
       <template #content>
         <UCard>
           <template #header>

@@ -48,7 +48,7 @@ async def clinic_setup(
     # Create dentist user for appointments
     dentist = User(
         id=uuid4(),
-        email="dentist@test.clinic",
+        email=f"dentist_{uuid4().hex[:8]}@test.clinic",
         password_hash=hash_password("TestPass123"),
         first_name="Test",
         last_name="Dentist",

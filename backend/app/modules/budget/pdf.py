@@ -168,7 +168,8 @@ class BudgetPDFService:
         money_locale = _LOCALE_BY_LANG.get(locale, "es_ES")
 
         def format_currency(amount: Decimal) -> str:
-            return _fmt_currency(amount, clinic.currency, locale=money_locale)
+            res = _fmt_currency(amount, clinic.currency, locale=money_locale)
+            return res.replace("₹", "Rs. ")
 
         # Build items table rows
         items_html = ""
@@ -591,7 +592,7 @@ class BudgetPDFService:
             {BudgetPDFService._render_signature_section(signature, labels, locale)}
 
             <div class="footer">
-                {labels["generated_by"]} DentalPin | {date.today().strftime("%d/%m/%Y %H:%M")}
+                {labels["generated_by"]} PureBite Dental | {date.today().strftime("%d/%m/%Y %H:%M")}
             </div>
         </body>
         </html>
@@ -603,18 +604,31 @@ class BudgetPDFService:
     def _html_to_pdf(html_content: str) -> bytes:
         """Convert HTML to PDF.
 
-        Uses WeasyPrint if available, otherwise returns HTML as fallback.
+        Uses WeasyPrint if available, otherwise falls back to xhtml2pdf or HTML bytes.
         """
+        # 1. Try WeasyPrint if system libraries (pango/cairo) are available
         try:
             from weasyprint import HTML
 
             pdf_buffer = BytesIO()
             HTML(string=html_content).write_pdf(pdf_buffer)
             return pdf_buffer.getvalue()
-        except ImportError:
-            # WeasyPrint not installed, return HTML content
-            # In production, WeasyPrint should be installed
-            return html_content.encode("utf-8")
+        except (ImportError, OSError, Exception):
+            pass
+
+        # 2. Try xhtml2pdf as pure Python fallback
+        try:
+            from xhtml2pdf import pisa
+
+            pdf_buffer = BytesIO()
+            pisa_status = pisa.pisaDocument(BytesIO(html_content.encode("utf-8")), pdf_buffer)
+            if not pisa_status.err:
+                return pdf_buffer.getvalue()
+        except (ImportError, Exception):
+            pass
+
+        # 3. Fallback to HTML content
+        return html_content.encode("utf-8")
 
     @staticmethod
     def _get_labels(locale: str) -> dict:

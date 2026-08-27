@@ -49,7 +49,7 @@ async def run(dpmf_path: Path, passphrase: str | None = None) -> None:
         db.add_all([clinic, admin])
         await db.flush()
 
-        # Seed the DentalPin catalog (the enriched one).
+        # Seed the PureBite Dental catalog (the enriched one).
         summary = await seed_catalog(db, clinic.id)
         await db.flush()
         print(f"[seed] {summary}", flush=True)

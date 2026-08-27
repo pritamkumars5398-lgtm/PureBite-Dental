@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Nº 1 Dental Studio",
+    "name": "PureBite Dental",
     "tagline": "Gestión de clínica dental"
   },
   "demo": {
@@ -873,7 +873,7 @@
       "afternoon": "Buenas tardes",
       "evening": "Buenas noches"
     },
-    "welcome": "Bienvenido a DentalPin",
+    "welcome": "Bienvenido a PureBite Dental",
     "welcomeMessage": "Comienza creando tu primer paciente.",
     "quickActions": {
       "newAppointment": "Nueva cita",
@@ -1030,6 +1030,57 @@
     "editClinicInfo": "Editar información",
     "clinicUpdated": "Información de la clínica actualizada",
     "clinicUpdateError": "Error al actualizar la información",
+    "branding": {
+      "title": "Marca y Apariencia",
+      "description": "Personaliza el logotipo de tu clínica, el tema de colores y la apariencia en toda la plataforma.",
+      "liveTheme": "Vista Previa en Vivo",
+      "managedByAdmin": "Administrado por el Administrador de la Plataforma",
+      "managedByAdminDesc": "El logotipo y el tema de color de tu clínica son gestionados centralmente por el Administrador de la Plataforma. Contacta con tu administrador para solicitar cambios.",
+      "goToAdminClinics": "Gestionar Clínicas en Administración",
+      "logoSectionTitle": "Logotipo de la Clínica",
+      "logoSectionDesc": "Sube o proporciona la URL del logotipo de tu clínica. Aparecerá en la barra lateral, portal de pacientes y documentos.",
+      "customLogoSet": "Logotipo Personalizado Configurado",
+      "defaultLogoInUse": "Logotipo por Defecto de PureBite",
+      "logoRecommendation": "Tamaño recomendado: 256x256px o formato vectorial SVG/PNG con fondo transparente.",
+      "uploadImage": "Subir Imagen",
+      "logoUrlLabel": "URL Directa de la Imagen del Logotipo",
+      "orUseSample": "O elige entre logotipos de demostración:",
+      "invalidImage": "Por favor selecciona un archivo de imagen válido (PNG, JPG, SVG, WebP).",
+      "themeSectionTitle": "Tema de Color y Paleta",
+      "themeSectionDesc": "Selecciona un tema predeterminado o elige un color corporativo personalizado. La plataforma adoptará esta paleta dinámicamente.",
+      "curatedPresets": "Temas Clínicos Predefinidos",
+      "customColorOption": "Color Personalizado de Marca",
+      "customSelected": "Color Personalizado Activo",
+      "pickCustomColor": "Haz clic en la muestra o ingresa HEX",
+      "computedPalette": "Paleta Dinámica Generada (50–950)",
+      "previewTitle": "Vista Previa de la Plataforma",
+      "previewDesc": "Visualiza cómo se ven los botones, pestañas y componentes con el tema elegido.",
+      "livePreview": "Interactivo",
+      "saveChanges": "Guardar Marca y Tema",
+      "resetChanges": "Descartar Cambios",
+      "toast": {
+        "saved": "Marca y tema de la clínica guardados con éxito",
+        "saveError": "Error al guardar la marca de la clínica"
+      },
+      "presets": {
+        "oceanBlue": "Azul Océano",
+        "oceanBlueDesc": "Azul clínico moderno y fresco",
+        "emerald": "Verde Esmeralda",
+        "emeraldDesc": "Verde médico natural y sereno",
+        "gold": "Dorado Nº 1 / Taupe",
+        "goldDesc": "Estética premium y cálida",
+        "indigo": "Índigo Real",
+        "indigoDesc": "Índigo profundo y profesional",
+        "violet": "Violeta Moderno",
+        "violetDesc": "Púrpura contemporáneo y vibrante",
+        "amber": "Ámbar Atardecer",
+        "amberDesc": "Ámbar cálido, enérgico y acogedor",
+        "rose": "Rosa Magenta",
+        "roseDesc": "Rosa suave y empático para salud",
+        "teal": "Turquesa Dental",
+        "tealDesc": "Turquesa higiénico e impecable"
+      }
+    },
     "subscription": {
       "title": "Suscripción de la clínica",
       "description": "Ver el estado de la suscripción y el historial de facturación.",

@@ -196,13 +196,26 @@ async def provision_tenant(
         raise HTTPException(status_code=400, detail="User with this email already exists")
 
     # Create Clinic
+    initial_settings = {}
+    if req.logo_url or req.primary_color or req.theme_preset:
+        initial_settings = {
+            "logo_url": req.logo_url,
+            "primary_color": req.primary_color or "#0284c7",
+            "theme_preset": req.theme_preset or "ocean_blue",
+            "branding": {
+                "logo_url": req.logo_url,
+                "primary_color": req.primary_color or "#0284c7",
+                "theme_preset": req.theme_preset or "ocean_blue",
+            },
+        }
+
     clinic = Clinic(
         id=uuid.uuid4(),
         name=req.clinic_name,
         tax_id=req.tax_id,
         timezone=req.timezone,
         currency=req.currency,
-        settings={},
+        settings=initial_settings,
     )
     db.add(clinic)
 
@@ -277,6 +290,8 @@ async def list_clinics(
         )
         subs = subs_result.scalars().all()
         latest = subs[0] if subs else None
+        c_settings = clinic.settings or {}
+        c_branding = c_settings.get("branding") or {}
         directory.append(
             ClinicDirectoryResponse(
                 id=clinic.id,
@@ -286,6 +301,9 @@ async def list_clinics(
                 subscription_active=bool(latest and latest.end_date > now),
                 subscription_end_date=latest.end_date if latest else None,
                 subscription_count=len(subs),
+                logo_url=c_branding.get("logo_url") or c_settings.get("logo_url"),
+                primary_color=c_branding.get("primary_color") or c_settings.get("primary_color") or "#0284c7",
+                theme_preset=c_branding.get("theme_preset") or c_settings.get("theme_preset") or "ocean_blue",
             )
         )
     return directory
@@ -469,9 +487,9 @@ async def grant_subscription(
     return _subscription_to_response(db_sub, now=now)
 
 
-@router.patch("/clinics/{clinic_id}", response_model=ClinicDirectoryResponse)
+@router.patch("/clinics/{target_clinic_id}", response_model=ClinicDirectoryResponse)
 async def update_clinic(
-    clinic_id: uuid.UUID,
+    target_clinic_id: uuid.UUID,
     payload: ClinicUpdate,
     ctx: Annotated[ClinicContext, Depends(get_clinic_context)],
     _: Annotated[None, Depends(require_permission("subscriptions.write"))],
@@ -482,18 +500,26 @@ async def update_clinic(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only"
         )
-    if clinic_id == ctx.clinic_id:
+    if target_clinic_id == ctx.clinic_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot modify the platform admin clinic"
         )
 
-    result = await db.execute(select(Clinic).where(Clinic.id == clinic_id))
+    result = await db.execute(select(Clinic).where(Clinic.id == target_clinic_id))
     clinic = result.scalar_one_or_none()
     if not clinic:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clinic not found")
 
+    settings = dict(clinic.settings or {})
+    branding = dict(settings.get("branding") or {})
     for field, value in payload.model_dump(exclude_unset=True).items():
-        setattr(clinic, field, value)
+        if field in ("logo_url", "primary_color", "theme_preset"):
+            branding[field] = value
+            settings[field] = value
+        elif hasattr(clinic, field):
+            setattr(clinic, field, value)
+    settings["branding"] = branding
+    clinic.settings = settings
 
     await db.commit()
     await db.refresh(clinic)
@@ -507,6 +533,8 @@ async def update_clinic(
     subs = subs_result.scalars().all()
     latest = subs[0] if subs else None
     
+    c_settings = clinic.settings or {}
+    c_branding = c_settings.get("branding") or {}
     return ClinicDirectoryResponse(
         id=clinic.id,
         name=clinic.name,
@@ -515,12 +543,15 @@ async def update_clinic(
         subscription_active=bool(latest and latest.end_date > datetime.now(UTC)),
         subscription_end_date=latest.end_date if latest else None,
         subscription_count=len(subs),
+        logo_url=c_branding.get("logo_url") or c_settings.get("logo_url"),
+        primary_color=c_branding.get("primary_color") or c_settings.get("primary_color") or "#0284c7",
+        theme_preset=c_branding.get("theme_preset") or c_settings.get("theme_preset") or "ocean_blue",
     )
 
 
-@router.delete("/clinics/{clinic_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/clinics/{target_clinic_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_clinic(
-    clinic_id: uuid.UUID,
+    target_clinic_id: uuid.UUID,
     ctx: Annotated[ClinicContext, Depends(get_clinic_context)],
     _: Annotated[None, Depends(require_permission("subscriptions.write"))],
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -533,12 +564,12 @@ async def delete_clinic(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only"
         )
-    if clinic_id == ctx.clinic_id:
+    if target_clinic_id == ctx.clinic_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot delete the platform admin clinic"
         )
 
-    result = await db.execute(select(Clinic).where(Clinic.id == clinic_id))
+    result = await db.execute(select(Clinic).where(Clinic.id == target_clinic_id))
     clinic = result.scalar_one_or_none()
     if not clinic:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clinic not found")

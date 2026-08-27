@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { SaasClinicDirectoryEntry, SaasSubscription } from '~/composables/useSaasAdmin'
+import { THEME_PRESETS } from '~/composables/useClinicTheme'
 
 definePageMeta({
   title: 'Platform Administration - Clinics & Subscriptions'
@@ -48,7 +49,10 @@ const provisionForm = ref({
   admin_email: '',
   admin_password: '',
   currency: 'INR',
-  timezone: 'Asia/Kolkata'
+  timezone: 'Asia/Kolkata',
+  logo_url: '',
+  primary_color: '#0284C7',
+  theme_preset: 'ocean_blue'
 })
 
 const currencyOptions = [
@@ -75,14 +79,20 @@ function openProvision() {
     admin_email: '',
     admin_password: '',
     currency: 'INR',
-    timezone: 'Asia/Kolkata'
+    timezone: 'Asia/Kolkata',
+    logo_url: '',
+    primary_color: '#0284C7',
+    theme_preset: 'ocean_blue'
   }
   showProvision.value = true
 }
 
 async function handleProvision() {
   isProvisioning.value = true
-  const ok = await provisionTenant(provisionForm.value)
+  const ok = await provisionTenant({
+    ...provisionForm.value,
+    logo_url: provisionForm.value.logo_url.trim() || null
+  })
   isProvisioning.value = false
   if (ok) showProvision.value = false
 }
@@ -90,22 +100,84 @@ async function handleProvision() {
 // ───────────────────────── Edit & Delete Clinic ─────────────────────────
 const showEditClinic = ref(false)
 const isEditingClinic = ref(false)
-const editClinicForm = ref({ id: '', name: '', tax_id: '' })
+const editClinicForm = ref({
+  id: '',
+  name: '',
+  tax_id: '',
+  logo_url: '',
+  primary_color: '#0284C7',
+  theme_preset: 'ocean_blue'
+})
 
 function openEditClinic(clinic: SaasClinicDirectoryEntry) {
   editClinicForm.value = {
     id: clinic.id,
     name: clinic.name,
-    tax_id: clinic.tax_id
+    tax_id: clinic.tax_id,
+    logo_url: clinic.logo_url || '',
+    primary_color: clinic.primary_color || '#0284C7',
+    theme_preset: clinic.theme_preset || 'ocean_blue'
   }
   showEditClinic.value = true
+}
+
+function selectEditTheme(presetId: string) {
+  editClinicForm.value.theme_preset = presetId
+  const found = THEME_PRESETS.find(p => p.id === presetId)
+  if (found) {
+    editClinicForm.value.primary_color = found.primaryColor
+  }
+}
+
+function selectProvisionTheme(presetId: string) {
+  provisionForm.value.theme_preset = presetId
+  const found = THEME_PRESETS.find(p => p.id === presetId)
+  if (found) {
+    provisionForm.value.primary_color = found.primaryColor
+  }
+}
+
+const provisionFileInput = ref<HTMLInputElement | null>(null)
+const editFileInput = ref<HTMLInputElement | null>(null)
+
+function handleProvisionFileUpload(event: Event) {
+  const file = (event.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  if (!file.type.startsWith('image/')) return
+
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    const result = e.target?.result as string
+    if (result) {
+      provisionForm.value.logo_url = result
+    }
+  }
+  reader.readAsDataURL(file)
+}
+
+function handleEditFileUpload(event: Event) {
+  const file = (event.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  if (!file.type.startsWith('image/')) return
+
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    const result = e.target?.result as string
+    if (result) {
+      editClinicForm.value.logo_url = result
+    }
+  }
+  reader.readAsDataURL(file)
 }
 
 async function handleEditClinic() {
   isEditingClinic.value = true
   const ok = await updateClinic(editClinicForm.value.id, {
     name: editClinicForm.value.name,
-    tax_id: editClinicForm.value.tax_id
+    tax_id: editClinicForm.value.tax_id,
+    logo_url: editClinicForm.value.logo_url.trim() || null,
+    primary_color: editClinicForm.value.primary_color,
+    theme_preset: editClinicForm.value.theme_preset
   })
   isEditingClinic.value = false
   if (ok) showEditClinic.value = false
@@ -247,13 +319,34 @@ const subStatusColor: Record<SaasSubscription['effective_status'], 'success' | '
             class="flex w-full items-center justify-between gap-3 py-3 text-left hover:bg-elevated/50 rounded-md px-2 -mx-2 transition-colors"
             @click="openClinicDetail(clinic)"
           >
-            <div class="min-w-0">
-              <p class="font-medium text-default truncate">
-                {{ clinic.name }}
-              </p>
-              <p class="text-caption text-subtle truncate">
-                {{ clinic.tax_id }} · {{ t('saasAdmin.clinics.subscriptionCount', { count: clinic.subscription_count }) }}
-              </p>
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-10 h-10 rounded-token-md border border-subtle bg-surface flex items-center justify-center overflow-hidden shrink-0 shadow-xs">
+                <img
+                  v-if="clinic.logo_url"
+                  :src="clinic.logo_url"
+                  alt=""
+                  class="w-full h-full object-contain p-0.5"
+                >
+                <div v-else class="w-full h-full flex items-center justify-center text-muted">
+                  <UIcon name="i-lucide-building" class="w-5 h-5 text-subtle" />
+                </div>
+              </div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                  <p class="font-medium text-default truncate">
+                    {{ clinic.name }}
+                  </p>
+                  <span
+                    v-if="clinic.primary_color"
+                    class="w-2.5 h-2.5 rounded-full shrink-0 border border-black/10 shadow-xs"
+                    :style="{ backgroundColor: clinic.primary_color }"
+                    :title="`Theme: ${clinic.theme_preset || clinic.primary_color}`"
+                  />
+                </div>
+                <p class="text-caption text-subtle truncate">
+                  {{ clinic.tax_id }} · {{ t('saasAdmin.clinics.subscriptionCount', { count: clinic.subscription_count }) }}
+                </p>
+              </div>
             </div>
             <div class="flex items-center gap-2 shrink-0">
               <UBadge
@@ -284,6 +377,7 @@ const subStatusColor: Record<SaasSubscription['effective_status'], 'success' | '
                 variant="ghost"
                 color="error"
                 size="sm"
+                class="ml-1 text-error-500 hover:text-error-600 hover:bg-error-50 dark:hover:bg-error-500/10"
                 @click.stop="confirmDeleteClinic(clinic)"
               />
               <UIcon
@@ -297,7 +391,11 @@ const subStatusColor: Record<SaasSubscription['effective_status'], 'success' | '
     </UCard>
 
     <!-- Provision clinic modal -->
-    <UModal v-model:open="showProvision">
+    <UModal
+      v-model:open="showProvision"
+      :title="t('saasAdmin.clinics.provision')"
+      description="Provision a new clinic tenant"
+    >
       <template #content>
         <UCard>
           <template #header>
@@ -385,6 +483,77 @@ const subStatusColor: Record<SaasSubscription['effective_status'], 'success' | '
               </UFormField>
             </div>
 
+            <!-- Branding: Logo URL & Theme Preset -->
+            <div class="space-y-3 pt-2 border-t border-subtle">
+              <p class="text-caption font-semibold text-default">Clinic Branding & Color Theme</p>
+              
+              <!-- Logo Preview & Upload -->
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-token-md border border-subtle bg-surface flex items-center justify-center overflow-hidden shrink-0 shadow-xs">
+                  <img
+                    v-if="provisionForm.logo_url"
+                    :src="provisionForm.logo_url"
+                    alt="Logo Preview"
+                    class="w-full h-full object-contain p-0.5"
+                  >
+                  <UIcon v-else name="i-lucide-building" class="w-6 h-6 text-subtle" />
+                </div>
+                <div class="flex-1 space-y-1.5">
+                  <label class="block text-caption font-medium text-default">Logo Image (URL or Upload)</label>
+                  <div class="flex items-center gap-2">
+                    <UInput
+                      v-model="provisionForm.logo_url"
+                      placeholder="https://example.com/logo.png or upload below"
+                      icon="i-lucide-image"
+                      class="flex-1"
+                    />
+                    <input
+                      ref="provisionFileInput"
+                      type="file"
+                      accept="image/png, image/jpeg, image/svg+xml, image/webp"
+                      class="hidden"
+                      @change="handleProvisionFileUpload"
+                    >
+                    <UButton
+                      type="button"
+                      size="sm"
+                      color="primary"
+                      variant="soft"
+                      icon="i-lucide-upload"
+                      @click="provisionFileInput?.click()"
+                    >
+                      Upload local
+                    </UButton>
+                    <UButton
+                      v-if="provisionForm.logo_url"
+                      type="button"
+                      size="sm"
+                      color="neutral"
+                      variant="ghost"
+                      icon="i-lucide-trash-2"
+                      @click="provisionForm.logo_url = ''"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label class="block text-caption font-medium text-default mb-2">Select Theme Preset</label>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <button
+                    v-for="preset in THEME_PRESETS"
+                    :key="preset.id"
+                    type="button"
+                    class="flex items-center gap-2 p-2 rounded-token-md border text-left transition-all"
+                    :class="provisionForm.theme_preset === preset.id ? 'border-primary ring-1 ring-primary bg-primary-50 dark:bg-primary-950/30' : 'border-subtle hover:bg-surface-muted'"
+                    @click="selectProvisionTheme(preset.id)"
+                  >
+                    <span class="w-4 h-4 rounded-full shrink-0 shadow-xs" :style="{ backgroundColor: preset.primaryColor }" />
+                    <span class="text-caption font-medium truncate">{{ t(preset.nameKey) }}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
             <div class="flex justify-end gap-2 pt-4">
               <UButton
                 variant="ghost"
@@ -405,7 +574,11 @@ const subStatusColor: Record<SaasSubscription['effective_status'], 'success' | '
     </UModal>
 
     <!-- Edit clinic modal -->
-    <UModal v-model:open="showEditClinic">
+    <UModal
+      v-model:open="showEditClinic"
+      title="Edit Clinic"
+      description="Update clinic metadata, logo, and brand theme"
+    >
       <template #content>
         <UCard>
           <template #header>
@@ -439,6 +612,97 @@ const subStatusColor: Record<SaasSubscription['effective_status'], 'success' | '
               </UFormField>
             </div>
 
+            <!-- Branding: Logo URL & Theme Preset -->
+            <div class="space-y-3 pt-2 border-t border-subtle">
+              <p class="text-caption font-semibold text-default">Clinic Branding & Color Theme</p>
+              
+              <!-- Logo Preview & Input -->
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-token-md border border-subtle bg-surface flex items-center justify-center overflow-hidden shrink-0 shadow-xs">
+                  <img
+                    v-if="editClinicForm.logo_url"
+                    :src="editClinicForm.logo_url"
+                    alt=""
+                    class="w-full h-full object-contain p-0.5"
+                  >
+                  <UIcon v-else name="i-lucide-building" class="w-6 h-6 text-subtle" />
+                </div>
+                <div class="flex-1 space-y-1.5">
+                  <label class="block text-caption font-medium text-default">Logo Image (URL or Upload)</label>
+                  <div class="flex items-center gap-2">
+                    <UInput
+                      v-model="editClinicForm.logo_url"
+                      placeholder="https://example.com/logo.png or upload below"
+                      icon="i-lucide-image"
+                      class="flex-1"
+                    />
+                    <input
+                      ref="editFileInput"
+                      type="file"
+                      accept="image/png, image/jpeg, image/svg+xml, image/webp"
+                      class="hidden"
+                      @change="handleEditFileUpload"
+                    >
+                    <UButton
+                      type="button"
+                      size="sm"
+                      color="primary"
+                      variant="soft"
+                      icon="i-lucide-upload"
+                      @click="editFileInput?.click()"
+                    >
+                      Upload local
+                    </UButton>
+                    <UButton
+                      v-if="editClinicForm.logo_url"
+                      type="button"
+                      size="sm"
+                      color="neutral"
+                      variant="ghost"
+                      icon="i-lucide-trash-2"
+                      @click="editClinicForm.logo_url = ''"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Theme Presets Grid -->
+              <div>
+                <label class="block text-caption font-medium text-default mb-2">Theme Preset</label>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <button
+                    v-for="preset in THEME_PRESETS"
+                    :key="preset.id"
+                    type="button"
+                    class="flex items-center gap-2 p-2 rounded-token-md border text-left transition-all"
+                    :class="editClinicForm.theme_preset === preset.id ? 'border-primary ring-1 ring-primary bg-primary-50 dark:bg-primary-950/30' : 'border-subtle hover:bg-surface-muted'"
+                    @click="selectEditTheme(preset.id)"
+                  >
+                    <span class="w-4 h-4 rounded-full shrink-0 shadow-xs" :style="{ backgroundColor: preset.primaryColor }" />
+                    <span class="text-caption font-medium truncate">{{ t(preset.nameKey) }}</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Custom HEX input -->
+              <div class="flex items-center gap-3 pt-1">
+                <div class="w-8 h-8 rounded-token-md border border-subtle overflow-hidden shrink-0 shadow-xs cursor-pointer relative">
+                  <input
+                    type="color"
+                    v-model="editClinicForm.primary_color"
+                    class="absolute -top-3 -left-3 w-14 h-14 cursor-pointer border-0"
+                  >
+                </div>
+                <div class="flex-1 max-w-xs">
+                  <UInput
+                    v-model="editClinicForm.primary_color"
+                    placeholder="#0284C7"
+                    icon="i-lucide-hash"
+                  />
+                </div>
+              </div>
+            </div>
+
             <div class="flex justify-end gap-2 pt-4">
               <UButton
                 variant="ghost"
@@ -459,7 +723,11 @@ const subStatusColor: Record<SaasSubscription['effective_status'], 'success' | '
     </UModal>
 
     <!-- Delete Clinic Confirmation Modal -->
-    <UModal v-model:open="showDeleteClinic">
+    <UModal
+      v-model:open="showDeleteClinic"
+      title="Delete Clinic"
+      description="Permanently remove clinic tenant"
+    >
       <template #content>
         <UCard>
           <template #header>
@@ -617,7 +885,11 @@ const subStatusColor: Record<SaasSubscription['effective_status'], 'success' | '
       </template>
     </USlideover>
     <!-- Confirm Grant modal -->
-    <UModal v-model:open="showConfirmGrant">
+    <UModal
+      v-model:open="showConfirmGrant"
+      title="Confirm Subscription Grant"
+      description="Grant a new subscription plan to the selected clinic"
+    >
       <template #content>
         <UCard>
           <template #header>

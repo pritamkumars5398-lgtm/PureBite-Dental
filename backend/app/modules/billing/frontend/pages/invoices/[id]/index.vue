@@ -51,6 +51,7 @@ const showSendModal = ref(false)
 const showIssueConfirm = ref(false)
 const isProcessing = ref(false)
 const isDownloadingPdf = ref(false)
+const downloadProgress = ref(0)
 const isSending = ref(false)
 
 // Credit note form
@@ -276,16 +277,18 @@ async function handleDownloadPDF() {
   if (!currentInvoice.value) return
 
   isDownloadingPdf.value = true
+  downloadProgress.value = 10
   try {
-    await downloadPDF(invoiceId.value, locale.value)
-  } catch {
-    toast.add({
-      title: t('common.error'),
-      description: t('invoice.pdf.downloadError'),
-      color: 'error'
+    await downloadPDF(invoiceId.value, locale.value, (pct) => {
+      downloadProgress.value = pct
     })
+  } catch {
+    // Handled in composable toast
   } finally {
     isDownloadingPdf.value = false
+    setTimeout(() => {
+      downloadProgress.value = 0
+    }, 1200)
   }
 }
 
@@ -381,9 +384,12 @@ const overflowActions = computed<EntityAction[]>(() => {
   if (inv.status !== 'draft' && can(PERMISSIONS.billing.read)) {
     actions.push({
       key: 'downloadPdf',
-      label: t('invoice.actions.downloadPdf'),
-      icon: 'i-lucide-download',
+      label: isDownloadingPdf.value
+        ? `${t('invoice.actions.downloadPdf')} (${downloadProgress.value}%)`
+        : t('invoice.actions.downloadPdf'),
+      icon: isDownloadingPdf.value ? 'i-lucide-loader-2' : 'i-lucide-download',
       loading: isDownloadingPdf.value,
+      disabled: isDownloadingPdf.value,
       onClick: handleDownloadPDF
     })
   }

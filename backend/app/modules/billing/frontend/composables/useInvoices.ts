@@ -211,11 +211,11 @@ export function useInvoices() {
     invoices.value = invoices.value.map(i =>
       i.id === id
         ? {
-            ...i,
-            total: response.data.total,
-            total_paid: response.data.total_paid,
-            balance_due: response.data.balance_due
-          }
+          ...i,
+          total: response.data.total,
+          total_paid: response.data.total_paid,
+          balance_due: response.data.balance_due
+        }
         : i
     )
     if (currentInvoice.value?.id === id) {
@@ -441,37 +441,21 @@ export function useInvoices() {
   // PDF
   // ============================================================================
 
-  async function downloadPDF(id: string, locale: string = 'es'): Promise<void> {
-    const baseUrl = config.public.apiBaseUrl
-    const token = auth.accessToken.value
+  const { downloadFile } = useDownload()
 
-    const response = await fetch(
-      `${baseUrl}/api/v1/billing/invoices/${id}/pdf?locale=${locale}`,
+  async function downloadPDF(
+    id: string,
+    locale: string = 'es',
+    onProgress?: (pct: number) => void
+  ): Promise<void> {
+    await downloadFile(
+      `/api/v1/billing/invoices/${id}/pdf?locale=${locale}`,
+      `factura_${id}.pdf`,
       {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        title: 'Downloading Invoice PDF',
+        onProgress
       }
     )
-
-    if (!response.ok) {
-      throw new Error('Failed to download PDF')
-    }
-
-    const blob = await response.blob()
-    const url = window.URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-
-    // Extract filename from Content-Disposition header or generate one
-    const contentDisposition = response.headers.get('Content-Disposition')
-    const filenameMatch = contentDisposition?.match(/filename="?(.+)"?/)
-    link.download = filenameMatch?.[1] || `factura_${id}.pdf`
-
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    window.URL.revokeObjectURL(url)
   }
 
   function getPDFPreviewUrl(id: string, locale: string = 'es'): string {

@@ -110,6 +110,13 @@ async def get_clinic_context(
             None,
         )
         if not membership:
+            from app.modules.saas.constants import is_platform_clinic
+            platform_mem = next((m for m in memberships if is_platform_clinic(m.clinic.name)), None)
+            if platform_mem:
+                requested_clinic = await db.get(ClinicModel, clinic_id)
+                if requested_clinic:
+                    set_request_context(clinic_id=requested_clinic.id, user_id=current_user.id)
+                    return ClinicContext(clinic=requested_clinic, membership=platform_mem)
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="User does not have access to this clinic",

@@ -98,7 +98,11 @@ function categoryLabel(catId: string): string {
       </kbd>
     </button>
 
-    <UModal v-model:open="isOpen">
+    <UModal
+      v-model:open="isOpen"
+      :title="t('settings.search.placeholder')"
+      description="Search clinic configuration and settings"
+    >
       <template #content>
         <div class="bg-(--color-surface) rounded-[var(--radius-lg)] overflow-hidden">
           <div class="flex items-center gap-2 px-4 py-3 border-b border-[var(--color-border)]">

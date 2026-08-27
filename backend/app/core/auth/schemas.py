@@ -72,6 +72,24 @@ class ClinicAddressUpdate(BaseModel):
     country: str | None = Field(default=None, max_length=100)
 
 
+class BrandingSettingsPatch(BaseModel):
+    """Schema for updating clinic branding and theme."""
+
+    logo_url: str | None = None
+    primary_color: str | None = Field(default=None, max_length=20)
+    theme_preset: str | None = Field(default=None, max_length=50)
+    dark_mode_preference: str | None = Field(default=None, max_length=20)
+
+
+class BrandingSettingsResponse(BaseModel):
+    """Schema for clinic branding and theme response."""
+
+    logo_url: str | None = None
+    primary_color: str = "#0284c7"
+    theme_preset: str = "ocean_blue"
+    dark_mode_preference: str = "system"
+
+
 class ClinicMetadataUpdate(BaseModel):
     """Schema for updating clinic info (admin only)."""
 
@@ -82,6 +100,8 @@ class ClinicMetadataUpdate(BaseModel):
     phone: str | None = Field(default=None, max_length=20)
     email: EmailStr | None = None
     timezone: str | None = Field(default=None, max_length=64)
+    logo_url: str | None = None
+    branding: BrandingSettingsPatch | None = None
     # NOTE: `currency` is intentionally NOT editable here. A clinic's
     # currency is fixed at provisioning/seed time; changing it after
     # budgets/invoices exist would silently reinterpret historical totals.
