@@ -14,6 +14,7 @@
     "../backend/app/modules/clinical_notes/frontend",
     "../backend/app/modules/schedules/frontend",
     "../backend/app/modules/recalls/frontend",
+    "../backend/app/modules/migration_import/frontend",
     "../backend/app/modules/notifications/frontend",
     "../backend/app/modules/patient_timeline/frontend",
     "../backend/app/modules/reports/frontend",
@@ -75,6 +76,10 @@
     {
       "name": "recalls",
       "path": "../backend/app/modules/recalls/frontend"
+    },
+    {
+      "name": "migration_import",
+      "path": "../backend/app/modules/migration_import/frontend"
     },
     {
       "name": "notifications",
