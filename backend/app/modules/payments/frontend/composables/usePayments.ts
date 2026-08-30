@@ -51,6 +51,19 @@ export interface FilterIdsResult {
   truncated: boolean
 }
 
+function extractErrorMessage(e: unknown): string {
+  const err = e as { data?: { detail?: unknown; message?: string }; message?: string }
+  if (err?.data?.detail) {
+    const detail = err.data.detail
+    if (typeof detail === 'string') return detail
+    if (Array.isArray(detail)) {
+      return detail.map((d: any) => d.msg || d.message || JSON.stringify(d)).join(', ')
+    }
+  }
+  if (err?.data?.message) return err.data.message
+  return (e as Error)?.message || 'An unexpected error occurred'
+}
+
 export function usePayments() {
   const api = useApi()
 
@@ -73,7 +86,7 @@ export function usePayments() {
       total.value = resp.total
       return resp.data
     } catch (e) {
-      error.value = (e as Error).message
+      error.value = extractErrorMessage(e)
       return []
     } finally {
       isLoading.value = false
@@ -85,7 +98,7 @@ export function usePayments() {
       const resp = await api.get<ApiResponse<PaymentRecord>>(`/api/v1/payments/${id}`)
       return resp.data
     } catch (e) {
-      error.value = (e as Error).message
+      error.value = extractErrorMessage(e)
       return null
     }
   }
@@ -95,7 +108,7 @@ export function usePayments() {
       const resp = await api.post<ApiResponse<PaymentRecord>>('/api/v1/payments', payload)
       return resp.data
     } catch (e) {
-      error.value = (e as Error).message
+      error.value = extractErrorMessage(e)
       return null
     }
   }
@@ -105,7 +118,7 @@ export function usePayments() {
       const resp = await api.post<ApiResponse<PaymentRecord>>(`/api/v1/payments/${id}/reallocate`, payload)
       return resp.data
     } catch (e) {
-      error.value = (e as Error).message
+      error.value = extractErrorMessage(e)
       return null
     }
   }
@@ -115,7 +128,7 @@ export function usePayments() {
       const resp = await api.post<ApiResponse<PaymentRefund>>(`/api/v1/payments/${id}/refunds`, payload)
       return resp.data
     } catch (e) {
-      error.value = (e as Error).message
+      error.value = extractErrorMessage(e)
       return null
     }
   }
