@@ -17,7 +17,8 @@
 import type {
   PaymentAllocationCreate,
   PaymentMethod,
-  PaymentRecord
+  PaymentRecord,
+  Patient
 } from '~~/app/types'
 
 const props = withDefaults(defineProps<{
@@ -54,11 +55,16 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const { create } = usePayments()
+const { create, error: paymentsError } = usePayments()
 const { format: formatCurrency, symbol: currencySymbol } = useCurrency()
 
 const isBudgetContext = computed(() => Boolean(props.defaultBudgetId))
 const isPatientLocked = computed(() => Boolean(props.defaultPatientId))
+const selectedPatient = ref<Patient | null>(null)
+
+watch(selectedPatient, (p) => {
+  form.value.patient_id = p ? p.id : ''
+})
 
 // Primary methods rendered as chips. Less common ones live in a "more"
 // disclosure to keep the default view scannable.
@@ -113,6 +119,7 @@ const amountInputRef = ref<HTMLInputElement | null>(null)
 // Reset whenever the modal opens — keeps state from leaking between calls.
 watch(() => props.open, async (isOpen) => {
   if (isOpen) {
+    selectedPatient.value = null
     form.value = buildInitialForm()
     formError.value = null
     showAdvanced.value = false
@@ -218,7 +225,7 @@ async function submit() {
       emit('created', created)
       emit('update:open', false)
     } else {
-      formError.value = t('payments.new.errUnknown')
+      formError.value = paymentsError.value || t('payments.new.errUnknown')
     }
   } finally {
     isSubmitting.value = false
@@ -265,15 +272,18 @@ function handleKeydown(e: KeyboardEvent) {
             </div>
           </div>
         </div>
-        <UFormField
+        <div
           v-else
-          :label="t('payments.new.patient')"
+          class="space-y-1.5"
         >
-          <UInput
-            v-model="form.patient_id"
-            :placeholder="t('payments.new.patientPlaceholder')"
+          <label class="block text-xs text-muted uppercase tracking-wide">
+            {{ t('payments.new.patient') }}
+          </label>
+          <PatientVisualSelector
+            v-model="selectedPatient"
+            in-modal
           />
-        </UFormField>
+        </div>
 
         <!-- Importe — hero field. Big, autofocused, currency suffix.
              Sub-line offers to snap to the suggested pending amount when
