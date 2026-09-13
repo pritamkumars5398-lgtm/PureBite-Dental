@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Budget Accepted - {{ clinic_name }}{% endblock %}
+
+{% block content %}
+<h2>Hello {{ patient_name }},</h2>
+
+<p>We have successfully recorded your acceptance of the treatment budget. Thank you for placing your trust in {{ clinic_name }}.</p>
+
+<div class="info-box">
+    <div class="info-row">
+        <div style="flex: 1;">
+            <div class="label">Budget #</div>
+            <div class="value">{{ budget_number }}</div>
+        </div>
+        <div style="flex: 1;">
+            <div class="label">Accepted Date</div>
+            <div class="value">{{ accepted_date }}</div>
+        </div>
+    </div>
+    <div class="info-row">
+        <div>
+            <div class="label">Total Treatment Value</div>
+            <div class="value" style="font-size: 20px; color: #3b82f6;">{{ total }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="alert alert-success">
+    <strong>Next Step:</strong> Our team will contact you shortly to schedule your treatment appointments.
+</div>
+
+{% if notes %}
+<p><strong>Notes:</strong> {{ notes }}</p>
+{% endif %}
+
+<p>If you have any questions or wish to schedule your next appointment right away, please contact us.</p>
+
+{% if clinic_phone %}
+<div class="button-container">
+    <a href="tel:{{ clinic_phone }}" class="button">Book Appointment</a>
+</div>
+{% endif %}
+
+<p>Thank you for choosing {{ clinic_name }}!</p>
+{% endblock %}

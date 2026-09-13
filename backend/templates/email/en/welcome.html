@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome to {{ clinic_name }}{% endblock %}
+
+{% block content %}
+<h2>Welcome {{ patient_name }}!</h2>
+
+<p>Thank you for registering with {{ clinic_name }}. We are delighted to assist you with your dental health and care.</p>
+
+<div class="alert alert-success">
+    Your patient profile has been successfully created in our system.
+</div>
+
+<h3 style="margin-top: 24px; margin-bottom: 12px; font-size: 16px; font-weight: 600;">What can you do now?</h3>
+
+<ul style="padding-left: 20px; color: #3f3f46;">
+    <li style="margin-bottom: 8px;">Schedule your initial checkup appointment</li>
+    <li style="margin-bottom: 8px;">Explore our available services and dental treatments</li>
+    <li style="margin-bottom: 8px;">Contact our team with any questions</li>
+</ul>
+
+{% if clinic_phone %}
+<div class="button-container">
+    <a href="tel:{{ clinic_phone }}" class="button">Schedule my first appointment</a>
+</div>
+{% endif %}
+
+<div class="info-box">
+    <div class="label">Opening Hours</div>
+    <div class="value">{{ clinic_hours | default('Monday to Friday: 9:00 - 20:00') }}</div>
+</div>
+
+<p>Please feel free to reach out if you have any questions. We are here to help!</p>
+
+<p>We look forward to seeing you!</p>
+{% endblock %}

@@ -269,4 +269,5 @@ class SmtpTestRequest(BaseModel):
     use_tls: bool = True
     use_ssl: bool = False
     from_email: str = Field(..., max_length=255)
+    from_name: str | None = Field(default=None, max_length=255)
     to_email: str = Field(..., max_length=255)

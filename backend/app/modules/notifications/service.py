@@ -405,6 +405,7 @@ class NotificationService:
         use_ssl: bool,
         from_email: str,
         to_email: str,
+        from_name: str | None = None,
     ) -> EmailResult:
         """Test SMTP connection with specific settings.
 
@@ -414,6 +415,18 @@ class NotificationService:
         from app.core.email.encryption import decrypt_password
         from app.core.email.providers.base import EmailMessage
         from app.core.email.providers.smtp import SMTPProvider
+
+        # Retrieve clinic name and language
+        clinic_row = (
+            await db.execute(
+                text("SELECT name, settings FROM clinics WHERE id = :id"),
+                {"id": clinic_id},
+            )
+        ).first()
+
+        clinic_name = from_name or (clinic_row.name if clinic_row and clinic_row.name else "PureBite Dental")
+        clinic_settings = clinic_row.settings if clinic_row and isinstance(clinic_row.settings, dict) else {}
+        locale = clinic_settings.get("communication_language") or DEFAULT_COMMUNICATION_LOCALE
 
         # If no password provided, try to use existing one from DB
         actual_password = password
@@ -431,28 +444,49 @@ class NotificationService:
             use_tls=use_tls,
             use_ssl=use_ssl,
             default_from_email=from_email,
-            default_from_name="PureBite Dental",
+            default_from_name=clinic_name,
+        )
+
+        is_en = locale.startswith("en")
+        subject = f"{clinic_name} - SMTP Connection Test" if is_en else f"{clinic_name} - Test de conexión SMTP"
+        header = "SMTP Connection Successful" if is_en else "Conexión SMTP exitosa"
+        p1 = (
+            f"This is a test email for {clinic_name}'s SMTP configuration."
+            if is_en
+            else f"Este es un email de prueba de la configuración SMTP de {clinic_name}."
+        )
+        p2 = (
+            "If you received this message, the email configuration is working properly."
+            if is_en
+            else "Si has recibido este mensaje, la configuración está funcionando correctamente."
+        )
+        footer = f"Sent from {clinic_name}" if is_en else f"Enviado desde {clinic_name}"
+        body_text = (
+            f"SMTP Connection Successful. The configuration for {clinic_name} is working properly."
+            if is_en
+            else f"Conexión SMTP exitosa. La configuración de {clinic_name} está funcionando correctamente."
         )
 
         # Send test email
         message = EmailMessage(
             to_email=to_email,
-            subject="PureBite Dental - Test de conexión SMTP",
-            body_html="""
+            subject=subject,
+            body_html=f"""
             <html>
             <body style="font-family: sans-serif; padding: 20px;">
-                <h2>Conexión SMTP exitosa</h2>
-                <p>Este es un email de prueba de la configuración SMTP de tu clínica.</p>
-                <p>Si has recibido este mensaje, la configuración está funcionando correctamente.</p>
+                <h2>{header}</h2>
+                <p>{p1}</p>
+                <p>{p2}</p>
                 <hr>
                 <p style="color: #666; font-size: 12px;">
-                    Enviado desde PureBite Dental
+                    {footer}
                 </p>
             </body>
             </html>
             """,
-            body_text="Conexión SMTP exitosa. La configuración está funcionando correctamente.",
+            body_text=body_text,
             from_email=from_email,
+            from_name=clinic_name,
         )
 
         result = await provider.send(message)

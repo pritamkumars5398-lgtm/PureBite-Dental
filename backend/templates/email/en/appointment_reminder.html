@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Appointment Reminder - {{ clinic_name }}{% endblock %}
+
+{% block content %}
+<h2>Hello {{ patient_name }},</h2>
+
+<p>This is a friendly reminder of your upcoming dental appointment:</p>
+
+<div class="info-box">
+    <div class="info-row">
+        <div style="flex: 1;">
+            <div class="label">Date</div>
+            <div class="value">{{ appointment_date }}</div>
+        </div>
+        <div style="flex: 1;">
+            <div class="label">Time</div>
+            <div class="value">{{ appointment_time }}</div>
+        </div>
+    </div>
+    {% if professional_name %}
+    <div class="info-row">
+        <div>
+            <div class="label">Professional</div>
+            <div class="value">{{ professional_name }}</div>
+        </div>
+    </div>
+    {% endif %}
+    {% if cabinet_name %}
+    <div class="info-row">
+        <div>
+            <div class="label">Cabinet / Chair</div>
+            <div class="value">{{ cabinet_name }}</div>
+        </div>
+    </div>
+    {% endif %}
+    {% if treatment_type %}
+    <div class="info-row">
+        <div>
+            <div class="label">Treatment</div>
+            <div class="value">{{ treatment_type }}</div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="alert alert-info">
+    <strong>Reminder:</strong> Please arrive 10 minutes prior to your appointment.
+</div>
+
+{% if notes %}
+<p><strong>Notes:</strong> {{ notes }}</p>
+{% endif %}
+
+<p>If you are unable to attend, please let us know as soon as possible so we can offer this slot to another patient.</p>
+
+{% if clinic_phone %}
+<div class="button-container">
+    <a href="tel:{{ clinic_phone }}" class="button">Confirm Attendance</a>
+</div>
+{% endif %}
+
+<p>We look forward to seeing you!</p>
+{% endblock %}

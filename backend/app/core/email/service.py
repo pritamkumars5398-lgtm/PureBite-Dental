@@ -145,6 +145,17 @@ class EmailService:
             if settings.password_encrypted:
                 password = decrypt_password(settings.password_encrypted)
 
+            clinic_name = "PureBite Dental"
+            if db and clinic_id:
+                clinic_row = (
+                    await db.execute(
+                        text("SELECT name FROM clinics WHERE id = :id"),
+                        {"id": clinic_id},
+                    )
+                ).first()
+                if clinic_row and clinic_row.name:
+                    clinic_name = clinic_row.name
+
             return SMTPProvider(
                 host=settings.host,
                 port=settings.port,
@@ -153,7 +164,7 @@ class EmailService:
                 use_tls=settings.use_tls,
                 use_ssl=settings.use_ssl,
                 default_from_email=settings.from_email or "",
-                default_from_name=settings.from_name or "DentalPin",
+                default_from_name=settings.from_name or clinic_name,
             )
 
         # Fallback to global
@@ -320,9 +331,10 @@ class EmailService:
             logger.warning("Jinja2 environment not initialized")
             return None
 
-        # Try locale-specific template first, then fallback to default
+        # Try locale-specific template first, then fallback to alternate locale, default, and root
         template_paths = [
             f"{locale}/{template_key}.{extension}",
+            f"es/{template_key}.{extension}" if locale != "es" else f"en/{template_key}.{extension}",
             f"default/{template_key}.{extension}",
             f"{template_key}.{extension}",
         ]

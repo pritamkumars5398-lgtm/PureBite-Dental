@@ -18,7 +18,8 @@
     "../backend/app/modules/notifications/frontend",
     "../backend/app/modules/patient_timeline/frontend",
     "../backend/app/modules/reports/frontend",
-    "../backend/app/modules/saas/frontend"
+    "../backend/app/modules/saas/frontend",
+    "../backend/app/modules/periodontogram/frontend"
   ],
   "modules": [
     {
@@ -96,6 +97,10 @@
     {
       "name": "saas",
       "path": "../backend/app/modules/saas/frontend"
+    },
+    {
+      "name": "periodontogram",
+      "path": "../backend/app/modules/periodontogram/frontend"
     }
   ],
   "version": 1

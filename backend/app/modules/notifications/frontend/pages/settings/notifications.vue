@@ -158,6 +158,7 @@ async function handleSmtpTest() {
     use_tls: smtpForm.value.use_tls ?? true,
     use_ssl: smtpForm.value.use_ssl ?? false,
     from_email: smtpForm.value.from_email,
+    from_name: smtpForm.value.from_name || undefined,
     to_email: smtpTestEmail.value
   }
 

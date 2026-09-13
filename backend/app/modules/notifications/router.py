@@ -588,6 +588,7 @@ async def test_smtp_settings(
         use_ssl=data.use_ssl,
         from_email=data.from_email,
         to_email=data.to_email,
+        from_name=data.from_name,
     )
 
     return ApiResponse(

@@ -1211,6 +1211,7 @@ export interface SmtpTestRequest {
   use_tls: boolean
   use_ssl: boolean
   from_email: string
+  from_name?: string
   to_email: string
 }
 

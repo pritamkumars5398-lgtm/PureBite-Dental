@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Treatment Budget - {{ clinic_name }}{% endblock %}
+
+{% block content %}
+<h2>Hello {{ patient_name }},</h2>
+
+<p>Please find below the detailed quotation for your proposed dental treatment.</p>
+
+<div class="info-box">
+    <div class="info-row">
+        <div style="flex: 1;">
+            <div class="label">Budget #</div>
+            <div class="value">{{ budget_number }}</div>
+        </div>
+        <div style="flex: 1;">
+            <div class="label">Date</div>
+            <div class="value">{{ budget_date }}</div>
+        </div>
+    </div>
+</div>
+
+{% if treatments %}
+<table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+    <thead>
+        <tr style="border-bottom: 2px solid #e4e4e7;">
+            <th style="text-align: left; padding: 12px 0; font-size: 12px; font-weight: 600; text-transform: uppercase; color: #71717a;">Treatment</th>
+            <th style="text-align: right; padding: 12px 0; font-size: 12px; font-weight: 600; text-transform: uppercase; color: #71717a;">Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for treatment in treatments %}
+        <tr style="border-bottom: 1px solid #f4f4f5;">
+            <td style="padding: 12px 0;">
+                <div style="font-weight: 500;">{{ treatment.name }}</div>
+                {% if treatment.tooth %}
+                <div style="font-size: 14px; color: #71717a;">Tooth: {{ treatment.tooth }}</div>
+                {% endif %}
+            </td>
+            <td style="text-align: right; padding: 12px 0;">{{ treatment.price }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        {% if subtotal and total != subtotal %}
+        <tr>
+            <td style="padding: 12px 0; text-align: right; font-weight: 500;">Subtotal:</td>
+            <td style="padding: 12px 0; text-align: right;">{{ subtotal }}</td>
+        </tr>
+        {% endif %}
+        {% if discount_amount %}
+        <tr>
+            <td style="padding: 12px 0; text-align: right; font-weight: 500; color: #22c55e;">Discount:</td>
+            <td style="padding: 12px 0; text-align: right; color: #22c55e;">-{{ discount_amount }}</td>
+        </tr>
+        {% endif %}
+        <tr style="border-top: 2px solid #18181b;">
+            <td style="padding: 16px 0; text-align: right; font-size: 18px; font-weight: 600;">Total:</td>
+            <td style="padding: 16px 0; text-align: right; font-size: 18px; font-weight: 600;">{{ total }}</td>
+        </tr>
+    </tfoot>
+</table>
+{% endif %}
+
+{% if validity_days %}
+<div class="alert alert-info">
+    <strong>Validity:</strong> This quotation is valid for {{ validity_days }} days from the date of issue.
+</div>
+{% endif %}
+
+{% if notes %}
+<p><strong>Notes:</strong> {{ notes }}</p>
+{% endif %}
+
+<p>If you have any questions regarding this proposal or would like to schedule your treatment sessions, please don't hesitate to reach out.</p>
+
+{% if clinic_phone %}
+<div class="button-container">
+    <a href="tel:{{ clinic_phone }}" class="button">Contact Clinic</a>
+</div>
+{% endif %}
+
+<p>Best regards,<br>{{ clinic_name }}</p>
+{% endblock %}
