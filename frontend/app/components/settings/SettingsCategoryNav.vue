@@ -48,18 +48,21 @@ function categoryHref(cat: VisibleCategory): string {
       class="group flex items-center gap-3 rounded-md px-3 py-2.5 min-h-[44px] transition border-l-2"
       :class="[
         activeId === cat.id
-          ? 'bg-(--color-primary-soft) border-(--color-primary) text-default'
-          : 'border-transparent hover:bg-(--color-surface-muted) text-default'
+          ? 'bg-[var(--color-primary-soft)] border-[var(--color-primary)] text-[var(--color-primary-soft-text)]'
+          : 'border-transparent hover:bg-[var(--color-surface-muted)] text-default'
       ]"
     >
       <UIcon
         :name="cat.icon"
         class="w-5 h-5 shrink-0"
-        :class="activeId === cat.id ? 'text-(--color-primary-accent)' : 'text-muted group-hover:text-default'"
+        :class="activeId === cat.id ? 'text-[var(--color-primary)] dark:text-[var(--color-primary-400)]' : 'text-muted group-hover:text-default'"
       />
       <div class="min-w-0 flex-1">
         <div class="flex items-center gap-2">
-          <span class="text-body font-medium truncate">
+          <span
+            class="text-body truncate"
+            :class="activeId === cat.id ? 'font-semibold text-[var(--color-primary-soft-text)]' : 'font-medium text-default'"
+          >
             {{ categoryLabel(cat) }}
           </span>
           <span
@@ -70,7 +73,8 @@ function categoryHref(cat: VisibleCategory): string {
         </div>
         <p
           v-if="!fullWidth"
-          class="hidden lg:block text-caption text-subtle truncate"
+          class="hidden lg:block text-caption truncate"
+          :class="activeId === cat.id ? 'text-[var(--color-primary-soft-text)]/80' : 'text-subtle'"
         >
           {{ categoryDescription(cat) }}
         </p>

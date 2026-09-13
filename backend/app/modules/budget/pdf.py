@@ -627,8 +627,10 @@ class BudgetPDFService:
         except (ImportError, Exception):
             pass
 
-        # 3. Fallback to HTML content
-        return html_content.encode("utf-8")
+        # 3. If both engines failed, do not return raw HTML (which causes Chrome PDF viewer to crash)
+        raise RuntimeError(
+            "PDF generation failed: neither WeasyPrint nor xhtml2pdf is available or could render the PDF."
+        )
 
     @staticmethod
     def _get_labels(locale: str) -> dict:

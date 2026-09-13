@@ -219,13 +219,6 @@ export function useClinicTheme() {
       root.style.setProperty(`--ui-primary-${step}`, val)
     }
 
-    // Set Design System Primary Tokens
-    root.style.setProperty('--color-primary', palette['500'] || colorHex)
-    root.style.setProperty('--color-primary-hover', palette['600'] || colorHex)
-    root.style.setProperty('--color-primary-soft', palette['50'] || '#F0F9FF')
-    root.style.setProperty('--color-primary-soft-text', palette['800'] || '#075985')
-    root.style.setProperty('--ui-primary', palette['500'] || colorHex)
-
     // Add a custom style tag to guarantee full CSS property cascade
     let customStyleTag = document.getElementById('clinic-custom-theme-style')
     if (!customStyleTag) {
@@ -233,6 +226,13 @@ export function useClinicTheme() {
       customStyleTag.id = 'clinic-custom-theme-style'
       document.head.appendChild(customStyleTag)
     }
+
+    // Clean up inline properties so the stylesheet rules cascade cleanly for both :root and .dark
+    root.style.removeProperty('--color-primary')
+    root.style.removeProperty('--color-primary-hover')
+    root.style.removeProperty('--color-primary-soft')
+    root.style.removeProperty('--color-primary-soft-text')
+    root.style.removeProperty('--ui-primary')
 
     const rgb500 = hexToRgb(palette['500'] || colorHex).join(', ')
 
@@ -279,7 +279,7 @@ export function useClinicTheme() {
         --ui-color-primary-900: ${palette['900']};
         --ui-color-primary-950: ${palette['950']};
       }
-      .dark {
+      .dark, :root.dark, html.dark {
         --color-primary: ${palette['400']};
         --color-primary-hover: ${palette['300']};
         --color-primary-soft: rgba(${rgb500}, 0.18);
