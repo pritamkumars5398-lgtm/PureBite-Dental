@@ -125,3 +125,29 @@ class ClinicUpdate(BaseModel):
     theme_preset: str | None = None
 
 
+class ClinicAdminInfo(BaseModel):
+    id: UUID
+    email: str
+    first_name: str | None = None
+    last_name: str | None = None
+    role: str
+
+
+class ClinicStatsResponse(BaseModel):
+    clinic_id: UUID
+    clinic_name: str
+    tax_id: str
+    currency: str | None = "USD"
+    timezone: str | None = "UTC"
+    patient_count: int = 0
+    user_count: int = 0
+    appointment_count: int = 0
+    treatment_count: int = 0
+    category_count: int = 0
+    invoice_count: int = 0
+    total_billed: float = 0.0
+    has_catalog: bool = False
+    admin_user: ClinicAdminInfo | None = None
+
+
+

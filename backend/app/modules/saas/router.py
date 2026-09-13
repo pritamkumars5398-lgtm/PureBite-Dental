@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
@@ -18,7 +18,9 @@ from app.database import get_db
 from .constants import PLATFORM_ADMIN_CLINIC_NAME, is_platform_clinic
 from .models import SaasLead, SaasPricingPlan, SaasSubscription
 from .schemas import (
+    ClinicAdminInfo,
     ClinicDirectoryResponse,
+    ClinicStatsResponse,
     ClinicUpdate,
     LeadCreate,
     LeadResponse,
@@ -248,6 +250,15 @@ async def provision_tenant(
             status_code=status.HTTP_409_CONFLICT,
             detail="A clinic or user with these details already exists",
         ) from None
+
+    # Automatically seed standard catalog (categories, treatments, VAT types)
+    try:
+        from app.modules.catalog.seed import seed_catalog
+
+        await seed_catalog(db, clinic.id)
+        await db.commit()
+    except Exception as exc:
+        logger.warning("Could not auto-seed catalog for clinic %s: %s", clinic.id, exc)
 
     return TenantProvisionResponse(
         clinic_id=clinic.id,
@@ -577,4 +588,129 @@ async def delete_clinic(
     await db.delete(clinic)
     await db.commit()
     return None
+
+
+@router.get("/clinics/{target_clinic_id}/stats", response_model=ClinicStatsResponse)
+async def get_clinic_stats(
+    target_clinic_id: uuid.UUID,
+    ctx: Annotated[ClinicContext, Depends(get_clinic_context)],
+    _: Annotated[None, Depends(require_permission("subscriptions.read"))],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    """Superadmin: Detailed operational statistics and counts for a clinic tenant."""
+    if not is_platform_clinic(ctx.clinic.name):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only"
+        )
+
+    clinic = await db.get(Clinic, target_clinic_id)
+    if not clinic:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clinic not found")
+
+    cid = str(target_clinic_id)
+
+    # Patients count
+    p_cnt = (
+        await db.execute(text("SELECT COUNT(*) FROM patients WHERE clinic_id = :cid"), {"cid": cid})
+    ).scalar() or 0
+
+    # Staff / Users count
+    u_cnt = (
+        await db.execute(text("SELECT COUNT(*) FROM clinic_memberships WHERE clinic_id = :cid"), {"cid": cid})
+    ).scalar() or 0
+
+    # Appointments count
+    a_cnt = (
+        await db.execute(text("SELECT COUNT(*) FROM appointments WHERE clinic_id = :cid"), {"cid": cid})
+    ).scalar() or 0
+
+    # Categories count
+    c_cnt = (
+        await db.execute(text("SELECT COUNT(*) FROM treatment_categories WHERE clinic_id = :cid"), {"cid": cid})
+    ).scalar() or 0
+
+    # Treatment catalog items count
+    t_cnt = (
+        await db.execute(text("SELECT COUNT(*) FROM treatment_catalog_items WHERE clinic_id = :cid"), {"cid": cid})
+    ).scalar() or 0
+
+    # Invoices count and total billed
+    inv_res = (
+        await db.execute(text("SELECT COUNT(*), COALESCE(SUM(total), 0) FROM invoices WHERE clinic_id = :cid"), {"cid": cid})
+    ).fetchone()
+    inv_cnt = inv_res[0] if inv_res else 0
+    inv_total = float(inv_res[1]) if inv_res else 0.0
+
+    # Primary Admin User
+    admin_row = (
+        await db.execute(
+            text("""
+                SELECT u.id, u.email, u.first_name, u.last_name, cm.role
+                FROM users u
+                JOIN clinic_memberships cm ON u.id = cm.user_id
+                WHERE cm.clinic_id = :cid
+                ORDER BY CASE WHEN cm.role = 'admin' THEN 0 ELSE 1 END, u.created_at ASC
+                LIMIT 1
+            """),
+            {"cid": cid},
+        )
+    ).fetchone()
+
+    admin_info = (
+        ClinicAdminInfo(
+            id=admin_row[0],
+            email=admin_row[1],
+            first_name=admin_row[2],
+            last_name=admin_row[3],
+            role=admin_row[4],
+        )
+        if admin_row
+        else None
+    )
+
+    return ClinicStatsResponse(
+        clinic_id=clinic.id,
+        clinic_name=clinic.name,
+        tax_id=clinic.tax_id or "",
+        currency=clinic.currency or "USD",
+        timezone=clinic.timezone or "UTC",
+        patient_count=p_cnt,
+        user_count=u_cnt,
+        appointment_count=a_cnt,
+        treatment_count=t_cnt,
+        category_count=c_cnt,
+        invoice_count=inv_cnt,
+        total_billed=inv_total,
+        has_catalog=bool(c_cnt > 0 and t_cnt > 0),
+        admin_user=admin_info,
+    )
+
+
+@router.post("/clinics/{target_clinic_id}/seed-catalog")
+async def seed_clinic_catalog(
+    target_clinic_id: uuid.UUID,
+    ctx: Annotated[ClinicContext, Depends(get_clinic_context)],
+    _: Annotated[None, Depends(require_permission("subscriptions.write"))],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    """Superadmin: seed standard catalog (categories, treatments, VAT) for a clinic tenant."""
+    if not is_platform_clinic(ctx.clinic.name):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Platform administrators only"
+        )
+
+    clinic = await db.get(Clinic, target_clinic_id)
+    if not clinic:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clinic not found")
+
+    from app.modules.catalog.seed import seed_catalog
+
+    summary = await seed_catalog(db, clinic.id)
+    await db.commit()
+    return {
+        "message": "Catalog initialized successfully",
+        "clinic_id": clinic.id,
+        "summary": summary,
+    }
+
 

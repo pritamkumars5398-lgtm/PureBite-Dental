@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SaasClinicDirectoryEntry, SaasSubscription } from '~/composables/useSaasAdmin'
+import type { SaasClinicDirectoryEntry, SaasSubscription, ClinicStats } from '~/composables/useSaasAdmin'
 import { THEME_PRESETS } from '~/composables/useClinicTheme'
 
 definePageMeta({
@@ -16,7 +16,9 @@ const {
   grantSubscription,
   plans,
   updateClinic,
-  deleteClinic
+  deleteClinic,
+  fetchClinicStats,
+  seedClinicCatalog
 } = useSaasAdmin()
 
 const route = useRoute()
@@ -210,6 +212,9 @@ const selectedClinic = ref<SaasClinicDirectoryEntry | null>(null)
 const showClinicDetail = ref(false)
 const clinicHistory = ref<SaasSubscription[]>([])
 const isLoadingHistory = ref(false)
+const clinicStats = ref<ClinicStats | null>(null)
+const isLoadingStats = ref(false)
+const isSeedingCatalog = ref(false)
 const grantForm = ref({ plan_id: '', duration_months: 1 })
 const isGranting = ref(false)
 const showConfirmGrant = ref(false)
@@ -242,8 +247,27 @@ async function openClinicDetail(clinic: SaasClinicDirectoryEntry) {
   }
 
   isLoadingHistory.value = true
-  clinicHistory.value = await fetchClinicSubscriptions(clinic.id)
+  isLoadingStats.value = true
+  clinicStats.value = null
+
+  const [history, stats] = await Promise.all([
+    fetchClinicSubscriptions(clinic.id),
+    fetchClinicStats(clinic.id)
+  ])
+  clinicHistory.value = history
+  clinicStats.value = stats
   isLoadingHistory.value = false
+  isLoadingStats.value = false
+}
+
+async function handleSeedCatalog() {
+  if (!selectedClinic.value) return
+  isSeedingCatalog.value = true
+  const ok = await seedClinicCatalog(selectedClinic.value.id)
+  if (ok) {
+    clinicStats.value = await fetchClinicStats(selectedClinic.value.id)
+  }
+  isSeedingCatalog.value = false
 }
 
 async function handleGrant() {
@@ -768,7 +792,7 @@ const subStatusColor: Record<SaasSubscription['effective_status'], 'success' | '
       :open="showClinicDetail"
       side="right"
       :title="selectedClinic?.name"
-      :ui="{ content: 'w-[480px] max-w-[95vw]' }"
+      :ui="{ content: 'w-[540px] max-w-[95vw]' }"
       @update:open="showClinicDetail = $event"
     >
       <template #content>
@@ -778,11 +802,20 @@ const subStatusColor: Record<SaasSubscription['effective_status'], 'success' | '
         >
           <header class="flex items-center justify-between px-4 h-14 border-b border-default shrink-0">
             <div class="min-w-0">
-              <p class="text-h3 text-default truncate">
-                {{ selectedClinic.name }}
-              </p>
+              <div class="flex items-center gap-2">
+                <p class="text-h3 text-default truncate">
+                  {{ selectedClinic.name }}
+                </p>
+                <UBadge
+                  :color="selectedClinic.subscription_active ? 'success' : 'error'"
+                  variant="subtle"
+                  size="xs"
+                >
+                  {{ selectedClinic.subscription_active ? 'Active' : 'Inactive' }}
+                </UBadge>
+              </div>
               <p class="text-caption text-subtle">
-                {{ selectedClinic.tax_id }}
+                {{ selectedClinic.tax_id }} · {{ selectedClinic.currency || 'USD' }} · {{ selectedClinic.timezone || 'UTC' }}
               </p>
             </div>
             <UButton
@@ -795,6 +828,162 @@ const subStatusColor: Record<SaasSubscription['effective_status'], 'success' | '
           </header>
 
           <div class="flex-1 overflow-y-auto p-4 space-y-6">
+            <!-- Clinic Operational Metrics -->
+            <section class="space-y-3">
+              <div class="flex items-center justify-between">
+                <h4 class="text-sm font-semibold text-default flex items-center gap-2">
+                  <UIcon name="i-lucide-bar-chart-2" class="w-4 h-4 text-primary-accent" />
+                  Clinic Metrics & Overview
+                </h4>
+                <UBadge
+                  v-if="clinicStats?.has_catalog"
+                  color="success"
+                  variant="subtle"
+                  size="xs"
+                  class="flex items-center gap-1"
+                >
+                  <UIcon name="i-lucide-check-circle" class="w-3 h-3" />
+                  Catalog Active
+                </UBadge>
+                <UBadge
+                  v-else-if="!isLoadingStats"
+                  color="warning"
+                  variant="subtle"
+                  size="xs"
+                  class="flex items-center gap-1"
+                >
+                  <UIcon name="i-lucide-alert-circle" class="w-3 h-3" />
+                  No Catalog
+                </UBadge>
+              </div>
+
+              <!-- Loading skeletons -->
+              <div v-if="isLoadingStats" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <USkeleton v-for="i in 6" :key="i" class="h-16 w-full rounded-token-md" />
+              </div>
+
+              <!-- Metrics Grid -->
+              <div v-else class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                <!-- Customers / Patients -->
+                <div class="p-3 rounded-token-md border border-subtle bg-surface-muted/40 flex flex-col justify-between">
+                  <div class="flex items-center justify-between text-subtle text-caption mb-1">
+                    <span>Customers</span>
+                    <UIcon name="i-lucide-users" class="w-4 h-4 text-primary-accent" />
+                  </div>
+                  <div class="text-xl font-bold text-default">
+                    {{ clinicStats?.patient_count ?? 0 }}
+                  </div>
+                  <span class="text-[11px] text-muted">Registered patients</span>
+                </div>
+
+                <!-- Staff Members -->
+                <div class="p-3 rounded-token-md border border-subtle bg-surface-muted/40 flex flex-col justify-between">
+                  <div class="flex items-center justify-between text-subtle text-caption mb-1">
+                    <span>Staff</span>
+                    <UIcon name="i-lucide-user-check" class="w-4 h-4 text-info-accent" />
+                  </div>
+                  <div class="text-xl font-bold text-default">
+                    {{ clinicStats?.user_count ?? 0 }}
+                  </div>
+                  <span class="text-[11px] text-muted">Active users</span>
+                </div>
+
+                <!-- Appointments -->
+                <div class="p-3 rounded-token-md border border-subtle bg-surface-muted/40 flex flex-col justify-between">
+                  <div class="flex items-center justify-between text-subtle text-caption mb-1">
+                    <span>Agenda</span>
+                    <UIcon name="i-lucide-calendar" class="w-4 h-4 text-warning-accent" />
+                  </div>
+                  <div class="text-xl font-bold text-default">
+                    {{ clinicStats?.appointment_count ?? 0 }}
+                  </div>
+                  <span class="text-[11px] text-muted">Appointments</span>
+                </div>
+
+                <!-- Categories -->
+                <div class="p-3 rounded-token-md border border-subtle bg-surface-muted/40 flex flex-col justify-between">
+                  <div class="flex items-center justify-between text-subtle text-caption mb-1">
+                    <span>Categories</span>
+                    <UIcon name="i-lucide-folder" class="w-4 h-4 text-indigo-500" />
+                  </div>
+                  <div class="text-xl font-bold text-default">
+                    {{ clinicStats?.category_count ?? 0 }}
+                  </div>
+                  <span class="text-[11px] text-muted">Treatment categories</span>
+                </div>
+
+                <!-- Treatments -->
+                <div class="p-3 rounded-token-md border border-subtle bg-surface-muted/40 flex flex-col justify-between">
+                  <div class="flex items-center justify-between text-subtle text-caption mb-1">
+                    <span>Treatments</span>
+                    <UIcon name="i-lucide-stethoscope" class="w-4 h-4 text-emerald-500" />
+                  </div>
+                  <div class="text-xl font-bold text-default">
+                    {{ clinicStats?.treatment_count ?? 0 }}
+                  </div>
+                  <span class="text-[11px] text-muted">Catalog items</span>
+                </div>
+
+                <!-- Total Invoiced -->
+                <div class="p-3 rounded-token-md border border-subtle bg-surface-muted/40 flex flex-col justify-between">
+                  <div class="flex items-center justify-between text-subtle text-caption mb-1">
+                    <span>Invoiced</span>
+                    <UIcon name="i-lucide-receipt" class="w-4 h-4 text-purple-500" />
+                  </div>
+                  <div class="text-xl font-bold text-default truncate">
+                    {{ clinicStats?.currency === 'INR' ? '₹' : (clinicStats?.currency || '$') }}{{ clinicStats?.total_billed?.toFixed(0) ?? '0' }}
+                  </div>
+                  <span class="text-[11px] text-muted">{{ clinicStats?.invoice_count ?? 0 }} invoices</span>
+                </div>
+              </div>
+
+              <!-- Admin User Contact Card -->
+              <div v-if="clinicStats?.admin_user" class="p-3 rounded-token-md border border-subtle bg-surface flex items-center justify-between gap-3 text-caption">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-950/50 flex items-center justify-center shrink-0 text-primary-600 font-semibold text-xs">
+                    {{ (clinicStats.admin_user.first_name?.[0] || 'A').toUpperCase() }}
+                  </div>
+                  <div class="min-w-0">
+                    <p class="font-medium text-default truncate">
+                      {{ [clinicStats.admin_user.first_name, clinicStats.admin_user.last_name].filter(Boolean).join(' ') || 'Administrator' }}
+                    </p>
+                    <p class="text-subtle truncate text-xs">{{ clinicStats.admin_user.email }}</p>
+                  </div>
+                </div>
+                <UBadge variant="subtle" color="neutral" size="xs" class="capitalize shrink-0">
+                  {{ clinicStats.admin_user.role }}
+                </UBadge>
+              </div>
+
+              <!-- Catalog Seeder Action Banner -->
+              <div
+                class="p-3 rounded-token-md border text-caption flex items-center justify-between gap-3"
+                :class="clinicStats?.has_catalog ? 'border-subtle bg-surface-muted/20' : 'border-warning-300 dark:border-warning-800/40 bg-warning-50/50 dark:bg-warning-950/20'"
+              >
+                <div class="min-w-0">
+                  <p class="font-medium text-default">
+                    {{ clinicStats?.has_catalog ? 'Standard Catalog Initialized' : 'Catalog Not Initialized' }}
+                  </p>
+                  <p class="text-subtle text-xs">
+                    {{ clinicStats?.has_catalog 
+                      ? `${clinicStats.category_count} categories & ${clinicStats.treatment_count} treatments ready.`
+                      : 'Missing standard categories and treatments. Click button to initialize.'
+                    }}
+                  </p>
+                </div>
+                <UButton
+                  size="xs"
+                  :color="clinicStats?.has_catalog ? 'neutral' : 'warning'"
+                  :variant="clinicStats?.has_catalog ? 'outline' : 'solid'"
+                  icon="i-lucide-sparkles"
+                  :loading="isSeedingCatalog"
+                  @click="handleSeedCatalog"
+                >
+                  {{ clinicStats?.has_catalog ? 'Re-seed Catalog' : 'Initialize Catalog' }}
+                </UButton>
+              </div>
+            </section>
+
             <!-- Grant / renew -->
             <section>
               <h4 class="text-sm font-semibold text-default mb-2">

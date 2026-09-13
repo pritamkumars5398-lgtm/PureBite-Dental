@@ -53,6 +53,31 @@ export interface SaasClinicDirectoryEntry {
   theme_preset?: string | null
 }
 
+export interface ClinicAdminInfo {
+  id: string
+  email: string
+  first_name?: string | null
+  last_name?: string | null
+  role: string
+}
+
+export interface ClinicStats {
+  clinic_id: string
+  clinic_name: string
+  tax_id: string
+  currency?: string | null
+  timezone?: string | null
+  patient_count: number
+  user_count: number
+  appointment_count: number
+  treatment_count: number
+  category_count: number
+  invoice_count: number
+  total_billed: number
+  has_catalog: boolean
+  admin_user?: ClinicAdminInfo | null
+}
+
 export interface TenantProvisionPayload {
   clinic_name: string
   tax_id: string
@@ -324,6 +349,35 @@ export function useSaasAdmin() {
     }
   }
 
+  async function fetchClinicStats(clinicId: string): Promise<ClinicStats | null> {
+    try {
+      return await api.get<ClinicStats>(`/api/v1/saas/clinics/${clinicId}/stats`)
+    } catch (e) {
+      console.error('Failed to fetch clinic stats:', e)
+      return null
+    }
+  }
+
+  async function seedClinicCatalog(clinicId: string): Promise<boolean> {
+    try {
+      await api.post(`/api/v1/saas/clinics/${clinicId}/seed-catalog`, {})
+      toast.add({
+        title: t('common.success'),
+        description: 'Standard catalog initialized successfully',
+        color: 'success'
+      })
+      return true
+    } catch (e) {
+      toast.add({
+        title: t('common.error'),
+        description: errorDescription(e, 'Failed to initialize catalog'),
+        color: 'error'
+      })
+      console.error('Failed to initialize catalog:', e)
+      return false
+    }
+  }
+
   return {
     leads: readonly(leads),
     clinics: readonly(clinics),
@@ -339,6 +393,8 @@ export function useSaasAdmin() {
     updatePlan,
     deletePlan,
     updateClinic,
-    deleteClinic
+    deleteClinic,
+    fetchClinicStats,
+    seedClinicCatalog
   }
 }
