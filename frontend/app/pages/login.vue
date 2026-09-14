@@ -84,7 +84,8 @@ async function onSubmit() {
     })
 
     const clinic = auth.clinics.value?.[0]
-    if (clinic?.name === 'Platform Administration') {
+    const clinicName = (clinic?.name || '').trim().toLowerCase()
+    if (clinicName === 'platform administration' || clinicName === 'platform-admin') {
       await navigateTo('/admin')
     } else {
       await navigateTo('/')

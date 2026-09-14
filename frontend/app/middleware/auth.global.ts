@@ -27,7 +27,8 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
   if (auth.isAuthenticated.value) {
     const clinic = auth.clinics.value?.[0]
-    const isSuperadmin = clinic?.name === 'Platform Administration'
+    const clinicName = (clinic?.name || '').trim().toLowerCase()
+    const isSuperadmin = clinicName === 'platform administration' || clinicName === 'platform-admin'
     const isAdminRoute = to.path === '/admin' || to.path.startsWith('/admin/')
 
     const isAuthOrLanding = to.path === '/login' || to.path === '/landing'

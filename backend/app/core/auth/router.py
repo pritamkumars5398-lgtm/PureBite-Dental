@@ -88,6 +88,7 @@ async def _build_clinic_responses(
         elif not is_platform_clinic(m.clinic.name) and not settings.TESTING:
             subscription_active = False
 
+        theme_color = (m.clinic.settings or {}).get("theme_color") if m.clinic.settings else None
         clinics.append(
             ClinicResponse(
                 id=m.clinic.id,
@@ -95,6 +96,7 @@ async def _build_clinic_responses(
                 role=m.role,
                 subscription_active=subscription_active,
                 subscription_end_date=subscription_end_date,
+                theme_color=theme_color,
             )
         )
     return clinics

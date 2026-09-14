@@ -19,7 +19,7 @@ export function useAuth() {
 
   // State
   const user = useState<User | null>('auth:user', () => null)
-  const clinics = useState<Array<{ id: string, name: string, role: string, subscription_active?: boolean, subscription_end_date?: string | null }>>('auth:clinics', () => [])
+  const clinics = useState<Array<{ id: string, name: string, role: string, subscription_active?: boolean, subscription_end_date?: string | null, theme_color?: string | null }>>('auth:clinics', () => [])
   const permissions = useState<string[]>('auth:permissions', () => [])
   // Cookie lifetime matches refresh token; JWT expiry is enforced by the
   // backend, and a 401 triggers refresh in useApi. Matching the access
@@ -63,6 +63,11 @@ export function useAuth() {
 
     // Fetch user info after login
     await fetchUser()
+
+    // Invalidate cached modules navigation so fresh permissions take effect immediately
+    useState('modules:active').value = null
+    useState('modules:active:at').value = 0
+    useState('modules:active:context').value = null
   }
 
   async function logout(): Promise<void> {
@@ -71,6 +76,12 @@ export function useAuth() {
     user.value = null
     clinics.value = []
     permissions.value = []
+
+    // Clear module navigation cache on logout
+    useState('modules:active').value = null
+    useState('modules:active:at').value = 0
+    useState('modules:active:context').value = null
+
     // SSR: skip router.push — calling it from middleware can crash the
     // response. The global auth middleware redirects to /login once it
     // sees isAuthenticated === false.

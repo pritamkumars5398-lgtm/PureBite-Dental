@@ -11,4 +11,7 @@ def is_platform_clinic(clinic_name: str) -> bool:
     need to agree on the same check, so it lives here once instead of as
     a magic string repeated at each call site.
     """
-    return clinic_name == PLATFORM_ADMIN_CLINIC_NAME
+    if not clinic_name:
+        return False
+    normalized = clinic_name.strip().lower()
+    return normalized in (PLATFORM_ADMIN_CLINIC_NAME.lower(), "platform-admin")

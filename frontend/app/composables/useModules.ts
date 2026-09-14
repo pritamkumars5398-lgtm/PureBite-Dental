@@ -41,14 +41,18 @@ export function useModules() {
   const loading = useState<boolean>('modules:active:loading', () => false)
   const error = useState<string | null>('modules:active:error', () => null)
   const lastLoadedAt = useState<number>('modules:active:at', () => 0)
+  const lastLoadedContext = useState<string | null>('modules:active:context', () => null)
 
   async function ensureLoaded(force = false): Promise<void> {
     if (!auth.accessToken.value) return
     if (loading.value) return
 
+    const currentContext = `${auth.user.value?.id || ''}:${auth.clinics.value?.[0]?.id || ''}`
+    const contextChanged = !lastLoadedContext.value || lastLoadedContext.value !== currentContext
+
     const age = Date.now() - lastLoadedAt.value
     const FRESH_MS = 60_000 // 1 min — cheap enough to refetch often
-    if (!force && active.value !== null && age < FRESH_MS) return
+    if (!force && !contextChanged && active.value !== null && age < FRESH_MS) return
 
     loading.value = true
     error.value = null
@@ -58,6 +62,7 @@ export function useModules() {
       )
       active.value = response.data
       lastLoadedAt.value = Date.now()
+      lastLoadedContext.value = currentContext
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to load modules'
       console.warn('useModules: backend fetch failed —', error.value)
@@ -94,7 +99,8 @@ export function useModules() {
     // should never see the SaaS admin link. Same permission the route
     // barricade in auth.global.ts uses, so nav and routing agree.
     const clinic = auth.clinics.value?.[0]
-    const isSuperadmin = clinic?.name === 'Platform Administration'
+    const clinicName = (clinic?.name || '').trim().toLowerCase()
+    const isSuperadmin = clinicName === 'platform administration' || clinicName === 'platform-admin'
     if (isSuperadmin) {
       allItems = allItems.filter(item => item.to === '/settings' || item.to.startsWith('/admin'))
     } else {

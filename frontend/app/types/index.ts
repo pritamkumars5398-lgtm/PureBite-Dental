@@ -55,6 +55,7 @@ export interface ClinicUpdate {
   phone?: string
   email?: string
   timezone?: string
+  theme_color?: string
   // currency is intentionally omitted — it is fixed at seed/provisioning
   // time and not editable via the clinic-update endpoint.
 }
@@ -69,8 +70,11 @@ export interface Clinic {
   email?: string
   timezone: string
   currency: string
+  theme_color?: string | null
   settings: {
     slot_duration_min?: number
+    theme_color?: string
+    [key: string]: unknown
   }
   cabinets: Cabinet[]
   created_at: string

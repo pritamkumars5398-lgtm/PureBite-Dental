@@ -206,30 +206,45 @@ const included = [
       <!-- ─────────────────────── HERO ─────────────────────── -->
       <section class="hero">
         <div class="hero__inner">
-          <p class="eyebrow">
-            Practice management &middot; est. for dentists
-          </p>
+          <div class="hero__grid">
+            <div class="hero__main">
+              <p class="eyebrow">
+                Practice management &middot; est. for dentists
+              </p>
 
-          <h1 class="hero__title">
-            The chart,
-            <em>the chair,</em>
-            and the books.
-          </h1>
+              <h1 class="hero__title">
+                The chart,
+                <em>the chair,</em>
+                and the books.
+              </h1>
 
-          <div class="hero__body">
-            <p class="lede">
-              One record per patient. Every clinician in your practice writing
-              to the same chart, in the same place, at the same time.
-            </p>
-            <div class="hero__actions">
-              <a
-                href="#request"
-                class="btn btn--ink btn--lg"
-              >Request access</a>
-              <a
-                href="#chart"
-                class="btn btn--ghost btn--lg"
-              >See what it does</a>
+              <div class="hero__body">
+                <p class="lede">
+                  One record per patient. Every clinician in your practice writing
+                  to the same chart, in the same place, at the same time.
+                </p>
+                <div class="hero__actions">
+                  <a
+                    href="#request"
+                    class="btn btn--ink btn--lg"
+                  >Request access</a>
+                  <a
+                    href="#chart"
+                    class="btn btn--ghost btn--lg"
+                  >See what it does</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="hero__visual">
+              <div class="periodontal-chart-container">
+                <img
+                  src="/images/odontogram-chart.png"
+                  alt="Dental Odontogram Chart - Upper Arch and Lower Arch"
+                  class="periodontal-chart-img"
+                  loading="eager"
+                >
+              </div>
             </div>
           </div>
         </div>
@@ -650,24 +665,65 @@ const included = [
 .lede--tight { font-size: 16px; }
 
 /* ───────── hero ───────── */
-.hero { padding: clamp(64px, 10vw, 116px) 0 0; }
-.hero__inner { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+.hero { padding: clamp(32px, 5vw, 64px) 0 0; }
+.hero__inner { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
+.hero__grid {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: clamp(24px, 3.5vw, 48px);
+  align-items: center;
+  padding-bottom: clamp(36px, 5vw, 56px);
+}
+@media (max-width: 1024px) {
+  .hero__grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
 .hero__title {
   font-family: 'Fraunces', Georgia, serif;
-  font-weight: 400; font-size: clamp(46px, 9.2vw, 108px);
-  line-height: .96; letter-spacing: -0.045em; margin: 0 0 40px;
+  font-weight: 400; font-size: clamp(34px, 5.5vw, 68px);
+  line-height: 1.02; letter-spacing: -0.045em; margin: 0 0 24px;
   font-variation-settings: 'SOFT' 0, 'WONK' 1, 'opsz' 144;
-  max-width: 13ch;
+  max-width: 14ch;
 }
 .hero__title em {
   display: block; font-style: italic; color: var(--mint);
   font-variation-settings: 'SOFT' 40, 'WONK' 1, 'opsz' 144;
 }
 .hero__body {
-  display: grid; grid-template-columns: 1fr auto; gap: 40px;
-  align-items: end; padding-bottom: clamp(48px, 7vw, 84px);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
-.hero__actions { display: flex; gap: 10px; flex-shrink: 0; }
+.hero__actions { display: flex; flex-wrap: wrap; gap: 12px; }
+
+/* ───────── periodontal chart preview right side ───────── */
+.hero__visual {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.periodontal-chart-container {
+  width: 100%;
+  background: transparent;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.periodontal-chart-img {
+  width: 100%;
+  height: auto;
+  max-height: 560px;
+  object-fit: contain;
+  display: block;
+  border: none;
+}
 
 /* ───────── signature: the arch ───────── */
 .arch {

@@ -50,29 +50,41 @@ const canWritePatients = computed(() => can(PERMISSIONS.patients.write))
 </script>
 
 <template>
-  <PageHeader
-    :title="title"
-    :subtitle="formattedDate"
-  >
-    <template #actions>
-      <UButton
-        v-if="canWritePatients"
-        to="/patients?new=1"
-        variant="soft"
-        color="neutral"
-        icon="i-lucide-user-plus"
-      >
-        {{ t('dashboard.quickActions.newPatient') }}
-      </UButton>
-      <UButton
-        v-if="canWriteAppointments"
-        to="/appointments?new=1"
-        variant="solid"
-        color="primary"
-        icon="i-lucide-calendar-plus"
-      >
-        {{ t('dashboard.quickActions.newAppointment') }}
-      </UButton>
-    </template>
-  </PageHeader>
+  <div class="relative mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <!-- Greeting & Date -->
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 dark:text-white text-pretty">
+          {{ title }}
+        </h1>
+        <p class="mt-1 text-sm sm:text-base text-neutral-500 dark:text-neutral-400 capitalize">
+          {{ formattedDate }}
+        </p>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="flex flex-wrap items-center gap-3">
+        <UButton
+          v-if="canWritePatients"
+          to="/patients?new=1"
+          variant="soft"
+          color="neutral"
+          size="md"
+          icon="i-lucide-user-plus"
+        >
+          {{ t('dashboard.quickActions.newPatient') }}
+        </UButton>
+        <UButton
+          v-if="canWriteAppointments"
+          to="/appointments?new=1"
+          variant="solid"
+          color="primary"
+          size="md"
+          icon="i-lucide-calendar-plus"
+        >
+          {{ t('dashboard.quickActions.newAppointment') }}
+        </UButton>
+      </div>
+    </div>
+  </div>
 </template>

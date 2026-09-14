@@ -17,6 +17,9 @@ useSeoMeta({
   title: 'Nº 1 Dental Studio',
   description: t('app.tagline')
 })
+
+// Dynamically apply superadmin-configured clinic theme color
+useClinicTheme()
 </script>
 
 <template>

@@ -37,6 +37,19 @@ function fmtDate(value: string | null): string {
   return new Date(value).toLocaleDateString()
 }
 
+const themeColorPresets = [
+  { name: 'Teal Mint', color: '#0F766E' },
+  { name: 'Royal Blue', color: '#2563EB' },
+  { name: 'Emerald', color: '#059669' },
+  { name: 'Violet', color: '#7C3AED' },
+  { name: 'Vibrant Rose', color: '#E11D48' },
+  { name: 'Warm Amber', color: '#D97706' },
+  { name: 'Luxury Gold', color: '#B39D82' },
+  { name: 'Ocean Cyan', color: '#0891B2' },
+  { name: 'Deep Indigo', color: '#4F46E5' },
+  { name: 'Coral Sunset', color: '#EA580C' }
+]
+
 // ───────────────────────── Provisioning ─────────────────────────
 const showProvision = ref(false)
 const isProvisioning = ref(false)
@@ -48,7 +61,8 @@ const provisionForm = ref({
   admin_email: '',
   admin_password: '',
   currency: 'INR',
-  timezone: 'Asia/Kolkata'
+  timezone: 'Asia/Kolkata',
+  theme_color: '#B39D82'
 })
 
 const currencyOptions = [
@@ -75,7 +89,8 @@ function openProvision() {
     admin_email: '',
     admin_password: '',
     currency: 'INR',
-    timezone: 'Asia/Kolkata'
+    timezone: 'Asia/Kolkata',
+    theme_color: '#B39D82'
   }
   showProvision.value = true
 }
@@ -90,13 +105,14 @@ async function handleProvision() {
 // ───────────────────────── Edit & Delete Clinic ─────────────────────────
 const showEditClinic = ref(false)
 const isEditingClinic = ref(false)
-const editClinicForm = ref({ id: '', name: '', tax_id: '' })
+const editClinicForm = ref({ id: '', name: '', tax_id: '', theme_color: '#B39D82' })
 
 function openEditClinic(clinic: SaasClinicDirectoryEntry) {
   editClinicForm.value = {
     id: clinic.id,
     name: clinic.name,
-    tax_id: clinic.tax_id
+    tax_id: clinic.tax_id,
+    theme_color: clinic.theme_color || '#B39D82'
   }
   showEditClinic.value = true
 }
@@ -105,7 +121,8 @@ async function handleEditClinic() {
   isEditingClinic.value = true
   const ok = await updateClinic(editClinicForm.value.id, {
     name: editClinicForm.value.name,
-    tax_id: editClinicForm.value.tax_id
+    tax_id: editClinicForm.value.tax_id,
+    theme_color: editClinicForm.value.theme_color
   })
   isEditingClinic.value = false
   if (ok) showEditClinic.value = false
@@ -247,13 +264,20 @@ const subStatusColor: Record<SaasSubscription['effective_status'], 'success' | '
             class="flex w-full items-center justify-between gap-3 py-3 text-left hover:bg-elevated/50 rounded-md px-2 -mx-2 transition-colors"
             @click="openClinicDetail(clinic)"
           >
-            <div class="min-w-0">
-              <p class="font-medium text-default truncate">
-                {{ clinic.name }}
-              </p>
-              <p class="text-caption text-subtle truncate">
-                {{ clinic.tax_id }} · {{ t('saasAdmin.clinics.subscriptionCount', { count: clinic.subscription_count }) }}
-              </p>
+            <div class="min-w-0 flex items-center gap-3">
+              <span
+                class="w-3.5 h-3.5 rounded-full shadow-sm shrink-0 ring-1 ring-black/10 dark:ring-white/20"
+                :style="{ backgroundColor: clinic.theme_color || '#B39D82' }"
+                :title="clinic.theme_color || 'Default Theme'"
+              />
+              <div class="min-w-0">
+                <p class="font-medium text-default truncate">
+                  {{ clinic.name }}
+                </p>
+                <p class="text-caption text-subtle truncate">
+                  {{ clinic.tax_id }} · {{ t('saasAdmin.clinics.subscriptionCount', { count: clinic.subscription_count }) }}
+                </p>
+              </div>
             </div>
             <div class="flex items-center gap-2 shrink-0">
               <UBadge
@@ -385,6 +409,43 @@ const subStatusColor: Record<SaasSubscription['effective_status'], 'success' | '
               </UFormField>
             </div>
 
+            <!-- Provision Theme Color -->
+            <div class="space-y-2 pt-2 border-t border-[var(--color-border-subtle)]">
+              <label class="block text-sm font-medium text-default">
+                Store / Client Theme Color
+              </label>
+              <div class="flex flex-wrap gap-2 pt-1">
+                <button
+                  v-for="preset in themeColorPresets"
+                  :key="preset.color"
+                  type="button"
+                  class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs transition-all"
+                  :class="provisionForm.theme_color === preset.color
+                    ? 'border-neutral-900 dark:border-white ring-2 ring-neutral-900/20 dark:ring-white/20 font-medium'
+                    : 'border-neutral-200 dark:border-neutral-800 hover:border-neutral-400'"
+                  @click="provisionForm.theme_color = preset.color"
+                >
+                  <span
+                    class="w-3.5 h-3.5 rounded-full shadow-sm"
+                    :style="{ backgroundColor: preset.color }"
+                  />
+                  <span>{{ preset.name }}</span>
+                </button>
+              </div>
+              <div class="flex items-center gap-3 pt-2">
+                <input
+                  v-model="provisionForm.theme_color"
+                  type="color"
+                  class="w-9 h-9 p-0.5 rounded-lg border border-neutral-300 dark:border-neutral-700 cursor-pointer bg-transparent"
+                >
+                <UInput
+                  v-model="provisionForm.theme_color"
+                  placeholder="#B39D82"
+                  class="w-28 uppercase font-mono text-xs"
+                />
+              </div>
+            </div>
+
             <div class="flex justify-end gap-2 pt-4">
               <UButton
                 variant="ghost"
@@ -437,6 +498,61 @@ const subStatusColor: Record<SaasSubscription['effective_status'], 'success' | '
                   required
                 />
               </UFormField>
+            </div>
+
+            <!-- Edit Clinic Theme Color Selection -->
+            <div class="space-y-2 pt-2 border-t border-[var(--color-border-subtle)]">
+              <label class="block text-sm font-medium text-default">
+                Client Store Dashboard &amp; Profile Color
+              </label>
+              <p class="text-xs text-subtle">
+                This color dynamically adjusts the client's dashboard, buttons, highlights, badges, and profile accents.
+              </p>
+
+              <!-- Color presets -->
+              <div class="flex flex-wrap gap-2 pt-1">
+                <button
+                  v-for="preset in themeColorPresets"
+                  :key="preset.color"
+                  type="button"
+                  class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs transition-all"
+                  :class="editClinicForm.theme_color === preset.color
+                    ? 'border-neutral-900 dark:border-white ring-2 ring-neutral-900/20 dark:ring-white/20 font-medium shadow-sm'
+                    : 'border-neutral-200 dark:border-neutral-800 hover:border-neutral-400'"
+                  @click="editClinicForm.theme_color = preset.color"
+                >
+                  <span
+                    class="w-3.5 h-3.5 rounded-full shadow-sm"
+                    :style="{ backgroundColor: preset.color }"
+                  />
+                  <span>{{ preset.name }}</span>
+                </button>
+              </div>
+
+              <!-- Custom Color Picker + Live Preview -->
+              <div class="flex flex-wrap items-center gap-3 pt-2">
+                <div class="flex items-center gap-2">
+                  <input
+                    v-model="editClinicForm.theme_color"
+                    type="color"
+                    class="w-9 h-9 p-0.5 rounded-lg border border-neutral-300 dark:border-neutral-700 cursor-pointer bg-transparent"
+                  >
+                  <UInput
+                    v-model="editClinicForm.theme_color"
+                    placeholder="#B39D82"
+                    class="w-28 uppercase font-mono text-xs"
+                  />
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                  <span class="text-subtle">Live Preview:</span>
+                  <span
+                    class="px-3 py-1 rounded-md text-white text-xs font-semibold shadow-sm transition-all"
+                    :style="{ backgroundColor: editClinicForm.theme_color || '#B39D82' }"
+                  >
+                    Primary Button &amp; Accent
+                  </span>
+                </div>
+              </div>
             </div>
 
             <div class="flex justify-end gap-2 pt-4">

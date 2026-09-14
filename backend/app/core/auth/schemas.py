@@ -56,6 +56,7 @@ class ClinicResponse(BaseModel):
     role: str  # User's role in this clinic
     subscription_active: bool = True
     subscription_end_date: str | None = None
+    theme_color: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
