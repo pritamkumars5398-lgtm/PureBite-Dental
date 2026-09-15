@@ -1,0 +1,10 @@
+---
+description: Adaptive layout from window width
+globs: "**/*.dart"
+alwaysApply: false
+---
+
+# Layout
+
+Use AppBreakpoints and LayoutBuilder. compact < 600, medium < 1024, else expanded.
+See docs/06-adaptive-layout.md

@@ -1,0 +1,11 @@
+---
+description: Flutter clean architecture for the clinic app
+globs: "**/*.dart"
+alwaysApply: false
+---
+
+# Architecture
+
+View → ViewModel → Repository → Service. Views never call Dio or Drift.
+One ApiClient. Features do not import other features.
+See docs/01-architecture.md

@@ -1,0 +1,10 @@
+---
+description: DRY utils, l10n, shared widgets
+globs: "**/*.dart"
+alwaysApply: false
+---
+
+# DRY
+
+No magic numbers. User strings from ARB. Helpers in lib/core/utils.
+See docs/07-coding-conventions.md

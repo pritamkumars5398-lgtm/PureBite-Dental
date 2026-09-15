@@ -1,0 +1,10 @@
+---
+description: Offline-first local reads and outbox writes
+globs: "**/*.dart"
+alwaysApply: false
+---
+
+# Offline
+
+UI reads local/cache data. Writes go local + outbox. Show OfflineBanner.
+See docs/05-offline-sync.md

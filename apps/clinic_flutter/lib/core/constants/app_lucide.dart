@@ -1,0 +1,63 @@
+import 'package:flutter/widgets.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+
+/// Semantic Lucide icons used by the clinic app. Always pair with [AppIcons.md]
+/// (20 px) except empty-state [AppIcons.xl].
+abstract final class AppLucide {
+  static const IconData home = LucideIcons.home;
+  static const IconData patients = LucideIcons.users;
+  static const IconData schedule = LucideIcons.calendar;
+  static const IconData recalls = LucideIcons.bell;
+  static const IconData treatmentPlans = LucideIcons.clipboardList;
+  static const IconData quotes = LucideIcons.fileText;
+  static const IconData invoices = LucideIcons.receipt;
+  static const IconData payments = LucideIcons.wallet;
+  static const IconData reports = LucideIcons.barChart3;
+  static const IconData ai = LucideIcons.sparkles;
+  static const IconData chart = LucideIcons.smile;
+  static const IconData notes = LucideIcons.stickyNote;
+  static const IconData settings = LucideIcons.settings;
+  static const IconData logout = LucideIcons.logOut;
+  static const IconData login = LucideIcons.logIn;
+  static const IconData mail = LucideIcons.mail;
+  static const IconData lock = LucideIcons.lock;
+  static const IconData search = LucideIcons.search;
+  static const IconData plus = LucideIcons.plus;
+  static const IconData userPlus = LucideIcons.userPlus;
+  static const IconData calendarPlus = LucideIcons.calendarPlus;
+  static const IconData calendarX = LucideIcons.calendarX;
+  static const IconData chevronRight = LucideIcons.chevronRight;
+  static const IconData chevronLeft = LucideIcons.chevronLeft;
+  static const IconData menu = LucideIcons.menu;
+  static const IconData more = LucideIcons.moreHorizontal;
+  static const IconData close = LucideIcons.x;
+  static const IconData help = LucideIcons.helpCircle;
+  static const IconData clinic = LucideIcons.building2;
+  static const IconData branding = LucideIcons.palette;
+  static const IconData workspace = LucideIcons.layoutGrid;
+  static const IconData cabinets = LucideIcons.doorOpen;
+  static const IconData people = LucideIcons.users;
+  static const IconData clinical = LucideIcons.stethoscope;
+  static const IconData catalog = LucideIcons.list;
+  static const IconData billing = LucideIcons.receipt;
+  static const IconData creditCard = LucideIcons.creditCard;
+  static const IconData hash = LucideIcons.hash;
+  static const IconData percent = LucideIcons.percent;
+  static const IconData communications = LucideIcons.mail;
+  static const IconData integrations = LucideIcons.plug;
+  static const IconData modules = LucideIcons.boxes;
+  static const IconData account = LucideIcons.userCircle;
+  static const IconData profile = LucideIcons.user;
+  static const IconData language = LucideIcons.languages;
+  static const IconData phone = LucideIcons.phone;
+  static const IconData clock = LucideIcons.clock;
+  static const IconData activity = LucideIcons.activity;
+  static const IconData alert = LucideIcons.alertTriangle;
+  static const IconData arrowRight = LucideIcons.arrowRight;
+  static const IconData panelClose = LucideIcons.panelLeftClose;
+  static const IconData panelOpen = LucideIcons.panelLeftOpen;
+  static const IconData sun = LucideIcons.sun;
+  static const IconData moon = LucideIcons.moon;
+  static const IconData userX = LucideIcons.userX;
+  static const IconData check = LucideIcons.check;
+}

@@ -1,0 +1,10 @@
+---
+description: API URLs via ApiConstants only
+globs: "**/*.dart"
+alwaysApply: false
+---
+
+# API
+
+Use ApiConstants. Login is form-urlencoded username/password. 401 refresh once.
+See docs/03-api-constants.md and docs/04-api-integration.md

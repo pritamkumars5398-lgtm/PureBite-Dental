@@ -1,0 +1,10 @@
+---
+description: Spacing, icons, and text tokens
+globs: "**/*.dart"
+alwaysApply: false
+---
+
+# Tokens
+
+Use AppSpacing, AppIcons, AppText, AppRadii. No magic numbers.
+See docs/02-design-tokens.md
