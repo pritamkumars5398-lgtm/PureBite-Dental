@@ -2,7 +2,7 @@
 /**
  * Patient detail — dashboard-first IA.
  *
- * The page hosts a persistent sticky header + a UTabs strip. Resumen is
+ * The page hosts a persistent sticky header + an airy tab strip. Resumen is
  * a dashboard of smart-cards: each card lives in (and is registered by)
  * its owning module via the ``patient.summary.cards`` slot. The page
  * only fetches data from its own module (``/api/v1/patients/{id}/extended``);
@@ -288,10 +288,12 @@ function collect() {
     <!-- Loading state -->
     <div
       v-if="status === 'pending'"
-      class="space-y-4"
+      class="overflow-hidden bg-[var(--color-surface)] p-5 sm:p-6 space-y-4"
+      style="border-radius: var(--radius-xl)"
     >
-      <USkeleton class="h-12 w-full" />
-      <USkeleton class="h-96 w-full" />
+      <USkeleton class="h-16 w-full rounded-[var(--radius-lg)]" />
+      <USkeleton class="h-8 w-64 rounded-[var(--radius-md)]" />
+      <USkeleton class="h-96 w-full rounded-[var(--radius-lg)]" />
     </div>
 
     <!-- Patient content -->
@@ -299,7 +301,7 @@ function collect() {
       <!-- Return to invoice banner -->
       <div
         v-if="returnTo"
-        class="alert-surface-info rounded-token-md px-3 py-2 flex items-center justify-between gap-3"
+        class="alert-surface-info rounded-[var(--radius-xl)] px-4 py-3 flex items-center justify-between gap-3"
         role="status"
       >
         <span class="text-body">
@@ -310,31 +312,53 @@ function collect() {
           color="primary"
           size="sm"
           icon="i-lucide-arrow-left"
+          class="rounded-full"
           :to="returnTo"
         >
           {{ t('patients.returnToInvoice') }}
         </UButton>
       </div>
 
-      <!-- Persistent header — stays visible across all tabs. -->
-      <PatientStickyHeader
-        :patient="patient"
-        @back="goBack"
-        @edit="openEditPatient"
-        @new-appointment="newAppointment"
-        @new-note="newNote"
-        @collect="collect"
-        @archive="isArchiveModalOpen = true"
-      />
+      <div
+        class="overflow-hidden bg-[var(--color-surface)]"
+        style="border-radius: var(--radius-xl)"
+      >
+        <!-- Persistent header — stays visible across all tabs. -->
+        <PatientStickyHeader
+          :patient="patient"
+          @back="goBack"
+          @edit="openEditPatient"
+          @new-appointment="newAppointment"
+          @new-note="newNote"
+          @collect="collect"
+          @archive="isArchiveModalOpen = true"
+        />
 
-      <main class="w-full min-w-0">
-        <UTabs
-          v-model="activeTab"
-          :items="tabs"
-          default-value="summary"
-          class="w-full"
-          :ui="{ content: 'overflow-visible' }"
-        >
+        <main class="w-full min-w-0">
+          <div
+            class="px-5 sm:px-6 flex items-center gap-6 overflow-x-auto border-b border-[var(--color-border-subtle)]"
+            role="tablist"
+          >
+            <button
+              v-for="tab in tabs"
+              :key="tab.value"
+              type="button"
+              role="tab"
+              class="relative pb-3 text-sm whitespace-nowrap transition-colors shrink-0"
+              :class="activeTab === tab.value
+                ? 'font-medium text-[var(--color-primary)]'
+                : 'text-muted hover:text-default'"
+              :aria-selected="activeTab === tab.value"
+              @click="activeTab = tab.value"
+            >
+              {{ tab.label }}
+              <span
+                v-if="activeTab === tab.value"
+                class="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-[var(--color-primary)]"
+              />
+            </button>
+          </div>
+
           <!-- Resumen — smart-card grid + clinical-notes feed.
                The whole Resumen body is slot-driven; modules register
                their cards via `.client.ts` plugins that only run after
@@ -342,17 +366,20 @@ function collect() {
                aligned with the client tree (an identically-shaped
                skeleton grid) so Vue doesn't hit hydration mismatches
                that re-layout the page after refresh. -->
-          <template #summary>
+          <div
+            v-if="activeTab === 'summary'"
+            class="px-5 sm:px-6 py-5"
+          >
             <ClientOnly>
-              <div class="mt-4 space-y-4 overflow-visible">
+              <div class="space-y-4 overflow-visible">
                 <div
                   v-if="summaryCards.length === 0"
                   class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 lg:gap-4"
                 >
                   <div
-                    class="md:col-span-2 xl:col-span-3 rounded-token-md border border-dashed border-default px-4 py-8 text-center text-muted"
+                    class="md:col-span-2 xl:col-span-3 rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border)] px-4 py-10 text-center text-muted"
                   >
-                    {{ t('patientDetail.noSummaryCards', 'No hay módulos registrados en el resumen.') }}
+                    {{ t('patientDetail.noSummaryCards') }}
                   </div>
                 </div>
                 <div
@@ -381,110 +408,116 @@ function collect() {
               </div>
 
               <template #fallback>
-                <div class="mt-4 space-y-4">
+                <div class="space-y-4">
                   <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 lg:gap-4">
                     <USkeleton
                       v-for="i in 6"
                       :key="i"
-                      class="h-36 w-full rounded-token-lg"
+                      class="h-36 w-full rounded-[var(--radius-lg)]"
                     />
                   </div>
-                  <USkeleton class="h-40 w-full rounded-token-lg" />
+                  <USkeleton class="h-40 w-full rounded-[var(--radius-lg)]" />
                 </div>
               </template>
             </ClientOnly>
-          </template>
+          </div>
 
           <!-- Datos tab content -->
-          <template #info>
-            <div class="mt-4 space-y-3 lg:space-y-4 overflow-visible">
-              <MedicalSnapshotCard
-                :medical-history="medicalHistory"
-                :active-alerts="patient.active_alerts"
-                :can-edit="canEditMedicalHistory"
-                @edit="openSectionModal('medical')"
-                @complete-history="openSectionModal('medical')"
-              />
+          <div
+            v-if="activeTab === 'info'"
+            class="px-5 sm:px-6 py-5 space-y-4 overflow-visible"
+          >
+            <MedicalSnapshotCard
+              :medical-history="medicalHistory"
+              :active-alerts="patient.active_alerts"
+              :can-edit="canEditMedicalHistory"
+              @edit="openSectionModal('medical')"
+              @complete-history="openSectionModal('medical')"
+            />
 
-              <PersonalInfoCard
-                :patient="patient"
-                :can-edit="canEditPatient"
-                @edit="openSectionModal('demographics')"
-              />
+            <PersonalInfoCard
+              :patient="patient"
+              :can-edit="canEditPatient"
+              @edit="openSectionModal('demographics')"
+            />
 
-              <ContactInfoCard
-                :patient="patient"
-                :is-minor="isMinor"
-                :can-edit="canEditPatient"
-                @edit-contact="openSectionModal('demographics')"
-                @edit-emergency="openSectionModal('emergency')"
-                @edit-guardian="openSectionModal('guardian')"
-              />
+            <ContactInfoCard
+              :patient="patient"
+              :is-minor="isMinor"
+              :can-edit="canEditPatient"
+              @edit-contact="openSectionModal('demographics')"
+              @edit-emergency="openSectionModal('emergency')"
+              @edit-guardian="openSectionModal('guardian')"
+            />
 
-              <AdministrativeCard
-                :patient="patient"
-                :can-edit="canEditPatient"
-                @edit="openSectionModal('billing')"
-              />
+            <AdministrativeCard
+              :patient="patient"
+              :can-edit="canEditPatient"
+              @edit="openSectionModal('billing')"
+            />
 
-              <!-- Danger zone -->
-              <div class="alert-surface-danger rounded-token-lg px-4 py-3 flex items-center justify-between gap-4">
-                <div class="min-w-0">
-                  <div class="text-ui">
-                    {{ t('patients.dangerZone.title') }}
-                  </div>
-                  <div class="text-caption">
-                    {{ t('patients.dangerZone.archiveHelp') }}
-                  </div>
+            <!-- Danger zone -->
+            <div class="alert-surface-danger rounded-[var(--radius-xl)] px-4 py-3 flex items-center justify-between gap-4">
+              <div class="min-w-0">
+                <div class="text-ui">
+                  {{ t('patients.dangerZone.title') }}
                 </div>
-                <UButton
-                  variant="outline"
-                  color="error"
-                  icon="i-lucide-archive"
-                  size="sm"
-                  @click="isArchiveModalOpen = true"
-                >
-                  {{ t('patients.archive') }}
-                </UButton>
+                <div class="text-caption">
+                  {{ t('patients.dangerZone.archiveHelp') }}
+                </div>
               </div>
+              <UButton
+                variant="outline"
+                color="error"
+                icon="i-lucide-archive"
+                size="sm"
+                class="rounded-full"
+                @click="isArchiveModalOpen = true"
+              >
+                {{ t('patients.archive') }}
+              </UButton>
             </div>
-          </template>
+          </div>
 
           <!-- Clinical tab content (Odontogram + Treatment Plans) -->
-          <template #clinical>
-            <div class="mt-4">
-              <ClinicalTab
-                :patient-id="patientId"
-                :readonly="!can(PERMISSIONS.odontogram.write)"
-              />
-            </div>
-          </template>
+          <div
+            v-if="activeTab === 'clinical' && tabs.some((tab) => tab.value === 'clinical')"
+            class="px-5 sm:px-6 py-5"
+          >
+            <ClinicalTab
+              :patient-id="patientId"
+              :readonly="!can(PERMISSIONS.odontogram.write)"
+            />
+          </div>
 
           <!-- Administration tab content (Budgets + Billing + Payments) -->
-          <template #administration>
-            <div class="mt-4">
-              <AdministrationTab
-                :patient-id="patientId"
-                :patient="patient"
-              />
-            </div>
-          </template>
+          <div
+            v-if="activeTab === 'administration' && tabs.some((tab) => tab.value === 'administration')"
+            class="px-5 sm:px-6 py-5"
+          >
+            <AdministrationTab
+              :patient-id="patientId"
+              :patient="patient"
+            />
+          </div>
 
           <!-- Gallery tab content -->
-          <template #gallery>
-            <UCard class="mt-4">
-              <PhotoGallery :patient-id="patientId" />
-            </UCard>
-          </template>
+          <div
+            v-if="activeTab === 'gallery' && tabs.some((tab) => tab.value === 'gallery')"
+            class="px-5 sm:px-6 py-5"
+          >
+            <PhotoGallery :patient-id="patientId" />
+          </div>
 
           <!-- Timeline tab content -->
-          <template #timeline>
-            <UCard class="mt-4">
-              <PatientTimeline :patient-id="patientId" />
-            </UCard>
-          </template>
-        </UTabs>
-      </main>
+          <div
+            v-if="activeTab === 'timeline'"
+            class="px-5 sm:px-6 py-5"
+          >
+            <PatientTimeline :patient-id="patientId" />
+          </div>
+        </main>
+      </div>
 
       <!-- Mobile bottom action bar -->
       <PatientBottomActionBar

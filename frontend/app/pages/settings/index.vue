@@ -40,15 +40,17 @@ watch(isDesktop, (desktop) => {
     :title="t('settings.title')"
     :subtitle="t('settings.subtitle')"
   >
-    <OnboardingChecklist class="mb-6" />
+    <OnboardingChecklist class="mb-8" />
 
-    <h2 class="text-h2 text-default mb-3">
+    <h2 class="text-h2 text-default mb-4">
       {{ t('settings.allCategories') }}
     </h2>
 
-    <SettingsCategoryNav
-      :active-id="null"
-      :full-width="true"
-    />
+    <div class="rounded-[var(--radius-xl)] bg-surface p-2">
+      <SettingsCategoryNav
+        :active-id="null"
+        :full-width="true"
+      />
+    </div>
   </SettingsLayout>
 </template>

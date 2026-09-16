@@ -224,7 +224,9 @@ function formatDate(s: string | undefined): string {
 <template>
   <DataListLayout
     :title="t('payments.list.title')"
+    :show-title="false"
     :subtitle="t('payments.list.subtitle')"
+    :noun="t('lists.noun.payments')"
     :loading="isLoading"
     :empty="!payments.length"
     :error="error"
@@ -238,7 +240,9 @@ function formatDate(s: string | undefined): string {
       <UButton
         v-if="can(PERMISSIONS.payments.recordWrite)"
         color="primary"
+        variant="solid"
         icon="i-lucide-plus"
+        class="rounded-full"
         @click="showCreate = true"
       >
         {{ t('payments.list.new') }}
@@ -248,6 +252,7 @@ function formatDate(s: string | undefined): string {
     <template #toolbar>
       <FilterBar
         :active-count="activeFilterCount"
+        always-collapsed
         @reset="resetFilters"
       >
         <template #search>
@@ -313,13 +318,23 @@ function formatDate(s: string | undefined): string {
         >
           <UButton
             color="primary"
+            variant="solid"
             icon="i-lucide-plus"
+            class="rounded-full"
             @click="showCreate = true"
           >
             {{ t('payments.list.new') }}
           </UButton>
         </template>
       </EmptyState>
+    </template>
+
+    <template #columns>
+      <span class="w-9 shrink-0" />
+      <span class="flex-1">{{ t('lists.columns.patient') }}</span>
+      <span class="hidden sm:inline w-40">{{ t('lists.columns.method') }}</span>
+      <span class="w-28 text-right">{{ t('lists.columns.amount') }}</span>
+      <span class="w-10" />
     </template>
 
     <template #rows>
@@ -389,7 +404,12 @@ function formatDate(s: string | undefined): string {
 
         <template #card>
           <div class="flex items-center justify-between gap-2">
-            <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-3 min-w-0 flex-1">
+              <UAvatar
+                :alt="p.patient?.first_name ?? '?'"
+                size="md"
+              />
+              <div class="min-w-0 flex-1">
               <div class="font-medium text-default truncate">
                 {{ patientName(p.patient) }}
               </div>
@@ -399,6 +419,7 @@ function formatDate(s: string | undefined): string {
                   class="w-3.5 h-3.5"
                 />
                 {{ formatDate(p.payment_date) }} · {{ t(`payments.methods.${p.method}`) }}
+              </div>
               </div>
             </div>
             <div class="text-right shrink-0">

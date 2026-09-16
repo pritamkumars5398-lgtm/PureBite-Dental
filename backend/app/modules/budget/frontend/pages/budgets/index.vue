@@ -304,6 +304,8 @@ async function handleDelete(b: BudgetListItem, ev: Event) {
 <template>
   <DataListLayout
     :title="t('budget.title')"
+    :show-title="false"
+    :noun="t('lists.noun.budgets')"
     :loading="isLoading"
     :empty="!budgets.length"
     :error="error"
@@ -317,8 +319,9 @@ async function handleDelete(b: BudgetListItem, ev: Event) {
       <UButton
         v-if="can(PERMISSIONS.budget.write)"
         color="primary"
-        variant="soft"
+        variant="solid"
         icon="i-lucide-plus"
+        class="rounded-full"
         @click="createBudget"
       >
         {{ t('budget.new') }}
@@ -328,6 +331,7 @@ async function handleDelete(b: BudgetListItem, ev: Event) {
     <template #toolbar>
       <FilterBar
         :active-count="activeFilterCount"
+        always-collapsed
         @reset="resetFilters"
       >
         <template #search>
@@ -392,14 +396,25 @@ async function handleDelete(b: BudgetListItem, ev: Event) {
         >
           <UButton
             color="primary"
-            variant="soft"
+            variant="solid"
             icon="i-lucide-plus"
+            class="rounded-full"
             @click="createBudget"
           >
             {{ t('budget.emptyAction') }}
           </UButton>
         </template>
       </EmptyState>
+    </template>
+
+    <template #columns>
+      <span class="w-9 shrink-0" />
+      <span class="flex-1">{{ t('lists.columns.patient') }}</span>
+      <span class="w-28">{{ t('lists.columns.number') }}</span>
+      <span class="w-24">{{ t('lists.columns.status') }}</span>
+      <span class="hidden lg:inline w-24">{{ t('lists.columns.date') }}</span>
+      <span class="w-28 text-right">{{ t('lists.columns.amount') }}</span>
+      <span class="w-16" />
     </template>
 
     <template #rows>
@@ -410,6 +425,10 @@ async function handleDelete(b: BudgetListItem, ev: Event) {
       >
         <!-- Desktop -->
         <template #row>
+          <UAvatar
+            :alt="patientName(b.patient)"
+            size="sm"
+          />
           <div class="flex-1 min-w-0 flex items-center gap-3">
             <div class="min-w-0 flex-1">
               <div class="text-ui text-default flex items-center gap-2 flex-wrap">
@@ -473,13 +492,19 @@ async function handleDelete(b: BudgetListItem, ev: Event) {
         <!-- Mobile -->
         <template #card>
           <div class="flex items-center justify-between gap-2">
-            <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-3 min-w-0 flex-1">
+              <UAvatar
+                :alt="patientName(b.patient)"
+                size="md"
+              />
+              <div class="min-w-0 flex-1">
               <div class="font-medium text-default truncate flex items-center gap-2">
                 <span class="tnum">{{ b.budget_number }}</span>
                 <BudgetStatusBadge :status="b.status" />
               </div>
               <div class="text-caption text-subtle truncate">
                 {{ patientName(b.patient) }}
+              </div>
               </div>
             </div>
             <Money

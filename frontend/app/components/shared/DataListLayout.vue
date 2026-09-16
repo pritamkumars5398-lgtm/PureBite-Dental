@@ -1,17 +1,16 @@
 <script setup lang="ts">
 /**
- * DataListLayout — the canonical shell for the four list pages.
+ * DataListLayout — canonical shell for clinic list pages.
  *
- * Wraps: PageHeader · toolbar slot (filters) · body slot · footer
- * (pagination + result count). Handles loading / empty / error states.
- *
- * Layout intentionally close to the existing /budgets and /invoices
- * pages so the visual transition is minimal; the win is in the
- * primitives and URL state, not in a redesigned shell.
+ * Zendenta table chrome: one white 16–20px rounded page card with title,
+ * result count, filter toolbar + primary action, muted column headers,
+ * rows, then pagination.
  */
 interface Props {
   title: string
   subtitle?: string
+  /** Lowercase noun interpolated into the count line ("12 total invoices"). */
+  noun?: string
   loading: boolean
   /** True when the result set is empty AND not loading. */
   empty: boolean
@@ -22,14 +21,16 @@ interface Props {
   pageSize: number
   total: number
   totalPages: number
-  /** Skeleton row count while loading. */
-  skeletonRows?: number
+  /** When false, the heading is screen-reader only — the app chrome already shows the page name. */
+  showTitle?: boolean
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   subtitle: undefined,
+  noun: undefined,
   error: null,
-  skeletonRows: 5
+  skeletonRows: 6,
+  showTitle: true,
 })
 
 const emit = defineEmits<{
@@ -38,92 +39,128 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
+const countSuffix = computed(() => {
+  if (props.noun) return t('lists.totalSuffix', { noun: props.noun })
+  return t('lists.totalSuffixBare')
+})
+
 function onPage(value: number) {
   emit('update:page', value)
 }
 </script>
 
 <template>
-  <div>
-    <PageHeader
-      :title="title"
-      :subtitle="subtitle"
+  <div
+    class="overflow-hidden bg-[var(--color-surface)] rounded-[var(--radius-xl)]"
+  >
+    <header
+      v-if="showTitle || subtitle || $slots.tabs"
+      class="px-5 sm:px-6 pt-5 sm:pt-6"
     >
-      <template
-        v-if="$slots.actions"
-        #actions
+      <h1
+        v-if="showTitle"
+        class="text-h1 text-default text-pretty"
       >
-        <slot name="actions" />
-      </template>
-    </PageHeader>
+        {{ title }}
+      </h1>
+      <h1
+        v-else
+        class="sr-only"
+      >
+        {{ title }}
+      </h1>
+      <p
+        v-if="subtitle"
+        class="mt-1 text-body text-muted text-pretty"
+      >
+        {{ subtitle }}
+      </p>
+      <div
+        v-if="$slots.tabs"
+        :class="(showTitle || subtitle) ? 'mt-4' : ''"
+      >
+        <slot name="tabs" />
+      </div>
+    </header>
 
-    <!-- Toolbar (search + filters) -->
-    <div
-      v-if="$slots.toolbar"
-      class="mb-[var(--density-gap,1rem)]"
-    >
-      <slot name="toolbar" />
+    <div class="px-5 sm:px-6 py-4 flex flex-col gap-3 lg:flex-row lg:items-center">
+      <p class="shrink-0 text-lg text-default">
+        <span class="font-semibold tnum">{{ total }}</span>
+        <span class="text-muted"> {{ countSuffix }}</span>
+      </p>
+
+      <div class="flex-1 min-w-0 flex items-center gap-2">
+        <div
+          v-if="$slots.toolbar"
+          class="flex-1 min-w-0"
+        >
+          <slot name="toolbar" />
+        </div>
+        <div
+          v-if="$slots.actions"
+          class="shrink-0 ml-auto flex items-center gap-2 min-h-11"
+        >
+          <slot name="actions" />
+        </div>
+      </div>
     </div>
 
-    <UCard>
-      <!-- Error -->
-      <UAlert
-        v-if="error"
-        color="error"
-        variant="soft"
-        :title="t('common.error')"
-        :description="error"
-        class="mb-3"
+    <UAlert
+      v-if="error"
+      color="error"
+      variant="soft"
+      :title="t('common.error')"
+      :description="error"
+      class="mx-5 sm:mx-6 mb-3 rounded-[var(--radius-lg)]"
+    />
+
+    <div
+      v-if="loading"
+      class="px-5 sm:px-6 pb-6 space-y-3"
+    >
+      <USkeleton
+        v-for="i in skeletonRows"
+        :key="i"
+        class="h-11 w-full rounded-[var(--radius-lg)]"
       />
+    </div>
 
-      <!-- Loading -->
+    <slot
+      v-else-if="empty"
+      name="empty"
+    >
+      <EmptyState
+        icon="i-lucide-inbox"
+        :title="t('lists.empty.title')"
+        :description="t('lists.empty.description')"
+      />
+    </slot>
+
+    <template v-else>
       <div
-        v-if="loading"
-        class="space-y-3"
+        v-if="$slots.columns"
+        class="hidden md:flex items-center gap-3 px-5 sm:px-6 min-h-11 border-t border-b border-[var(--color-border-subtle)] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text-subtle)]"
       >
-        <USkeleton
-          v-for="i in skeletonRows"
-          :key="i"
-          class="h-14 w-full"
-        />
+        <slot name="columns" />
       </div>
-
-      <!-- Empty -->
-      <slot
-        v-else-if="empty"
-        name="empty"
-      >
-        <EmptyState
-          icon="i-lucide-inbox"
-          :title="t('lists.empty.title')"
-          :description="t('lists.empty.description')"
-        />
-      </slot>
-
-      <!-- Rows -->
-      <div
-        v-else
-        class="divide-y divide-[var(--color-border-subtle)]"
-      >
+      <div :class="$slots.columns ? '' : 'border-t border-[var(--color-border-subtle)]'">
         <slot name="rows" />
       </div>
 
-      <!-- Footer: count + pagination -->
-      <div
-        v-if="!loading && !empty"
-        class="flex items-center justify-between pt-3 mt-3 border-t border-subtle text-caption text-subtle tnum"
-      >
+      <div class="flex items-center justify-between gap-3 px-5 sm:px-6 py-3 min-h-11 border-t border-[var(--color-border-subtle)] text-caption text-subtle tnum">
         <span>
           {{ t('lists.resultCount', { shown: Math.min(page * pageSize, total), total }) }}
         </span>
-        <PaginationBar
-          :page="page"
-          :total-pages="totalPages"
-          :total="total"
-          :page-size="pageSize"
-          @update:page="onPage"
-        />
+        <div class="[&>:first-child]:mt-0 [&>:first-child]:border-0 [&>:first-child]:pt-0">
+          <PaginationBar
+            :page="page"
+            :total-pages="totalPages"
+            :total="total"
+            :page-size="pageSize"
+            @update:page="onPage"
+          />
+        </div>
       </div>
-    </UCard>
+    </template>
   </div>
 </template>

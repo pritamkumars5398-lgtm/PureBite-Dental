@@ -102,151 +102,149 @@ function whatsappPatient(row: PipelineRow) {
 </script>
 
 <template>
-  <div class="space-y-4">
+  <div>
+    <div
+      v-if="!loading && rows.length"
+      class="px-5 sm:px-6 py-3 text-lg text-default"
+    >
+      <span class="font-semibold tnum">{{ total }}</span>
+      <span class="text-muted"> {{ t('lists.totalSuffix', { noun: t('lists.noun.plans') }) }}</span>
+    </div>
+
     <div
       v-if="loading"
-      class="rounded-md border border-dashed border-[var(--ui-border)] py-12 text-center text-sm text-[var(--ui-text-muted)]"
+      class="px-5 sm:px-6 pb-6 space-y-3"
     >
-      {{ t('pipeline.loading') }}
+      <USkeleton
+        v-for="i in 5"
+        :key="i"
+        class="h-16 w-full rounded-[var(--radius-lg)]"
+      />
     </div>
 
-    <div
+    <EmptyState
       v-else-if="rows.length === 0"
-      class="rounded-md border border-dashed border-[var(--ui-border)] py-12 text-center text-sm text-[var(--ui-text-muted)]"
-    >
-      {{ t('pipeline.empty') }}
-    </div>
+      icon="i-lucide-clipboard-list"
+      :title="t('pipeline.empty')"
+    />
 
-    <div
-      v-else
-      class="space-y-2"
-    >
-      <UCard
+    <template v-else>
+      <div class="hidden md:flex items-center gap-3 px-5 sm:px-6 py-2.5 border-t border-b border-[var(--color-border-subtle)] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text-subtle)]">
+        <span class="w-9 shrink-0" />
+        <span class="flex-1">{{ t('lists.columns.patient') }}</span>
+        <span class="w-24">{{ t('lists.columns.status') }}</span>
+        <span class="w-28">{{ t('pipeline.row.items') }}</span>
+        <span class="w-32">{{ t('pipeline.row.budget') }}</span>
+        <span class="w-24" />
+      </div>
+
+      <button
         v-for="row in rows"
         :key="row.plan_id"
-        class="hover:border-[var(--ui-primary)] transition-colors"
+        type="button"
+        class="w-full text-left hidden md:flex items-center gap-3 px-5 sm:px-6 py-3.5 min-h-[64px] border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-surface-muted)] transition-colors"
+        @click="openPlan(row)"
       >
-        <div class="flex flex-col md:flex-row md:items-center md:gap-4">
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-3">
-              <UAvatar
-                :alt="patientName(row)"
-                :text="patientName(row).slice(0, 2).toUpperCase()"
-                size="md"
-              />
-              <div class="min-w-0">
-                <button
-                  type="button"
-                  class="block text-left font-medium hover:underline truncate"
-                  @click="openPlan(row)"
-                >
-                  {{ patientName(row) }}
-                </button>
-                <div class="text-xs text-[var(--ui-text-muted)] flex items-center gap-2">
-                  <span>{{ row.plan_number }}</span>
-                  <UBadge
-                    :color="statusBadgeColor(row.plan_status)"
-                    variant="soft"
-                    size="xs"
-                  >
-                    {{ t(`treatmentPlans.status.${row.plan_status}`) }}
-                  </UBadge>
-                  <span v-if="row.closure_reason">
-                    · {{ t(`treatmentPlans.closureReason.${row.closure_reason}`) }}
-                  </span>
-                </div>
-              </div>
-            </div>
+        <UAvatar
+          :alt="patientName(row)"
+          size="sm"
+        />
+        <div class="flex-1 min-w-0">
+          <div class="text-ui text-default truncate">
+            {{ patientName(row) }}
           </div>
-
-          <div class="hidden md:block text-xs text-[var(--ui-text-muted)] min-w-24">
-            <div>{{ t('pipeline.row.items') }}</div>
-            <div class="text-sm text-[var(--ui-text-toned)]">
-              {{ row.items_completed }} / {{ row.items_total }}
-            </div>
-          </div>
-
-          <div class="hidden md:block min-w-32 text-xs">
-            <div class="text-[var(--ui-text-muted)]">
-              {{ t('pipeline.row.budget') }}
-            </div>
-            <div
-              v-if="row.budget"
-              class="text-sm"
-            >
-              <UBadge
-                :color="row.budget.status === 'expired' ? 'error' : 'neutral'"
-                variant="soft"
-                size="xs"
-              >
-                {{ row.budget.status }}
-              </UBadge>
-              <span
-                v-if="row.budget.total !== null"
-                class="ml-2"
-              >
-                {{ formatCurrency(row.budget.total) }}
-              </span>
-            </div>
-            <div
-              v-else
-              class="text-sm text-[var(--ui-text-muted)]"
-            >
-              {{ t('pipeline.row.noBudget') }}
-            </div>
-          </div>
-
-          <div class="hidden md:block text-xs text-[var(--ui-text-muted)] min-w-24">
-            <div>{{ t('pipeline.row.daysIn', { n: row.days_in_status }) }}</div>
-            <div
-              v-if="row.next_appointment"
-              class="text-sm"
-            >
-              {{ t('pipeline.row.nextAppt') }}: {{ formatDate(row.next_appointment.start_at) }}
-            </div>
-            <div
-              v-else
-              class="text-sm text-[var(--ui-text-muted)]"
-            >
-              {{ t('pipeline.row.noNextAppt') }}
-            </div>
-          </div>
-
-          <div class="flex items-center gap-2 mt-3 md:mt-0">
-            <UButton
-              v-if="row.patient.phone"
-              icon="i-lucide-phone"
-              variant="ghost"
-              color="neutral"
-              size="sm"
-              :title="t('pipeline.actions.call')"
-              @click="callPatient(row)"
-            />
-            <UButton
-              v-if="row.patient.phone"
-              icon="i-lucide-message-circle"
-              variant="ghost"
-              color="neutral"
-              size="sm"
-              :title="t('pipeline.actions.whatsapp')"
-              @click="whatsappPatient(row)"
-            />
-            <UButton
-              color="primary"
-              variant="solid"
-              size="sm"
-              @click="openPlan(row)"
-            >
-              {{ t('pipeline.actions.open') }}
-            </UButton>
+          <div class="text-caption text-subtle truncate">
+            {{ row.plan_number }}
+            · {{ t('pipeline.row.daysIn', { n: row.days_in_status }) }}
+            <span v-if="row.next_appointment">
+              · {{ t('pipeline.row.nextAppt') }}: {{ formatDate(row.next_appointment.start_at) }}
+            </span>
+            <span v-else>
+              · {{ t('pipeline.row.noNextAppt') }}
+            </span>
+            <span v-if="row.closure_reason">
+              · {{ t(`treatmentPlans.closureReason.${row.closure_reason}`) }}
+            </span>
           </div>
         </div>
-      </UCard>
-    </div>
+        <UBadge
+          :color="statusBadgeColor(row.plan_status)"
+          variant="subtle"
+          size="xs"
+          class="w-24 justify-center"
+        >
+          {{ t(`treatmentPlans.status.${row.plan_status}`) }}
+        </UBadge>
+        <span class="w-28 text-caption text-subtle tnum">
+          {{ row.items_completed }} / {{ row.items_total }}
+        </span>
+        <span class="w-32 text-caption text-subtle truncate">
+          <template v-if="row.budget">
+            {{ row.budget.status }}
+            <span
+              v-if="row.budget.total !== null"
+              class="tnum"
+            > · {{ formatCurrency(row.budget.total) }}</span>
+          </template>
+          <template v-else>
+            {{ t('pipeline.row.noBudget') }}
+          </template>
+        </span>
+        <span class="flex items-center gap-1 shrink-0">
+          <UButton
+            v-if="row.patient.phone"
+            icon="i-lucide-phone"
+            variant="ghost"
+            color="neutral"
+            size="xs"
+            :title="t('pipeline.actions.call')"
+            @click.stop="callPatient(row)"
+          />
+          <UButton
+            v-if="row.patient.phone"
+            icon="i-lucide-message-circle"
+            variant="ghost"
+            color="neutral"
+            size="xs"
+            :title="t('pipeline.actions.whatsapp')"
+            @click.stop="whatsappPatient(row)"
+          />
+          <UIcon
+            name="i-lucide-chevron-right"
+            class="text-subtle"
+          />
+        </span>
+      </button>
+
+      <button
+        v-for="row in rows"
+        :key="`${row.plan_id}-m`"
+        type="button"
+        class="w-full md:hidden flex items-center gap-3 px-5 py-4 min-h-[72px] border-b border-[var(--color-border-subtle)] text-left"
+        @click="openPlan(row)"
+      >
+        <UAvatar
+          :alt="patientName(row)"
+          size="md"
+        />
+        <div class="flex-1 min-w-0">
+          <div class="font-medium text-default truncate">
+            {{ patientName(row) }}
+          </div>
+          <div class="text-caption text-subtle truncate">
+            {{ row.plan_number }} · {{ t(`treatmentPlans.status.${row.plan_status}`) }}
+          </div>
+        </div>
+        <UIcon
+          name="i-lucide-chevron-right"
+          class="text-subtle"
+        />
+      </button>
+    </template>
 
     <div
       v-if="total > pageSize"
-      class="flex justify-center"
+      class="flex justify-center px-5 py-4"
     >
       <UPagination
         :model-value="page"

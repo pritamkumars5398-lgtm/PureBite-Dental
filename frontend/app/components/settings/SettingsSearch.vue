@@ -83,7 +83,7 @@ function categoryLabel(catId: string): string {
   <div>
     <button
       type="button"
-      class="inline-flex items-center gap-2 px-3 py-2 rounded-md ring-1 ring-[var(--color-border)] bg-(--color-surface) text-muted hover:text-default hover:ring-(--color-primary)/40 transition w-full sm:w-72 min-h-[40px]"
+      class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full ring-1 ring-[var(--color-border-subtle)] bg-(--color-surface) text-muted hover:text-default hover:ring-(--color-primary)/35 transition w-full sm:w-72 min-h-[44px]"
       @click="open"
     >
       <UIcon
@@ -101,10 +101,10 @@ function categoryLabel(catId: string): string {
     <UModal
       v-model:open="isOpen"
       :title="t('settings.search.placeholder')"
-      description="Search clinic configuration and settings"
+      :description="t('settings.search.description')"
     >
       <template #content>
-        <div class="bg-(--color-surface) rounded-[var(--radius-lg)] overflow-hidden">
+        <div class="bg-(--color-surface) rounded-[var(--radius-xl)] overflow-hidden">
           <div class="flex items-center gap-2 px-4 py-3 border-b border-[var(--color-border)]">
             <UIcon
               name="i-lucide-search"

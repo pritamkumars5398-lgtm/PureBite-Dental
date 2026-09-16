@@ -116,9 +116,15 @@ async function onAttemptLogged() {
 
 <template>
   <div
-    class="rounded-token-md border border-default bg-default p-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3"
+    class="flex flex-col gap-2 md:flex-row md:items-center px-5 sm:px-6 py-3.5 min-h-[64px] border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-surface-muted)] transition-colors"
   >
-    <div class="flex-1 min-w-0">
+    <div class="flex-1 min-w-0 flex items-start md:items-center gap-3">
+      <UAvatar
+        :alt="patient ? `${patient.first_name} ${patient.last_name}` : '?'"
+        size="sm"
+        class="hidden md:flex"
+      />
+      <div class="flex-1 min-w-0">
       <div class="flex items-center gap-2 flex-wrap">
         <NuxtLink
           v-if="patient"
@@ -161,6 +167,7 @@ async function onAttemptLogged() {
       >
         {{ recall.reason_note }}
       </p>
+      </div>
     </div>
 
     <div class="flex gap-1 sm:gap-2 flex-wrap">
@@ -170,7 +177,8 @@ async function onAttemptLogged() {
         icon="i-lucide-phone"
         size="sm"
         color="primary"
-        variant="soft"
+        variant="solid"
+        class="rounded-full"
       >
         {{ t('recalls.actions.call') }}
       </UButton>

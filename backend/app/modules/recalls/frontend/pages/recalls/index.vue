@@ -164,15 +164,20 @@ async function downloadCsv() {
 </script>
 
 <template>
-  <div class="container mx-auto p-4 space-y-4">
-    <header class="flex items-center justify-between gap-2 flex-wrap">
-      <h1 class="text-h1">
+  <div
+    class="overflow-hidden bg-[var(--color-surface)]"
+    style="border-radius: var(--radius-xl)"
+  >
+    <header class="px-5 sm:px-6 pt-5 sm:pt-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <h1 class="sr-only">
         {{ t('recalls.callList') }}
       </h1>
       <UButton
         icon="i-lucide-download"
         size="sm"
-        variant="soft"
+        color="primary"
+        variant="solid"
+        class="rounded-full"
         :loading="isExporting"
         @click="downloadCsv"
       >
@@ -182,74 +187,80 @@ async function downloadCsv() {
 
     <section
       v-if="stats"
-      class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center"
+      class="px-5 sm:px-6 py-4 grid grid-cols-2 sm:grid-cols-4 gap-2 text-center"
     >
-      <UCard :ui="{ body: 'p-2' }">
+      <div class="rounded-[var(--radius-lg)] bg-[var(--color-surface-muted)] p-3">
         <div class="text-h2 tnum">
           {{ stats.due_this_week }}
         </div>
         <div class="text-caption text-subtle">
           {{ t('recalls.counters.due_this_week') }}
         </div>
-      </UCard>
-      <UCard :ui="{ body: 'p-2' }">
+      </div>
+      <div class="rounded-[var(--radius-lg)] bg-[var(--color-surface-muted)] p-3">
         <div class="text-h2 tnum">
           {{ stats.overdue }}
         </div>
         <div class="text-caption text-subtle">
           {{ t('recalls.counters.overdue') }}
         </div>
-      </UCard>
-      <UCard :ui="{ body: 'p-2' }">
+      </div>
+      <div class="rounded-[var(--radius-lg)] bg-[var(--color-surface-muted)] p-3">
         <div class="text-h2 tnum">
           {{ stats.scheduled_this_month }}
         </div>
         <div class="text-caption text-subtle">
           {{ t('recalls.counters.scheduled_this_month') }}
         </div>
-      </UCard>
-      <UCard :ui="{ body: 'p-2' }">
+      </div>
+      <div class="rounded-[var(--radius-lg)] bg-[var(--color-surface-muted)] p-3">
         <div class="text-h2 tnum">
           {{ conversionPct }}%
         </div>
         <div class="text-caption text-subtle">
           {{ t('recalls.counters.conversion_rate') }}
         </div>
-      </UCard>
+      </div>
     </section>
 
-    <section class="grid grid-cols-2 sm:grid-cols-5 gap-2">
-      <UFormField :label="t('recalls.filters.month')">
-        <MonthPickerDropdown v-model="month" />
-      </UFormField>
-      <UFormField :label="t('recalls.filters.reason')">
-        <USelectMenu
-          v-model="reason"
-          :items="reasonOptions"
-          value-key="value"
-          label-key="label"
-        />
-      </UFormField>
-      <UFormField :label="t('recalls.filters.status')">
-        <USelectMenu
-          v-model="status"
-          :items="statusOptions"
-          value-key="value"
-          label-key="label"
-        />
-      </UFormField>
-      <UFormField :label="t('recalls.filters.priority')">
-        <USelectMenu
-          v-model="priority"
-          :items="priorityOptions"
-          value-key="value"
-          label-key="label"
-        />
-      </UFormField>
-      <UFormField :label="t('recalls.filters.overdue')">
-        <USwitch v-model="overdue" />
-      </UFormField>
-    </section>
+    <div class="px-5 sm:px-6 pb-4 flex flex-col gap-3 lg:flex-row lg:items-center">
+      <p class="shrink-0 text-lg text-default">
+        <span class="font-semibold tnum">{{ total }}</span>
+        <span class="text-muted"> {{ t('lists.totalSuffix', { noun: t('lists.noun.recalls') }) }}</span>
+      </p>
+      <div class="flex-1 min-w-0 grid grid-cols-2 sm:grid-cols-5 gap-2">
+        <UFormField :label="t('recalls.filters.month')">
+          <MonthPickerDropdown v-model="month" />
+        </UFormField>
+        <UFormField :label="t('recalls.filters.reason')">
+          <USelectMenu
+            v-model="reason"
+            :items="reasonOptions"
+            value-key="value"
+            label-key="label"
+          />
+        </UFormField>
+        <UFormField :label="t('recalls.filters.status')">
+          <USelectMenu
+            v-model="status"
+            :items="statusOptions"
+            value-key="value"
+            label-key="label"
+          />
+        </UFormField>
+        <UFormField :label="t('recalls.filters.priority')">
+          <USelectMenu
+            v-model="priority"
+            :items="priorityOptions"
+            value-key="value"
+            label-key="label"
+          />
+        </UFormField>
+        <UFormField :label="t('recalls.filters.overdue')">
+          <USwitch v-model="overdue" />
+        </UFormField>
+      </div>
+    </div>
 
     <RecallList
       :items="items"

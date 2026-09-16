@@ -121,6 +121,7 @@ const isActive = computed(() => Boolean(props.modelValue.from || props.modelValu
       size="sm"
       icon="i-lucide-calendar"
       trailing-icon="i-lucide-chevron-down"
+      class="rounded-full"
     >
       {{ labelText }}
     </UButton>

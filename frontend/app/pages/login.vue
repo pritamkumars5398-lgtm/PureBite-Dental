@@ -108,108 +108,119 @@ watch(() => formState.password, () => {
 </script>
 
 <template>
-  <div class="w-full max-w-[400px] p-6">
-    <!-- Brand -->
-    <div class="text-center mb-6">
-      <img
-        src="/logo-mark.svg"
-        alt="Nº 1 Dental Studio"
-        width="56"
-        height="56"
-        class="mx-auto mb-3"
-      >
-      <h1 class="text-h1 text-default font-serif">
-        Nº 1 Dental Studio
-      </h1>
-      <p class="text-caption text-muted mt-1">
-        {{ t('app.tagline') }}
-      </p>
-    </div>
-
-    <UCard>
-      <form
-        class="space-y-4"
-        @submit.prevent="onSubmit"
-      >
-        <!-- Error message — pastel danger (DESIGN §2.4) -->
-        <div
-          v-if="errorMessage"
-          class="alert-surface-danger rounded-token-md px-3 py-2 flex items-start gap-2"
-          role="alert"
+  <div class="w-full max-w-5xl">
+    <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+      <div class="text-center lg:text-left">
+        <NuxtLink
+          to="/landing"
+          class="inline-block text-2xl sm:text-3xl font-semibold tracking-tight text-default hover:text-primary-accent transition-colors"
         >
-          <UIcon
-            name="i-lucide-alert-circle"
-            class="w-4 h-4 mt-0.5 shrink-0"
-            :style="{ color: 'var(--color-danger-accent)' }"
+          {{ t('app.name') }}
+        </NuxtLink>
+        <p class="text-body text-muted mt-2">
+          {{ t('app.tagline') }}
+        </p>
+        <DentalArchArt class="mt-6 lg:mt-10 max-w-[220px] sm:max-w-xs lg:max-w-md mx-auto lg:mx-0" />
+      </div>
+
+      <div class="w-full max-w-[440px] mx-auto lg:max-w-none">
+        <div class="mb-8 flex flex-col items-center lg:items-start">
+          <ToothMark
+            size="lg"
+            class="mb-4"
           />
-          <span class="text-body">
-            {{ errorMessage }}
-          </span>
+          <h1 class="text-2xl font-semibold tracking-tight text-default">
+            {{ t('auth.welcomeBack') }}
+          </h1>
         </div>
 
-        <UFormField
-          :label="t('auth.email')"
-          name="email"
-          :error="emailError || undefined"
-        >
-          <UInput
-            v-model="formState.email"
-            type="email"
-            class="w-full"
-            :placeholder="t('auth.email')"
-            icon="i-lucide-mail"
-            autocomplete="email"
-            :disabled="isLoading"
-          />
-        </UFormField>
-
-        <UFormField
-          :label="t('auth.password')"
-          name="password"
-          :error="passwordError || undefined"
-        >
-          <div class="relative w-full">
-            <UInput
-              v-model="formState.password"
-              :type="showPassword ? 'text' : 'password'"
-              class="w-full"
-              :placeholder="t('auth.password')"
-              icon="i-lucide-lock"
-              autocomplete="current-password"
-              :disabled="isLoading"
-            />
-            <button
-              type="button"
-              class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-700 z-10"
-              tabindex="-1"
-              aria-label="Toggle password visibility"
-              @click="showPassword = !showPassword"
+        <div class="bg-surface rounded-[var(--radius-xl)] p-6 sm:p-8">
+          <form
+            class="space-y-5"
+            @submit.prevent="onSubmit"
+          >
+            <div
+              v-if="errorMessage"
+              class="alert-surface-danger rounded-[var(--radius-lg)] px-3 py-2.5 flex items-start gap-2"
+              role="alert"
             >
               <UIcon
-                :name="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
-                class="w-4 h-4"
+                name="i-lucide-alert-circle"
+                class="w-4 h-4 mt-0.5 shrink-0"
+                :style="{ color: 'var(--color-danger-accent)' }"
               />
-            </button>
-          </div>
-        </UFormField>
+              <span class="text-body">
+                {{ errorMessage }}
+              </span>
+            </div>
 
-        <UButton
-          type="submit"
-          color="primary"
-          variant="soft"
-          block
-          :loading="isLoading"
-          :disabled="isLoading"
-        >
-          {{ t('auth.loginButton') }}
-        </UButton>
-      </form>
-    </UCard>
+            <UFormField
+              :label="t('auth.email')"
+              name="email"
+              :error="emailError || undefined"
+            >
+              <UInput
+                v-model="formState.email"
+                type="email"
+                class="w-full"
+                :placeholder="t('auth.email')"
+                icon="i-lucide-mail"
+                autocomplete="email"
+                :disabled="isLoading"
+              />
+            </UFormField>
 
-    <DemoCredentialsHint />
+            <UFormField
+              :label="t('auth.password')"
+              name="password"
+              :error="passwordError || undefined"
+            >
+              <div class="relative w-full">
+                <UInput
+                  v-model="formState.password"
+                  :type="showPassword ? 'text' : 'password'"
+                  class="w-full"
+                  :placeholder="t('auth.password')"
+                  icon="i-lucide-lock"
+                  autocomplete="current-password"
+                  :disabled="isLoading"
+                />
+                <button
+                  type="button"
+                  class="absolute inset-y-0 right-0 px-3 flex items-center text-muted hover:text-default z-10"
+                  tabindex="-1"
+                  :aria-label="showPassword ? t('auth.hidePassword') : t('auth.showPassword')"
+                  @click="showPassword = !showPassword"
+                >
+                  <UIcon
+                    :name="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                    class="w-4 h-4"
+                  />
+                </button>
+              </div>
+            </UFormField>
 
-    <p class="text-center text-caption text-subtle mt-6">
-      &copy; {{ new Date().getFullYear() }} Nº 1 Dental Studio
-    </p>
+            <UButton
+              type="submit"
+              color="primary"
+              variant="solid"
+              size="lg"
+              block
+              class="rounded-token-pill"
+              :loading="isLoading"
+              :disabled="isLoading"
+            >
+              {{ t('auth.loginButton') }}
+            </UButton>
+          </form>
+        </div>
+
+        <DemoCredentialsHint />
+
+        <p class="text-center lg:text-left text-caption text-subtle mt-8">
+          &copy; {{ new Date().getFullYear() }} {{ t('app.name') }}
+        </p>
+      </div>
+    </div>
   </div>
 </template>

@@ -5,7 +5,6 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../core/widgets/app_gap.dart';
 import '../../../core/widgets/app_kpi_card.dart';
-import '../../../core/widgets/app_page_header.dart';
 import '../../../core/widgets/feedback.dart';
 import '../view_models/recalls_view_model.dart';
 
@@ -53,7 +52,6 @@ class _RecallsBody extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.xl),
       children: [
-        AppPageHeader(title: l10n.recallsTitle),
         LayoutBuilder(
           builder: (context, constraints) {
             final wide = constraints.maxWidth >= 600;

@@ -58,9 +58,9 @@ function formatDate(dateString: string): string {
 </script>
 
 <template>
-  <div class="treatment-panel">
+  <div class="treatment-panel rounded-[20px] bg-surface ring-1 ring-[var(--color-border-subtle)] p-5">
     <div class="flex items-center justify-between mb-3">
-      <h4 class="text-sm font-semibold flex items-center gap-2">
+      <h4 class="text-h3 text-default flex items-center gap-2">
         {{ t('odontogram.treatments.title') }}
         <UBadge
           color="neutral"
@@ -203,40 +203,22 @@ function formatDate(dateString: string): string {
 </template>
 
 <style scoped>
-.treatment-panel {
-  background-color: white;
-  border-radius: 0.5rem;
-  border: 1px solid #e5e7eb;
-  padding: 1rem;
-}
-
-:root.dark .treatment-panel {
-  background-color: #111827;
-  border-color: #374151;
-}
-
 .treatment-item {
-  padding: 0.5rem;
-  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: background-color 0.15s;
+  transition: background-color var(--motion-base) var(--motion-ease);
 }
 
 .treatment-item:hover {
-  background-color: #f9fafb;
-}
-
-:root.dark .treatment-item:hover {
-  background-color: #1f2937;
+  background-color: var(--color-canvas);
 }
 
 .treatment-planned {
-  border-left: 2px solid #fbbf24;
-  padding-left: 0.75rem;
+  border-left: 2px solid var(--color-warning-accent);
 }
 
 .treatment-existing {
-  border-left: 2px solid #6b7280;
-  padding-left: 0.75rem;
+  border-left: 2px solid var(--color-border-strong);
 }
 </style>

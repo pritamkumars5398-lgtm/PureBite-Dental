@@ -143,11 +143,14 @@ async function handleDelete() {
   <SectionCard
     icon="i-lucide-users"
     :title="t('settings.users')"
+    class="!rounded-[var(--radius-xl)]"
   >
     <template #actions>
       <UButton
         icon="i-lucide-plus"
         size="sm"
+        color="primary"
+        variant="solid"
         @click="openCreate"
       >
         {{ t('settings.newUser') }}
@@ -240,7 +243,7 @@ async function handleDelete() {
       description="Create a new clinic user or professional"
     >
       <template #content>
-        <UCard>
+        <UCard class="!rounded-[var(--radius-xl)]">
           <template #header>
             <div class="flex items-center gap-2">
               <UIcon
@@ -308,6 +311,8 @@ async function handleDelete() {
               </UButton>
               <UButton
                 type="submit"
+                color="primary"
+                variant="solid"
                 :loading="isCreating"
               >
                 {{ t('settings.createUser') }}
@@ -325,7 +330,7 @@ async function handleDelete() {
       description="Update clinic user account details"
     >
       <template #content>
-        <UCard>
+        <UCard class="!rounded-[var(--radius-xl)]">
           <template #header>
             <div class="flex items-center gap-2">
               <UIcon
@@ -398,6 +403,8 @@ async function handleDelete() {
               </UButton>
               <UButton
                 type="submit"
+                color="primary"
+                variant="solid"
                 :loading="isUpdating"
               >
                 {{ t('settings.saveChanges') }}
@@ -415,7 +422,7 @@ async function handleDelete() {
       description="Remove user from this clinic"
     >
       <template #content>
-        <UCard>
+        <UCard class="!rounded-[var(--radius-xl)]">
           <template #header>
             <div class="flex items-center gap-2">
               <UIcon

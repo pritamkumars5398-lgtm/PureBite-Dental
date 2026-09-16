@@ -38,7 +38,7 @@ class QuoteDetailView extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.xl),
       children: [
         AppPageHeader(
-          title: l10n.quotesTitle,
+          title: title!,
           subtitle: patientName,
         ),
         AppSectionCard(

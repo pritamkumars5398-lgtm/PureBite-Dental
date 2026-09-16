@@ -37,7 +37,7 @@ function categoryHref(cat: VisibleCategory): string {
 
 <template>
   <nav
-    class="flex flex-col gap-0.5"
+    class="flex flex-col gap-1"
     :class="fullWidth ? '' : 'sticky top-20'"
     aria-label="Settings categories"
   >
@@ -45,11 +45,11 @@ function categoryHref(cat: VisibleCategory): string {
       v-for="cat in registry.categories.value"
       :key="cat.id"
       :to="categoryHref(cat)"
-      class="group flex items-center gap-3 rounded-md px-3 py-2.5 min-h-[44px] transition border-l-2"
+      class="group flex items-center gap-3 rounded-[14px] px-3 py-2.5 min-h-[44px] transition"
       :class="[
         activeId === cat.id
-          ? 'bg-[var(--color-primary-soft)] border-[var(--color-primary)] text-[var(--color-primary-soft-text)]'
-          : 'border-transparent hover:bg-[var(--color-surface-muted)] text-default'
+          ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary-soft-text)]'
+          : 'hover:bg-[var(--color-primary-soft)] text-default'
       ]"
     >
       <UIcon

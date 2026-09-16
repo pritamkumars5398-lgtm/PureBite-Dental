@@ -16,6 +16,7 @@ const props = defineProps<{
   currentDate: Date
   isLoading?: boolean
   highlightedAppointmentId?: string | null
+  hideChrome?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -38,6 +39,8 @@ watch(() => props.highlightedAppointmentId, (newId) => {
 }, { immediate: true })
 
 const { t, locale } = useI18n()
+const clinic = useClinic()
+const { statusLabel } = useAppointmentStatus()
 
 // Time slots configuration. Narrowed to actual clinic hours via
 // schedules module; 8–21 fallback when that module is uninstalled.
@@ -199,36 +202,60 @@ function getAppointmentStyle(appointment: Appointment): Record<string, string> {
   }
 }
 
-// Tint + rail for an appointment block (DESIGN §7.3): fill alpha 0.12, left border 3 px.
-function getProfessionalFill(hex: string): Record<string, string> {
+// Pastel fills: status hue first, professional colour as fallback.
+function getCardPastel(appointment: Appointment, hex: string): Record<string, string> {
+  const byStatus: Partial<Record<Appointment['status'], [string, string]>> = {
+    scheduled: ['rgba(251, 207, 232, 0.72)', 'rgba(244, 114, 182, 0.22)'],
+    confirmed: ['rgba(191, 219, 254, 0.72)', 'rgba(96, 165, 250, 0.28)'],
+    checked_in: ['rgba(254, 215, 170, 0.78)', 'rgba(251, 146, 60, 0.28)'],
+    in_treatment: ['rgba(253, 230, 138, 0.82)', 'rgba(245, 158, 11, 0.32)'],
+    completed: ['rgba(187, 247, 208, 0.72)', 'rgba(74, 222, 128, 0.28)'],
+    cancelled: ['rgba(226, 232, 240, 0.78)', 'rgba(148, 163, 184, 0.28)'],
+    no_show: ['rgba(254, 202, 202, 0.72)', 'rgba(248, 113, 113, 0.28)']
+  }
+  const pair = byStatus[appointment.status]
+  if (pair) {
+    return { backgroundColor: pair[0], borderColor: pair[1] }
+  }
   const r = parseInt(hex.slice(1, 3), 16)
   const g = parseInt(hex.slice(3, 5), 16)
   const b = parseInt(hex.slice(5, 7), 16)
   return {
-    backgroundColor: `rgba(${r}, ${g}, ${b}, 0.12)`,
-    borderLeftColor: hex,
-    borderLeftWidth: '3px'
+    backgroundColor: `rgba(${r}, ${g}, ${b}, 0.22)`,
+    borderColor: `rgba(${r}, ${g}, ${b}, 0.35)`
   }
 }
 
-// Status styling — fill tinted from professional colour (inline), status modulates text/opacity.
-function getStatusClass(status: Appointment['status']): string {
-  const baseClass = 'bg-surface ring-1 ring-[var(--color-border)]'
+function getStatusChipClass(status: Appointment['status']): string {
   switch (status) {
-    case 'scheduled':
-    case 'confirmed':
-      return `${baseClass} text-default`
-    case 'checked_in':
-    case 'in_treatment':
-      return `${baseClass} text-default`
     case 'completed':
-      return `${baseClass} text-muted opacity-70`
+      return 'bg-white/80 text-emerald-600'
+    case 'in_treatment':
+      return 'bg-white/80 text-amber-700'
+    case 'checked_in':
+      return 'bg-white/80 text-orange-600'
     case 'cancelled':
-      return `${baseClass} text-subtle line-through opacity-50`
     case 'no_show':
-      return `${baseClass} text-subtle opacity-60`
+      return 'bg-white/80 text-rose-600'
     default:
-      return baseClass
+      return 'bg-white/75 text-slate-500'
+  }
+}
+
+function getStatusAccent(hex: string): Record<string, string> {
+  return { backgroundColor: hex }
+}
+
+function getStatusClass(status: Appointment['status']): string {
+  switch (status) {
+    case 'completed':
+      return 'text-default'
+    case 'cancelled':
+      return 'text-subtle line-through opacity-60'
+    case 'no_show':
+      return 'text-subtle opacity-70'
+    default:
+      return 'text-default'
   }
 }
 
@@ -240,9 +267,98 @@ function getStatusIcon(status: Appointment['status']): string {
     case 'completed': return 'i-lucide-check-check'
     case 'cancelled': return 'i-lucide-x'
     case 'no_show': return 'i-lucide-user-x'
-    default: return ''
+    default: return 'i-lucide-calendar'
   }
 }
+
+function formatHourLabel(slot: string): string {
+  const hour = Number(slot.split(':')[0] ?? 0)
+  const d = new Date()
+  d.setHours(hour, 0, 0, 0)
+  return d.toLocaleTimeString(locale.value, { hour: 'numeric' }).toLowerCase()
+}
+
+function formatClock(timeStr: string): string {
+  const parts = timeStr.split(':').map(Number)
+  const d = new Date()
+  d.setHours(parts[0] ?? 0, parts[1] ?? 0, 0, 0)
+  return d.toLocaleTimeString(locale.value, { hour: '2-digit', minute: '2-digit' })
+}
+
+function formatTimeRange(appointment: Appointment): string {
+  const start = appointment.start_time.split('T')[1]?.substring(0, 5) ?? '08:00'
+  const end = appointment.end_time.split('T')[1]?.substring(0, 5) ?? '08:15'
+  return `${formatClock(start)} > ${formatClock(end)}`
+}
+
+function treatmentLabel(appointment: Appointment): string {
+  if (appointment.treatment_type) return appointment.treatment_type
+  const first = appointment.treatments?.[0]
+  if (!first) return ''
+  const names = first.names
+  return names?.[locale.value] || names?.es || names?.en || first.internal_code
+}
+
+function patientName(appointment: Appointment): string {
+  if (!appointment.patient) return t('appointments.noPatient')
+  return `${appointment.patient.first_name} ${appointment.patient.last_name}`.trim()
+}
+
+function initials(prof: ProfessionalWithColor): string {
+  return `${prof.first_name.charAt(0)}${prof.last_name.charAt(0)}`.toUpperCase()
+}
+
+function countForProfessional(professionalId: string): number {
+  return appointmentsByProfId.value.get(professionalId)?.length ?? 0
+}
+
+function blockedForProfessional(professionalId: string): BlockedSegment[] {
+  return blockedSegments.value.filter(s => s.professionalId === professionalId)
+}
+
+function blockedLabel(seg: BlockedSegment): string {
+  if (seg.reason) return seg.reason
+  if (seg.state === 'clinic_closed') return t('appointments.freeSlots.clinicClosed')
+  return t('appointments.notAvailable')
+}
+
+const gmtLabel = computed(() => {
+  const tz = clinic.currentClinic.value?.timezone
+  try {
+    const parts = new Intl.DateTimeFormat(locale.value, {
+      timeZone: tz || undefined,
+      timeZoneName: 'shortOffset'
+    }).formatToParts(props.currentDate)
+    const name = parts.find(p => p.type === 'timeZoneName')?.value ?? ''
+    return name.replace('GMT', '').replace('UTC', '').trim() || name
+  } catch {
+    return ''
+  }
+})
+
+const nowTick = ref(Date.now())
+let nowTimer: ReturnType<typeof setInterval> | null = null
+onMounted(() => {
+  nowTimer = setInterval(() => {
+    nowTick.value = Date.now()
+  }, 30_000)
+})
+onUnmounted(() => {
+  if (nowTimer) clearInterval(nowTimer)
+})
+
+const nowLine = computed(() => {
+  if (!isToday.value) return null
+  const d = new Date(nowTick.value)
+  const minutes = d.getHours() * 60 + d.getMinutes()
+  const start = startHour.value * 60
+  const end = endHour.value * 60
+  if (minutes < start || minutes > end) return null
+  return {
+    top: `${((minutes - start) / SLOT_MINUTES) * getSlotHeight()}px`,
+    label: d.toLocaleTimeString(locale.value, { hour: '2-digit', minute: '2-digit' })
+  }
+})
 
 // Handle drag-to-create on empty slot
 function startCreateDrag(professionalId: string, timeSlot: string, profIndex: number, event: MouseEvent) {
@@ -479,8 +595,10 @@ const appointmentsByProfIndex = computed(() => {
 
 <template>
   <div class="flex flex-col h-full">
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-4 flex-shrink-0">
+    <div
+      v-if="!hideChrome"
+      class="flex items-center justify-between mb-4 flex-shrink-0"
+    >
       <div class="flex items-center gap-2">
         <UButton
           variant="outline"
@@ -511,7 +629,6 @@ const appointmentsByProfIndex = computed(() => {
       </h2>
     </div>
 
-    <!-- Loading -->
     <div
       v-if="isLoading"
       class="flex items-center justify-center py-12"
@@ -523,7 +640,6 @@ const appointmentsByProfIndex = computed(() => {
       />
     </div>
 
-    <!-- No professionals message -->
     <div
       v-else-if="professionals.length === 0"
       class="flex items-center justify-center py-12 text-muted"
@@ -531,97 +647,108 @@ const appointmentsByProfIndex = computed(() => {
       {{ t('appointments.noProfessionals') }}
     </div>
 
-    <!-- Calendar grid -->
     <div
       v-else
       ref="calendarRef"
-      class="flex-1 overflow-auto ring-1 ring-[var(--color-border)] rounded-token-lg"
+      class="flex-1 overflow-auto rounded-2xl bg-surface shadow-sm"
     >
       <div
         class="min-w-[600px]"
-        :style="{ minWidth: `${200 * professionals.length + 80}px` }"
+        :style="{ minWidth: `${240 * professionals.length + 72}px` }"
       >
-        <!-- Professional headers -->
         <div
-          class="grid border-b border-default bg-surface-muted sticky top-0 z-10"
-          :style="{ gridTemplateColumns: `80px repeat(${professionals.length}, 1fr)` }"
+          class="grid border-b border-subtle bg-surface sticky top-0 z-20"
+          :style="{ gridTemplateColumns: `72px repeat(${professionals.length}, minmax(220px, 1fr))` }"
         >
-          <div class="p-2 text-center text-caption text-subtle border-r border-subtle" />
+          <div class="px-2 py-3 text-center border-r border-subtle flex flex-col items-center justify-center leading-tight">
+            <span class="text-[10px] font-medium text-subtle uppercase tracking-wide">GMT</span>
+            <span class="text-[10px] text-subtle tnum">{{ gmtLabel }}</span>
+          </div>
           <div
             v-for="prof in professionals"
             :key="prof.id"
-            class="p-2 text-center border-r border-subtle last:border-r-0"
+            class="px-3 py-3 border-r border-subtle last:border-r-0 min-w-0"
           >
-            <div class="flex items-center justify-center gap-2">
+            <div class="flex items-center gap-2.5 min-w-0">
               <span
-                class="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-semibold"
+                class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-semibold shrink-0 shadow-xs"
                 :style="{ backgroundColor: prof.color }"
               >
-                {{ prof.first_name.charAt(0) }}{{ prof.last_name.charAt(0) }}
+                {{ initials(prof) }}
               </span>
-              <span class="text-ui text-default">
-                {{ prof.first_name }} {{ prof.last_name }}
-              </span>
+              <div class="min-w-0">
+                <div class="text-sm font-semibold text-default truncate">
+                  {{ prof.first_name }} {{ prof.last_name }}
+                </div>
+                <div class="text-[11px] text-muted truncate">
+                  {{ t('appointments.todaysAppointmentCount', { count: countForProfessional(prof.id) }) }}
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Time rows -->
         <div class="relative">
           <div
             v-for="(slot, slotIndex) in timeSlots"
             :key="slot"
-            class="grid border-b border-[var(--color-border-subtle)] h-[var(--density-slot-height,28px)]"
-            :class="{ 'border-[var(--color-border)]': slotIndex % SLOTS_PER_HOUR === 0 }"
-            :style="{ gridTemplateColumns: `80px repeat(${professionals.length}, 1fr)` }"
+            class="grid h-[var(--density-slot-height,28px)]"
+            :class="slotIndex % SLOTS_PER_HOUR === 0 ? 'border-t border-slate-200/80 dark:border-white/10' : 'border-t border-dashed border-slate-100 dark:border-white/5'"
+            :style="{ gridTemplateColumns: `72px repeat(${professionals.length}, minmax(220px, 1fr))` }"
           >
-            <div class="p-1 text-right border-r border-subtle flex items-center justify-end pr-2">
+            <div class="pr-3 border-r border-subtle flex items-start justify-end">
               <span
                 v-if="slotIndex % SLOTS_PER_HOUR === 0"
-                class="text-caption text-subtle tnum"
+                class="text-[11px] text-subtle tnum -translate-y-2.5"
               >
-                {{ slot }}
+                {{ formatHourLabel(slot) }}
               </span>
             </div>
             <div
               v-for="(prof, profIdx) in professionals"
               :key="`${prof.id}-${slot}`"
-              class="border-r border-[var(--color-border-subtle)] last:border-r-0 cursor-cell hover:bg-[var(--color-primary-soft)]/50 transition-colors relative"
-              :class="{ 'border-[var(--color-border)]': slotIndex % SLOTS_PER_HOUR === 0 }"
+              class="group/slot border-r border-slate-100 dark:border-white/5 last:border-r-0 cursor-cell relative"
               @mousedown="startCreateDrag(prof.id, slot, profIdx, $event)"
-            />
+            >
+              <span class="absolute inset-1 hidden group-hover/slot:flex items-center justify-center pointer-events-none rounded-xl bg-slate-50/80 dark:bg-white/5 text-slate-400">
+                <UIcon name="i-lucide-plus" class="w-4 h-4" />
+              </span>
+            </div>
           </div>
 
-          <!-- Appointments overlay -->
           <div class="absolute inset-0 pointer-events-none">
             <div
               class="grid h-full"
-              :style="{ gridTemplateColumns: `80px repeat(${professionals.length}, 1fr)` }"
+              :style="{ gridTemplateColumns: `72px repeat(${professionals.length}, minmax(220px, 1fr))` }"
             >
               <div class="border-r border-subtle" />
 
-              <!-- Professional columns -->
               <div
                 v-for="(prof, profIndex) in professionals"
                 :key="`appointments-${prof.id}`"
                 class="relative border-r border-subtle last:border-r-0"
               >
-                <!-- Blocked availability overlay (schedules module) -->
                 <div
-                  v-for="(seg, segIdx) in blockedSegments.filter(s => s.professionalId === prof.id)"
+                  v-for="(seg, segIdx) in blockedForProfessional(prof.id)"
                   :key="`blocked-${prof.id}-${segIdx}`"
-                  class="absolute inset-x-0 pointer-events-none z-10 schedules-blocked"
-                  :title="seg.reason || (seg.state === 'clinic_closed' ? 'Clínica cerrada' : 'No disponible')"
+                  class="absolute inset-x-0 z-10 schedules-blocked flex items-center justify-center px-2"
+                  :title="blockedLabel(seg)"
                   :style="{
                     top: `${seg.startSlot * getSlotHeight()}px`,
                     height: `${(seg.endSlot - seg.startSlot) * getSlotHeight()}px`
                   }"
-                />
+                >
+                  <span
+                    v-if="(seg.endSlot - seg.startSlot) * getSlotHeight() >= 36"
+                    class="text-[10px] font-semibold tracking-[0.14em] uppercase text-slate-400"
+                  >
+                    {{ blockedLabel(seg) }}
+                  </span>
+                </div>
 
-                <!-- Ghost block during drag-to-create -->
                 <div
                   v-if="createDragState && createDragState.professionalIndex === profIndex"
-                  class="absolute left-1 right-1 rounded border-2 border-dashed border-[var(--color-primary)] bg-[var(--color-primary-soft)] pointer-events-none z-40 flex items-start p-1"
+                  class="absolute left-1 right-1 rounded-xl border-2 border-dashed border-[var(--color-primary)] bg-[var(--color-primary-soft)] pointer-events-none z-40 flex items-start p-1"
                   :style="{
                     top: `${createDragState.startSlot * getSlotHeight()}px`,
                     height: `${Math.max(1, createDragState.currentSlot - createDragState.startSlot + 1) * getSlotHeight()}px`,
@@ -639,64 +766,69 @@ const appointmentsByProfIndex = computed(() => {
                 <div
                   v-for="appointment in (appointmentsByProfIndex.get(profIndex) ?? [])"
                   :key="appointment.id"
-                  v-memo="[
-                    appointment.id,
-                    appointment.start_time,
-                    appointment.end_time,
-                    appointment.status,
-                    dragState?.appointmentId === appointment.id,
-                    highlightedAppointmentId === appointment.id,
-                    prof.color
-                  ]"
-                  class="group absolute rounded overflow-hidden pointer-events-auto select-none shadow-sm border-l-4"
+                  class="group absolute rounded-2xl overflow-hidden pointer-events-auto select-none border"
                   :class="[
                     getStatusClass(appointment.status),
-                    dragState?.appointmentId === appointment.id ? 'cursor-grabbing ring-2 ring-primary-500' : 'cursor-grab hover:ring-2 hover:ring-primary-500',
+                    dragState?.appointmentId === appointment.id ? 'cursor-grabbing ring-2 ring-[var(--color-primary)]' : 'cursor-grab hover:shadow-md',
                     highlightedAppointmentId === appointment.id ? 'ring-4 ring-warning-500 animate-pulse z-50' : ''
                   ]"
                   :style="{
                     ...getAppointmentStyle(appointment),
                     ...getOverlapStyle(appointment),
-                    ...getProfessionalFill(prof.color)
+                    ...getCardPastel(appointment, prof.color)
                   }"
                   @click="handleAppointmentClick(appointment, $event)"
                   @mousedown="startDrag(appointment, $event, 'move')"
                 >
-                  <!-- Content -->
-                  <div class="px-1.5 h-full flex flex-col py-0.5 relative">
-                    <!-- Quick-action dropdown (shown on hover) -->
+                  <div class="px-2.5 h-full flex flex-col py-1.5 relative min-w-0">
                     <div
-                      class="absolute top-0.5 right-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-20"
+                      class="absolute top-0.5 right-6 opacity-0 group-hover:opacity-100 transition-opacity z-20"
                       @click.stop
                       @mousedown.stop
                     >
                       <AppointmentQuickActions :appointment="appointment" dense />
                     </div>
-                    <div class="flex items-center gap-1 min-h-[18px] pr-6">
-                      <UIcon
-                        v-if="getStatusIcon(appointment.status)"
-                        :name="getStatusIcon(appointment.status)"
-                        class="w-3 h-3 flex-shrink-0"
-                      />
-                      <span class="text-xs font-medium truncate">
-                        {{ appointment.patient ? `${appointment.patient.first_name} ${appointment.patient.last_name}` : 'Sin paciente' }}
+                    <div class="flex items-start justify-between gap-1 min-w-0">
+                      <div class="flex items-center gap-1.5 min-w-0">
+                        <span
+                          class="w-5 h-5 rounded-md flex items-center justify-center text-white shrink-0"
+                          :style="getStatusAccent(prof.color)"
+                        >
+                          <UIcon
+                            :name="getStatusIcon(appointment.status)"
+                            class="w-3 h-3"
+                          />
+                        </span>
+                        <span class="text-[13px] font-semibold truncate text-default">
+                          {{ patientName(appointment) }}
+                        </span>
+                        <UIcon
+                          v-if="notesIndicator.has(appointment.id)"
+                          name="i-lucide-sticky-note"
+                          class="w-3 h-3 flex-shrink-0 text-primary"
+                          :title="t('appointments.hasNotes', 'Tiene notas')"
+                        />
+                      </div>
+                      <span
+                        class="text-[10px] font-medium px-1.5 py-0.5 rounded-md shrink-0"
+                        :class="getStatusChipClass(appointment.status)"
+                      >
+                        {{ statusLabel(appointment.status) }}
                       </span>
-                      <UIcon
-                        v-if="notesIndicator.has(appointment.id)"
-                        name="i-lucide-sticky-note"
-                        class="w-3 h-3 flex-shrink-0 text-primary"
-                        :title="t('appointments.hasNotes', 'Tiene notas')"
-                      />
+                    </div>
+                    <div class="text-[11px] text-muted tnum mt-0.5 truncate pl-6">
+                      {{ formatTimeRange(appointment) }}
                     </div>
                     <div
-                      v-if="appointment.treatment_type"
-                      class="text-xs opacity-60 truncate"
+                      v-if="treatmentLabel(appointment)"
+                      class="mt-auto pt-1"
                     >
-                      {{ appointment.treatment_type }}
+                      <span class="inline-flex text-[10px] text-muted px-2 py-0.5 rounded-md bg-white/70 truncate max-w-full">
+                        {{ treatmentLabel(appointment) }}
+                      </span>
                     </div>
                   </div>
 
-                  <!-- Resize handle -->
                   <div
                     class="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
                     @mousedown.stop="startDrag(appointment, $event, 'resize')"
@@ -704,6 +836,19 @@ const appointmentsByProfIndex = computed(() => {
                     <div class="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-current opacity-30 rounded" />
                   </div>
                 </div>
+              </div>
+            </div>
+
+            <div
+              v-if="nowLine"
+              class="absolute left-[72px] right-0 z-30 pointer-events-none"
+              :style="{ top: nowLine.top }"
+            >
+              <div class="relative">
+                <div class="h-px bg-red-500" />
+                <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[10px] font-semibold text-white bg-slate-900 rounded-full px-2 py-0.5 tnum shadow-sm">
+                  {{ nowLine.label }}
+                </span>
               </div>
             </div>
           </div>
@@ -716,11 +861,11 @@ const appointmentsByProfIndex = computed(() => {
 <style scoped>
 .schedules-blocked {
   background-image: repeating-linear-gradient(
-    45deg,
-    rgba(148, 163, 184, 0.18),
-    rgba(148, 163, 184, 0.18) 6px,
-    rgba(148, 163, 184, 0.32) 6px,
-    rgba(148, 163, 184, 0.32) 12px
+    -45deg,
+    rgba(226, 232, 240, 0.55),
+    rgba(226, 232, 240, 0.55) 8px,
+    rgba(203, 213, 225, 0.7) 8px,
+    rgba(203, 213, 225, 0.7) 16px
   );
 }
 </style>

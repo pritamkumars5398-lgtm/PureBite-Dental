@@ -97,3 +97,12 @@ bool navItemActive(String location, String current) {
   if (location == '/') return current == '/';
   return current == location || current.startsWith('$location/');
 }
+
+/// Title shown in [AppChrome] for the current route (nav label, else app name).
+String chromePageTitle(String location, AppLocalizations l10n) {
+  for (final item in clinicMainNav(l10n)) {
+    if (navItemActive(item.location, location)) return item.label;
+  }
+  if (navItemActive('/settings', location)) return l10n.navSettings;
+  return l10n.appName;
+}

@@ -1,6 +1,12 @@
 {
   "@@locale": "en",
-  "appName": "DentalPin",
+  "appName": "PureBite Dental",
+  "appVersion": "v{version}",
+  "@appVersion": {
+    "placeholders": {
+      "version": {"type": "String"}
+    }
+  },
   "loginTitle": "Sign in",
   "loginEmail": "Email",
   "loginPassword": "Password",

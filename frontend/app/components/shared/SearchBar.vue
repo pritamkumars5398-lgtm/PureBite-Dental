@@ -23,6 +23,7 @@ const emit = defineEmits<{
   'update:debounced': [value: string]
 }>()
 
+const { t } = useI18n()
 const local = ref(props.modelValue)
 let timer: ReturnType<typeof setTimeout> | null = null
 
@@ -48,14 +49,18 @@ function clear() {
 </script>
 
 <template>
-  <div :class="maxWidth">
+  <div :class="['w-full', maxWidth]">
     <UInput
       v-model="local"
-      :placeholder="placeholder"
+      :placeholder="placeholder || t('common.search')"
       :icon="icon"
       :disabled="disabled"
-      class="w-full"
-      :ui="{ trailing: 'pe-1' }"
+      size="md"
+      class="w-full min-h-11"
+      :ui="{
+        base: 'rounded-full min-h-11 bg-[var(--color-canvas)] ring-1 ring-inset ring-[var(--color-border-subtle)]',
+        trailing: 'pe-1'
+      }"
     >
       <template
         v-if="local"
@@ -66,7 +71,8 @@ function clear() {
           color="neutral"
           size="xs"
           icon="i-lucide-x"
-          :aria-label="'Clear'"
+          class="rounded-full"
+          :aria-label="t('lists.search.clear')"
           @click="clear"
         />
       </template>

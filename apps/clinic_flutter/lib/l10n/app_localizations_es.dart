@@ -9,7 +9,12 @@ class AppLocalizationsEs extends AppLocalizations {
   AppLocalizationsEs([String locale = 'es']) : super(locale);
 
   @override
-  String get appName => 'DentalPin';
+  String get appName => 'PureBite Dental';
+
+  @override
+  String appVersion(String version) {
+    return 'v$version';
+  }
 
   @override
   String get loginTitle => 'Iniciar sesión';

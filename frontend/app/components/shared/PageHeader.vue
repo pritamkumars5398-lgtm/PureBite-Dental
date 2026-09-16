@@ -2,21 +2,38 @@
 interface Props {
   title: string
   subtitle?: string
+  /** When false, the heading is screen-reader only — the app chrome already shows the page name. */
+  showTitle?: boolean
 }
 
-defineProps<Props>()
+withDefaults(defineProps<Props>(), {
+  subtitle: undefined,
+  showTitle: true
+})
 </script>
 
 <template>
-  <header class="mb-6">
-    <div class="flex items-start justify-between gap-4">
+  <header class="mb-5">
+    <div
+      v-if="showTitle || subtitle || $slots.actions"
+      class="flex items-start justify-between gap-4"
+    >
       <div class="min-w-0">
-        <h1 class="text-display text-default text-pretty">
+        <h1
+          v-if="showTitle"
+          class="text-h1 text-default text-pretty"
+        >
+          {{ title }}
+        </h1>
+        <h1
+          v-else
+          class="sr-only"
+        >
           {{ title }}
         </h1>
         <p
           v-if="subtitle"
-          class="mt-1 text-body text-muted text-pretty"
+          class="mt-1 text-caption text-muted text-pretty"
         >
           {{ subtitle }}
         </p>
@@ -30,7 +47,7 @@ defineProps<Props>()
     </div>
     <div
       v-if="$slots.tabs"
-      class="mt-4"
+      :class="(showTitle || subtitle || $slots.actions) ? 'mt-4 -mb-px border-b border-subtle' : '-mb-px border-b border-subtle'"
     >
       <slot name="tabs" />
     </div>

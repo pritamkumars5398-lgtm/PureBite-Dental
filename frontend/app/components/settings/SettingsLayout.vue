@@ -34,13 +34,13 @@ const headerTitle = computed(() => props.title ?? t('settings.title'))
 </script>
 
 <template>
-  <div class="space-y-6">
-    <header class="flex items-start justify-between gap-3 flex-wrap">
+  <div class="space-y-8">
+    <header class="flex items-start justify-between gap-4 flex-wrap">
       <div class="min-w-0 flex-1">
         <NuxtLink
           v-if="backTo"
           :to="backTo"
-          class="inline-flex items-center gap-1 text-caption text-muted hover:text-default lg:hidden"
+          class="inline-flex items-center gap-1 text-caption text-muted hover:text-default lg:hidden mb-2"
         >
           <UIcon
             name="i-lucide-arrow-left"
@@ -48,12 +48,12 @@ const headerTitle = computed(() => props.title ?? t('settings.title'))
           />
           {{ backLabel ?? t('settings.title') }}
         </NuxtLink>
-        <h1 class="text-display text-default text-pretty">
+        <h1 class="text-display text-default text-pretty tracking-tight">
           {{ headerTitle }}
         </h1>
         <p
           v-if="subtitle"
-          class="mt-1 text-body text-muted text-pretty"
+          class="mt-1.5 text-body text-muted text-pretty"
         >
           {{ subtitle }}
         </p>
@@ -64,12 +64,14 @@ const headerTitle = computed(() => props.title ?? t('settings.title'))
       </div>
     </header>
 
-    <div class="flex gap-6">
+    <div class="flex gap-8">
       <aside
         v-if="!hideRail && isDesktop"
-        class="w-60 shrink-0"
+        class="w-64 shrink-0"
       >
-        <SettingsCategoryNav :active-id="activeId" />
+        <div class="rounded-[var(--radius-xl)] bg-surface p-2">
+          <SettingsCategoryNav :active-id="activeId" />
+        </div>
       </aside>
 
       <main class="min-w-0 flex-1">

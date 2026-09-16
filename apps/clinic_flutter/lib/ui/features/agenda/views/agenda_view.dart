@@ -36,11 +36,6 @@ class AgendaView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                l10n.agendaTitle,
-                style: textTheme.headlineLarge,
-              ),
-              AppGap.xl(),
               AgendaWeekStrip(
                 selectedDay: viewModel.day,
                 onSelectDay: (day) => viewModel.load(day),

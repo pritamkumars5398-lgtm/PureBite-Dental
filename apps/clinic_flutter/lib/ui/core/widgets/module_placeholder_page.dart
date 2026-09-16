@@ -28,6 +28,7 @@ class ModulePlaceholderPage extends StatelessWidget {
       children: [
         AppPageHeader(
           title: title,
+          showTitle: false,
           actions: [
             if (actionLabel != null)
               AppButton(

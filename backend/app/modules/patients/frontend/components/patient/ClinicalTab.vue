@@ -113,7 +113,7 @@ watch(currentMode, (newMode) => {
 </script>
 
 <template>
-  <div class="clinical-tab space-y-4">
+  <div class="clinical-tab space-y-5">
     <!-- Mode Toggle -->
     <ClinicalModeToggle v-model="currentMode" />
 

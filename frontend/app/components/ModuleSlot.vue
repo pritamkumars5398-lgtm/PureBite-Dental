@@ -34,10 +34,17 @@ const entries = computed(() => {
 </script>
 
 <template>
-  <component
-    :is="entry.component"
-    v-for="entry in entries"
-    :key="entry.id"
-    :ctx="props.ctx"
-  />
+  <!--
+    ``contents`` lets host grids (clinic home bento) treat each registered
+    tile as a grid item without changing other slot parents: children still
+    participate in the parent's formatting context.
+  -->
+  <div class="contents">
+    <component
+      :is="entry.component"
+      v-for="entry in entries"
+      :key="entry.id"
+      :ctx="props.ctx"
+    />
+  </div>
 </template>

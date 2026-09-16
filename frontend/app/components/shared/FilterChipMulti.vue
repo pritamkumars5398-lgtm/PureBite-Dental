@@ -83,6 +83,7 @@ function clear() {
       :icon="icon"
       :disabled="disabled"
       trailing-icon="i-lucide-chevron-down"
+      class="rounded-full"
     >
       {{ displayLabel }}
     </UButton>

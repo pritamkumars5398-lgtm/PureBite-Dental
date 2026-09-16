@@ -27,11 +27,14 @@ interface Props {
   activeCount?: number
   /** Optional sticky position for tall lists. */
   sticky?: boolean
+  /** Always show the Filters button instead of inline chips. */
+  alwaysCollapsed?: boolean
 }
 
 withDefaults(defineProps<Props>(), {
   activeCount: 0,
-  sticky: false
+  sticky: false,
+  alwaysCollapsed: false
 })
 
 const emit = defineEmits<{
@@ -96,13 +99,13 @@ function onReset() {
 
 <template>
   <div
-    class="flex items-center gap-2 w-full"
+    class="flex items-center gap-2 w-full min-h-11"
     :class="sticky && 'sticky top-0 z-10 bg-[var(--color-surface)] py-2'"
   >
     <!-- Search (always left) -->
     <div
       v-if="$slots.search"
-      class="shrink-0 w-full max-w-xs"
+      class="shrink-0 min-w-0 w-full max-w-sm"
     >
       <slot name="search" />
     </div>
@@ -110,9 +113,9 @@ function onReset() {
     <!-- Desktop chips region: chips always rendered for measurement;
          visually hidden when overflow detected, replaced by "Filtros (N)". -->
     <div
-      v-if="$slots.default"
+      v-if="$slots.default && !alwaysCollapsed"
       ref="chipsRegion"
-      class="hidden md:block flex-1 min-w-0 relative h-9"
+      class="hidden md:block flex-1 min-w-0 relative h-11"
     >
       <div
         ref="chipsInner"
@@ -128,17 +131,18 @@ function onReset() {
         color="neutral"
         icon="i-lucide-sliders-horizontal"
         size="sm"
-        class="absolute inset-y-0 left-0 my-auto h-fit"
+        class="absolute inset-y-0 left-0 my-auto min-h-11 rounded-[var(--radius-lg)]"
         @click="isOpen = true"
       >
         {{ activeCount ? t('lists.filter.moreCount', { count: activeCount }) : t('lists.filter.more') }}
       </UButton>
     </div>
 
-    <!-- Mobile trigger (<md) -->
+    <!-- Mobile trigger (<md), or always when collapsed into a Filters button -->
     <UButton
       v-if="$slots.default"
-      class="md:hidden shrink-0"
+      class="shrink-0 min-h-11 rounded-[var(--radius-lg)]"
+      :class="alwaysCollapsed ? '' : 'md:hidden'"
       variant="outline"
       color="neutral"
       icon="i-lucide-sliders-horizontal"
@@ -173,6 +177,7 @@ function onReset() {
                 variant="ghost"
                 color="neutral"
                 icon="i-lucide-x"
+                class="min-h-11 min-w-11 rounded-[var(--radius-lg)]"
                 :aria-label="t('common.close')"
                 @click="isOpen = false"
               />
@@ -188,12 +193,14 @@ function onReset() {
               <UButton
                 variant="ghost"
                 color="neutral"
+                class="min-h-11 rounded-[var(--radius-lg)]"
                 @click="onReset"
               >
                 {{ t('lists.filter.clear') }}
               </UButton>
               <UButton
                 color="primary"
+                class="min-h-11 rounded-[var(--radius-lg)]"
                 @click="isOpen = false"
               >
                 {{ t('lists.filter.apply') }}

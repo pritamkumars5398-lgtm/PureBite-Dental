@@ -19,7 +19,7 @@ export default defineNuxtPlugin(() => {
   registerSlot('dashboard.activity', {
     id: 'reports.dashboard.weekGlance',
     component: defineAsyncComponent(() => import('../components/home/WeekGlancePanel.vue')),
-    order: 20,
+    order: 5,
     permission: 'reports.billing.read'
   })
 })

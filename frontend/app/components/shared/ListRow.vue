@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * ListRow — standard clickable row pattern.
+ * ListRow — standard clickable row pattern (Zendenta table chrome).
  *
  * Visual anatomy:
  *   [leading] [title + subtitle] [spacer] [meta] [chevron if to]
@@ -34,9 +34,9 @@ function handleClick(e: MouseEvent) {
 }
 
 const rowClass = computed(() => [
-  'flex items-center gap-[var(--density-gap,0.75rem)] px-2 py-1 -mx-2 rounded-token-md transition-colors min-h-[var(--density-row-height,44px)]',
+  'flex items-center gap-3 px-5 sm:px-6 py-3 min-h-11 border-b border-[var(--color-border-subtle)] last:border-b-0 transition-colors',
   isInteractive.value
-    ? 'cursor-pointer hover:bg-surface-muted focus:bg-surface-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]'
+    ? 'cursor-pointer hover:bg-[var(--color-canvas)] focus:bg-[var(--color-canvas)] focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-primary)]'
     : ''
 ])
 </script>
@@ -69,13 +69,13 @@ const rowClass = computed(() => [
     </div>
     <div
       v-if="$slots.meta"
-      class="shrink-0 flex items-center gap-2"
+      class="shrink-0 flex items-center gap-2 text-caption text-muted"
     >
       <slot name="meta" />
     </div>
     <div
       v-if="$slots.actions"
-      class="shrink-0 flex items-center gap-1"
+      class="shrink-0 flex items-center gap-1 min-h-11"
     >
       <slot name="actions" />
     </div>
@@ -116,13 +116,13 @@ const rowClass = computed(() => [
     </div>
     <div
       v-if="$slots.meta"
-      class="shrink-0 flex items-center gap-2"
+      class="shrink-0 flex items-center gap-2 text-caption text-muted"
     >
       <slot name="meta" />
     </div>
     <div
       v-if="$slots.actions"
-      class="shrink-0 flex items-center gap-1"
+      class="shrink-0 flex items-center gap-1 min-h-11"
     >
       <slot name="actions" />
     </div>

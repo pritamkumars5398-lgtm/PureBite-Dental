@@ -14,21 +14,21 @@ abstract final class AppColors {
   static const Color textSubtle = Color(0xFF94908A);
   static const Color textDisabled = Color(0xFFBAB6B0);
 
-  static const Color canvasDark = Color(0xFF161513);
-  static const Color surfaceDark = Color(0xFF1E1C19);
-  static const Color surfaceMutedDark = Color(0xFF252320);
-  static const Color surfaceSunkenDark = Color(0xFF121110);
-  static const Color textDark = Color(0xEBFFFAF0);
-  static const Color textMutedDark = Color(0xFFA39E97);
-  static const Color textSubtleDark = Color(0xFF787570);
+  static const Color canvasDark = Color(0xFF000000);
+  static const Color surfaceDark = Color(0xFF0A0A0A);
+  static const Color surfaceMutedDark = Color(0xFF171717);
+  static const Color surfaceSunkenDark = Color(0xFF050505);
+  static const Color textDark = Color(0xF0FAFAFA);
+  static const Color textMutedDark = Color(0xFFA3A3A3);
+  static const Color textSubtleDark = Color(0xFF737373);
 
-  static const Color primary = Color(0xFFB39D82);
-  static const Color primaryHover = Color(0xFF9E8569);
-  static const Color primarySoft = Color(0xFFFAF6F0);
-  static const Color primarySoftText = Color(0xFF66523F);
-  static const Color primaryDark = Color(0xFFC0A481);
-  static const Color primarySoftDark = Color(0x26B39D82);
-  static const Color primarySoftTextDark = Color(0xFFE5D7C2);
+  static const Color primary = Color(0xFF0284C7);
+  static const Color primaryHover = Color(0xFF0369A1);
+  static const Color primarySoft = Color(0xFFF0F9FF);
+  static const Color primarySoftText = Color(0xFF075985);
+  static const Color primaryDark = Color(0xFF38BDF8);
+  static const Color primarySoftDark = Color(0x2638BDF8);
+  static const Color primarySoftTextDark = Color(0xFFBAE6FD);
 
   static const Color successAccent = Color(0xFF0F9D58);
   static const Color successSoft = Color(0xFFE6F6EC);

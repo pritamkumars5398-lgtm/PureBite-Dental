@@ -108,6 +108,7 @@ class _QuotesViewState extends State<QuotesView> {
         children: [
           AppPageHeader(
             title: l10n.quotesTitle,
+            showTitle: false,
             actions: [
               if (widget.onAdd != null)
                 AppButton(

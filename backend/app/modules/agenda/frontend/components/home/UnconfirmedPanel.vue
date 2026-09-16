@@ -18,6 +18,7 @@ const toast = useToast()
 const pending = computed(() => !tomorrowLoaded.value)
 const canWrite = computed(() => can(PERMISSIONS.appointments.write))
 const busyIds = ref<Set<string>>(new Set())
+const total = computed(() => tomorrowUnconfirmed.value.length)
 
 onMounted(() => {
   if (!tomorrowLoaded.value) fetchTomorrowUnconfirmed()
@@ -64,70 +65,81 @@ function appointmentHref(a: Appointment): string {
 </script>
 
 <template>
-  <SectionCard
-    icon="i-lucide-calendar-check"
-    icon-role="warning"
+  <DashboardCard
     :title="t('dashboard.unconfirmed.title')"
+    :caption="t('dashboard.caption.tomorrow')"
+    class="h-full"
   >
     <div
       v-if="pending"
-      class="space-y-2"
+      class="space-y-3"
     >
-      <USkeleton class="h-10 w-full" />
-      <USkeleton class="h-10 w-full" />
+      <USkeleton class="h-9 w-16" />
+      <USkeleton class="h-4 w-28" />
+      <USkeleton class="h-14 w-full" />
+      <USkeleton class="h-14 w-full" />
     </div>
 
-    <EmptyState
-      v-else-if="tomorrowUnconfirmed.length === 0"
-      icon="i-lucide-check-check"
-      :title="t('dashboard.unconfirmed.empty')"
-    />
-
-    <ul
+    <div
       v-else
-      class="divide-y divide-[var(--color-border-subtle)]"
+      class="space-y-4"
     >
-      <li
-        v-for="a in tomorrowUnconfirmed"
-        :key="a.id"
+      <div>
+        <p class="text-display text-default tnum tracking-tight">
+          {{ total }}
+        </p>
+        <p class="text-caption text-muted mt-1">
+          {{ total > 0 ? t('dashboard.caption.tomorrow') : t('dashboard.unconfirmed.empty') }}
+        </p>
+      </div>
+
+      <ul
+        v-if="total > 0"
+        class="space-y-2"
       >
-        <ListRow :to="appointmentHref(a)">
-          <template #leading>
-            <span class="text-ui tnum text-default w-12">
-              {{ formatTime(a.start_time) }}
-            </span>
-          </template>
-          <template #title>
-            {{ a.patient?.first_name }} {{ a.patient?.last_name }}
-          </template>
-          <template #subtitle>
-            <span v-if="a.professional">
-              {{ a.professional.first_name }} {{ a.professional.last_name }}
-            </span>
-            <span
-              v-if="a.cabinet"
-              class="ml-1 text-subtle"
+        <li
+          v-for="a in tomorrowUnconfirmed"
+          :key="a.id"
+          class="rounded-2xl bg-[var(--color-canvas)] px-2 shadow-[0_6px_16px_rgba(15,23,42,0.05)]"
+        >
+          <ListRow :to="appointmentHref(a)">
+            <template #leading>
+              <span class="text-ui tnum text-default w-12">
+                {{ formatTime(a.start_time) }}
+              </span>
+            </template>
+            <template #title>
+              {{ a.patient?.first_name }} {{ a.patient?.last_name }}
+            </template>
+            <template #subtitle>
+              <span v-if="a.professional">
+                {{ a.professional.first_name }} {{ a.professional.last_name }}
+              </span>
+              <span
+                v-if="a.cabinet"
+                class="ml-1 text-subtle"
+              >
+                · {{ a.cabinet }}
+              </span>
+            </template>
+            <template
+              v-if="canWrite"
+              #actions
             >
-              · {{ a.cabinet }}
-            </span>
-          </template>
-          <template
-            v-if="canWrite"
-            #actions
-          >
-            <UButton
-              size="xs"
-              variant="soft"
-              color="primary"
-              :loading="busyIds.has(a.id)"
-              icon="i-lucide-check"
-              @click.stop.prevent="confirm(a)"
-            >
-              {{ t('dashboard.unconfirmed.confirm') }}
-            </UButton>
-          </template>
-        </ListRow>
-      </li>
-    </ul>
-  </SectionCard>
+              <UButton
+                size="xs"
+                variant="soft"
+                color="primary"
+                :loading="busyIds.has(a.id)"
+                icon="i-lucide-check"
+                @click.stop.prevent="confirm(a)"
+              >
+                {{ t('dashboard.unconfirmed.confirm') }}
+              </UButton>
+            </template>
+          </ListRow>
+        </li>
+      </ul>
+    </div>
+  </DashboardCard>
 </template>

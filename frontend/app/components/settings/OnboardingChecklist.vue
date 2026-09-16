@@ -32,13 +32,13 @@ function severityColor(sev?: string): string {
 <template>
   <section
     v-if="isVisible"
-    class="rounded-[var(--radius-lg)] ring-1 ring-[var(--color-border)] bg-(--color-surface) p-4 sm:p-5"
+    class="rounded-[var(--radius-xl)] bg-(--color-surface) p-5 sm:p-6"
   >
     <header class="flex items-start justify-between gap-3 mb-3">
       <div class="flex items-center gap-2 min-w-0">
         <UIcon
           name="i-lucide-rocket"
-          class="w-5 h-5 text-(--color-primary-accent) shrink-0"
+          class="w-5 h-5 text-(--color-primary) shrink-0"
         />
         <div class="min-w-0">
           <h2 class="text-h3 text-default">

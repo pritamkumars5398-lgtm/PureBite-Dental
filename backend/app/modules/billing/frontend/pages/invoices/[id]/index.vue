@@ -526,20 +526,30 @@ function goToCreditNoteFor() {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="space-y-5">
     <!-- Loading state -->
     <div
       v-if="isLoading && !currentInvoice"
       class="space-y-4"
     >
-      <USkeleton class="h-8 w-48" />
-      <USkeleton class="h-64 w-full" />
+      <div
+        class="overflow-hidden bg-[var(--color-surface)] px-5 sm:px-6 py-6 space-y-3"
+        style="border-radius: var(--radius-xl)"
+      >
+        <USkeleton class="h-8 w-48" />
+        <USkeleton class="h-5 w-32" />
+      </div>
+      <USkeleton
+        class="h-64 w-full"
+        style="border-radius: var(--radius-xl)"
+      />
     </div>
 
     <!-- Invoice not found -->
     <div
       v-else-if="!currentInvoice"
-      class="text-center py-12"
+      class="overflow-hidden bg-[var(--color-surface)] text-center py-16 px-6"
+      style="border-radius: var(--radius-xl)"
     >
       <UIcon
         name="i-lucide-file-x"
@@ -548,51 +558,66 @@ function goToCreditNoteFor() {
       <h3 class="text-h2 text-default mb-2">
         {{ t('invoice.notFound') }}
       </h3>
-      <UButton @click="goBack">
+      <UButton
+        color="primary"
+        class="rounded-full"
+        @click="goBack"
+      >
         {{ backLabel }}
       </UButton>
     </div>
 
     <!-- Invoice content -->
     <template v-else>
-      <!-- Header -->
-      <DetailPageHeader
-        :title="currentInvoice.invoice_number || t('invoice.draftNoNumber')"
-        :back-to="{
-          to: comesFromPatient ? `/patients/${route.query.patientId}` : '/invoices',
-          label: backLabel
-        }"
+      <!-- Header card -->
+      <div
+        class="overflow-hidden bg-[var(--color-surface)]"
+        style="border-radius: var(--radius-xl)"
       >
-        <template #status>
-          <div class="flex flex-wrap items-center gap-1.5">
-            <EntityStatusChips :chips="statusChips" />
-            <!--
-              Compliance modules surface AEAT/factur-x/etc. badges here.
-              Renders nothing when there is no compliance data for the
-              active country.
-            -->
-            <ModuleSlot
-              name="invoice.detail.header.meta"
-              :ctx="complianceSlotCtx"
-            />
-          </div>
-        </template>
-        <template #subtitle>
-          <NuxtLink
-            v-if="currentInvoice.patient"
-            :to="`/patients/${currentInvoice.patient.id}`"
-            class="inline-block text-body text-primary-accent hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:underline"
+        <div class="px-5 sm:px-6 pt-5 sm:pt-6 pb-5">
+          <DetailPageHeader
+            :title="currentInvoice.invoice_number || t('invoice.draftNoNumber')"
+            :back-to="{
+              to: comesFromPatient ? `/patients/${route.query.patientId}` : '/invoices',
+              label: backLabel
+            }"
           >
-            {{ currentInvoice.patient.first_name }} {{ currentInvoice.patient.last_name }}
-          </NuxtLink>
-        </template>
-        <template #actions>
-          <EntityActionBar
-            :primary="primaryActions"
-            :overflow="overflowActions"
-          />
-        </template>
-      </DetailPageHeader>
+            <template #status>
+              <div class="flex flex-wrap items-center gap-1.5">
+                <EntityStatusChips :chips="statusChips" />
+                <!--
+                  Compliance modules surface AEAT/factur-x/etc. badges here.
+                  Renders nothing when there is no compliance data for the
+                  active country.
+                -->
+                <ModuleSlot
+                  name="invoice.detail.header.meta"
+                  :ctx="complianceSlotCtx"
+                />
+              </div>
+            </template>
+            <template #subtitle>
+              <NuxtLink
+                v-if="currentInvoice.patient"
+                :to="`/patients/${currentInvoice.patient.id}`"
+                class="inline-flex items-center gap-2 mt-1 text-body text-[var(--color-primary)] hover:underline"
+              >
+                <UAvatar
+                  :alt="`${currentInvoice.patient.first_name} ${currentInvoice.patient.last_name}`"
+                  size="xs"
+                />
+                {{ currentInvoice.patient.first_name }} {{ currentInvoice.patient.last_name }}
+              </NuxtLink>
+            </template>
+            <template #actions>
+              <EntityActionBar
+                :primary="primaryActions"
+                :overflow="overflowActions"
+              />
+            </template>
+          </DetailPageHeader>
+        </div>
+      </div>
 
       <!-- Critical banner — AEAT rejection (or future compliance failures).
            The header badge keeps the at-a-glance signal; this banner makes
@@ -600,6 +625,7 @@ function goToCreditNoteFor() {
       <EntityCriticalBanner
         v-if="complianceRejection"
         role="danger"
+        class="!rounded-[var(--radius-xl)]"
         :title="t('invoice.criticalBanner.aeatRejected.title')"
         :description="complianceRejection.message"
         :cta="{
@@ -610,33 +636,35 @@ function goToCreditNoteFor() {
       />
 
       <!-- Main content grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <!-- Left column - Invoice details -->
-        <div class="lg:col-span-2 space-y-6">
+        <div class="lg:col-span-2 space-y-5">
           <!-- Invoice info card -->
-          <UCard>
-            <template #header>
-              <h3 class="font-semibold text-default">
+          <div
+            class="overflow-hidden bg-[var(--color-surface)]"
+            style="border-radius: var(--radius-xl)"
+          >
+            <header class="px-5 sm:px-6 pt-5 pb-3">
+              <h2 class="text-h3 text-default">
                 {{ t('invoice.details') }}
-              </h3>
-            </template>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              </h2>
+            </header>
+            <dl class="px-5 sm:px-6 pb-5 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
               <div>
-                <dt class="text-caption text-subtle">
+                <dt class="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text-subtle)]">
                   {{ t('invoice.issueDate') }}
                 </dt>
-                <dd class="font-medium text-default">
+                <dd class="mt-1 text-body text-default tnum">
                   {{ formatDate(currentInvoice.issue_date) }}
                 </dd>
               </div>
               <div>
-                <dt class="text-caption text-subtle">
+                <dt class="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text-subtle)]">
                   {{ t('invoice.dueDate') }}
                 </dt>
                 <dd
-                  class="font-medium"
-                  :class="isOverdue ? 'text-danger-accent' : 'text-default'"
+                  class="mt-1 text-body tnum"
+                  :class="isOverdue ? 'text-danger-accent font-medium' : 'text-default'"
                 >
                   {{ formatDate(currentInvoice.due_date) }}
                 </dd>
@@ -644,7 +672,7 @@ function goToCreditNoteFor() {
               <!-- Billing data incomplete warning -->
               <div
                 v-if="hasBillingDataIncomplete"
-                class="col-span-2 flex items-center gap-2 px-3 py-2 alert-surface-warning rounded-token-md"
+                class="sm:col-span-2 flex items-center gap-2 px-3 py-2 alert-surface-warning rounded-[var(--radius-lg)]"
               >
                 <UIcon
                   name="i-lucide-alert-triangle"
@@ -662,6 +690,7 @@ function goToCreditNoteFor() {
                   size="sm"
                   variant="outline"
                   color="warning"
+                  class="rounded-full"
                   @click="router.push(`/patients/${currentInvoice.patient?.id}`)"
                 >
                   {{ t('invoice.editPatientBilling') }}
@@ -669,30 +698,30 @@ function goToCreditNoteFor() {
               </div>
 
               <div>
-                <dt class="text-caption text-subtle">
+                <dt class="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text-subtle)]">
                   {{ t('invoice.billingName') }}
                 </dt>
-                <dd class="font-medium text-default">
+                <dd class="mt-1 text-body text-default">
                   {{ currentInvoice.billing_name || '-' }}
                 </dd>
               </div>
               <div v-if="currentInvoice.billing_tax_id">
-                <dt class="text-caption text-subtle">
+                <dt class="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text-subtle)]">
                   {{ t('invoice.taxId') }}
                 </dt>
-                <dd class="font-medium text-default">
+                <dd class="mt-1 text-body text-default tnum">
                   {{ currentInvoice.billing_tax_id }}
                 </dd>
               </div>
               <div v-if="currentInvoice.budget">
-                <dt class="text-caption text-subtle">
+                <dt class="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text-subtle)]">
                   {{ t('invoice.linkedBudget') }}
                 </dt>
-                <dd>
+                <dd class="mt-1">
                   <UButton
                     variant="link"
                     size="sm"
-                    class="p-0"
+                    class="p-0 text-[var(--color-primary)]"
                     @click="goToBudget"
                   >
                     {{ currentInvoice.budget.budget_number }}
@@ -700,111 +729,158 @@ function goToCreditNoteFor() {
                 </dd>
               </div>
               <div v-if="currentInvoice.credit_note_for">
-                <dt class="text-caption text-subtle">
+                <dt class="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text-subtle)]">
                   {{ t('invoice.creditNoteFor') }}
                 </dt>
-                <dd>
+                <dd class="mt-1">
                   <UButton
                     variant="link"
                     size="sm"
-                    class="p-0"
+                    class="p-0 text-[var(--color-primary)]"
                     @click="goToCreditNoteFor"
                   >
                     {{ currentInvoice.credit_note_for.invoice_number || t('invoice.draftNoNumber') }}
                   </UButton>
                 </dd>
               </div>
-            </div>
-          </UCard>
+            </dl>
+          </div>
 
-          <!-- Items card -->
-          <UCard>
-            <template #header>
-              <h3 class="font-semibold text-default">
+          <!-- Items table card -->
+          <div
+            class="overflow-hidden bg-[var(--color-surface)]"
+            style="border-radius: var(--radius-xl)"
+          >
+            <header class="px-5 sm:px-6 pt-5 pb-3 flex items-baseline gap-2">
+              <h2 class="text-h3 text-default">
                 {{ t('invoice.items') }}
-              </h3>
-            </template>
+              </h2>
+              <span class="text-caption text-muted tnum">
+                {{ currentInvoice.items?.length ?? 0 }}
+              </span>
+            </header>
 
-            <div class="divide-y divide-[var(--color-border-subtle)]">
+            <div
+              v-if="!currentInvoice.items?.length"
+              class="px-5 sm:px-6 pb-6 text-caption text-subtle"
+            >
+              {{ t('budget.items.empty') }}
+            </div>
+
+            <template v-else>
               <div
-                v-for="item in currentInvoice.items"
-                :key="item.id"
-                class="py-3 first:pt-0 last:pb-0"
+                class="hidden md:flex items-center gap-3 px-5 sm:px-6 py-2.5 border-t border-b border-[var(--color-border-subtle)] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text-subtle)]"
               >
-                <div class="flex justify-between items-start gap-4">
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2 flex-wrap">
-                      <span class="font-medium text-default">{{ item.description }}</span>
-                      <span
-                        v-if="item.tooth_number"
-                        class="inline-flex items-center px-1.5 py-0.5 rounded bg-[var(--ui-bg-elevated)] text-caption font-medium text-default"
-                      >
-                        #{{ item.tooth_number }}
+                <span class="flex-1 min-w-0">{{ t('invoice.itemDescription') }}</span>
+                <span class="w-14 text-right">{{ t('invoice.itemQuantity') }}</span>
+                <span class="w-24 text-right">{{ t('invoice.itemPrice') }}</span>
+                <span class="w-20 text-right">{{ t('invoice.discount') }}</span>
+                <span class="w-16 text-right">{{ t('invoice.vat') }}</span>
+                <span class="w-24 text-right">{{ t('invoice.total') }}</span>
+              </div>
+
+              <div>
+                <div
+                  v-for="item in currentInvoice.items"
+                  :key="item.id"
+                  class="px-5 sm:px-6 py-3.5 border-b border-[var(--color-border-subtle)] last:border-b-0"
+                >
+                  <div class="hidden md:flex items-center gap-3">
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-ui text-default">{{ item.description }}</span>
                         <span
-                          v-if="item.surfaces?.length"
-                          class="ml-1 text-subtle font-normal"
+                          v-if="item.tooth_number"
+                          class="inline-flex items-center px-1.5 py-0.5 rounded-md bg-[var(--color-surface-muted)] text-caption font-medium text-default"
                         >
-                          {{ item.surfaces.join(', ') }}
+                          #{{ item.tooth_number }}
+                          <span
+                            v-if="item.surfaces?.length"
+                            class="ml-1 text-subtle font-normal"
+                          >
+                            {{ item.surfaces.join(', ') }}
+                          </span>
                         </span>
-                      </span>
+                      </div>
+                      <p
+                        v-if="item.internal_code"
+                        class="text-caption text-subtle mt-0.5"
+                      >
+                        {{ item.internal_code }}
+                      </p>
                     </div>
-                    <p
-                      v-if="item.internal_code"
-                      class="text-caption text-subtle mt-1"
-                    >
-                      {{ item.internal_code }}
-                    </p>
+                    <span class="w-14 text-right text-caption text-subtle tnum">{{ item.quantity }}</span>
+                    <span class="w-24 text-right text-caption text-subtle tnum">{{ formatCurrency(item.unit_price) }}</span>
+                    <span class="w-20 text-right text-caption tnum" :class="item.line_discount > 0 ? 'text-success-accent' : 'text-subtle'">
+                      {{ item.line_discount > 0 ? `-${formatCurrency(item.line_discount)}` : '—' }}
+                    </span>
+                    <span class="w-16 text-right text-caption text-subtle tnum">{{ item.vat_rate }}%</span>
+                    <span class="w-24 text-right text-ui text-default font-medium tnum">{{ formatCurrency(item.line_total) }}</span>
                   </div>
-                  <div class="text-right">
+
+                  <div class="md:hidden space-y-1">
+                    <div class="flex items-start justify-between gap-3">
+                      <div class="min-w-0">
+                        <p class="text-ui text-default">{{ item.description }}</p>
+                        <p class="text-caption text-subtle tnum">
+                          {{ item.quantity }} × {{ formatCurrency(item.unit_price) }}
+                          <span v-if="item.tooth_number"> · #{{ item.tooth_number }}</span>
+                        </p>
+                      </div>
+                      <p class="text-ui font-medium text-default tnum shrink-0">
+                        {{ formatCurrency(item.line_total) }}
+                      </p>
+                    </div>
                     <p class="text-caption text-subtle">
-                      {{ item.quantity }} x {{ formatCurrency(item.unit_price) }}
-                    </p>
-                    <p
-                      v-if="item.line_discount > 0"
-                      class="text-sm text-success-accent"
-                    >
-                      -{{ formatCurrency(item.line_discount) }}
-                    </p>
-                    <p class="font-semibold text-default">
-                      {{ formatCurrency(item.line_total) }}
-                    </p>
-                    <p class="text-xs text-subtle">
                       {{ t('invoice.vat') }} {{ item.vat_rate }}%
+                      <span
+                        v-if="item.line_discount > 0"
+                        class="text-success-accent"
+                      >
+                        · -{{ formatCurrency(item.line_discount) }}
+                      </span>
                     </p>
                   </div>
                 </div>
               </div>
-            </div>
-          </UCard>
+            </template>
+          </div>
 
           <!-- Payments card. The link rows live in billing's
                ``invoice_payments`` table; the underlying Payment is in
                the payments module. Refunds happen via
                /api/v1/payments/{id}/refunds — not from this screen. -->
-          <UCard v-if="currentInvoice.invoice_payments && currentInvoice.invoice_payments.length > 0">
-            <template #header>
-              <h3 class="font-semibold text-default">
+          <div
+            v-if="currentInvoice.invoice_payments && currentInvoice.invoice_payments.length > 0"
+            class="overflow-hidden bg-[var(--color-surface)]"
+            style="border-radius: var(--radius-xl)"
+          >
+            <header class="px-5 sm:px-6 pt-5 pb-3">
+              <h2 class="text-h3 text-default">
                 {{ t('invoice.payments.title') }}
-              </h3>
-            </template>
-
-            <div class="divide-y divide-[var(--color-border-subtle)]">
+              </h2>
+            </header>
+            <div
+              class="hidden md:flex items-center gap-3 px-5 sm:px-6 py-2.5 border-t border-b border-[var(--color-border-subtle)] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text-subtle)]"
+            >
+              <span class="flex-1">{{ t('invoice.payments.date') }}</span>
+              <span class="w-28 text-right">{{ t('invoice.payments.amount') }}</span>
+            </div>
+            <div>
               <div
                 v-for="ip in currentInvoice.invoice_payments"
                 :key="ip.id"
-                class="py-3 first:pt-0 last:pb-0 flex items-center justify-between"
+                class="flex items-center justify-between gap-3 px-5 sm:px-6 py-3.5 border-b border-[var(--color-border-subtle)] last:border-b-0"
               >
-                <div>
-                  <p class="font-medium text-default">
-                    {{ formatCurrency(ip.amount) }}
-                  </p>
-                  <p class="text-caption text-subtle">
-                    {{ formatDate(ip.created_at) }}
-                  </p>
-                </div>
+                <p class="text-caption text-subtle tnum">
+                  {{ formatDate(ip.created_at) }}
+                </p>
+                <p class="text-ui font-medium text-default tnum">
+                  {{ formatCurrency(ip.amount) }}
+                </p>
               </div>
             </div>
-          </UCard>
+          </div>
         </div>
 
         <!-- Right column - Summary.
@@ -814,44 +890,49 @@ function goToCreditNoteFor() {
              so we want the compliance / totals block at the top — the
              outer grid already places the sidebar below main on mobile,
              but inside the sidebar we keep "money first". -->
-        <div class="space-y-6">
+        <div class="space-y-5">
           <EntityTotalsCard
+            class="!rounded-[var(--radius-xl)]"
             :title="t('invoice.summary')"
             :lines="totalsLines"
           />
 
           <EntityInfoCard
             v-if="infoItems.length"
+            class="!rounded-[var(--radius-xl)]"
             :items="infoItems"
           />
 
           <!-- Notes card -->
-          <UCard v-if="currentInvoice.public_notes || currentInvoice.internal_notes">
-            <template #header>
-              <h3 class="font-semibold text-default">
+          <div
+            v-if="currentInvoice.public_notes || currentInvoice.internal_notes"
+            class="overflow-hidden bg-[var(--color-surface)]"
+            style="border-radius: var(--radius-xl)"
+          >
+            <header class="px-5 sm:px-6 pt-5 pb-3">
+              <h2 class="text-h3 text-default">
                 {{ t('invoice.notes') }}
-              </h3>
-            </template>
-
-            <div class="space-y-4">
+              </h2>
+            </header>
+            <div class="px-5 sm:px-6 pb-5 space-y-4">
               <div v-if="currentInvoice.public_notes">
-                <dt class="text-caption text-subtle mb-1">
+                <dt class="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text-subtle)] mb-1">
                   {{ t('invoice.publicNotes') }}
                 </dt>
-                <dd class="text-default whitespace-pre-wrap">
+                <dd class="text-body text-default whitespace-pre-wrap">
                   {{ currentInvoice.public_notes }}
                 </dd>
               </div>
               <div v-if="currentInvoice.internal_notes">
-                <dt class="text-caption text-subtle mb-1">
+                <dt class="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text-subtle)] mb-1">
                   {{ t('invoice.internalNotes') }}
                 </dt>
-                <dd class="text-default whitespace-pre-wrap">
+                <dd class="text-body text-default whitespace-pre-wrap">
                   {{ currentInvoice.internal_notes }}
                 </dd>
               </div>
             </div>
-          </UCard>
+          </div>
 
           <!--
             Compliance modules (Verifactu-ES, factur-x-FR, ...) plug
@@ -908,6 +989,7 @@ function goToCreditNoteFor() {
           <UButton
             color="primary"
             icon="i-lucide-send"
+            class="rounded-full"
             :loading="isProcessing"
             @click="handleIssue"
           >
@@ -1034,6 +1116,7 @@ function goToCreditNoteFor() {
           </UButton>
           <UButton
             color="primary"
+            class="rounded-full"
             :loading="isSending"
             :disabled="sendForm.send_email && !currentInvoice?.patient?.email"
             @click="handleSend"

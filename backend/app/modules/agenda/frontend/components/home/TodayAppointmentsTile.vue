@@ -26,81 +26,64 @@ const counts = computed(() => {
   }
   return c
 })
+
+const stats = computed(() => {
+  const c = counts.value
+  return [
+    { key: 'completed', label: t('dashboard.todayKpi.completed'), value: c.completed },
+    { key: 'inProgress', label: t('dashboard.todayKpi.inProgress'), value: c.inProgress },
+    { key: 'upcoming', label: t('dashboard.todayKpi.upcoming'), value: c.upcoming },
+    { key: 'cancelled', label: t('dashboard.todayKpi.cancelled'), value: c.cancelled },
+    { key: 'noShow', label: t('dashboard.todayKpi.noShow'), value: c.noShow }
+  ]
+})
 </script>
 
 <template>
-  <div class="rounded-token-lg bg-surface ring-1 ring-[var(--color-border)] px-4 py-3 shadow-[var(--shadow-sm)]">
-    <div class="flex items-center justify-between mb-1">
-      <p class="text-caption text-subtle">
-        {{ t('dashboard.todayKpi.title') }}
-      </p>
-      <UIcon
-        name="i-lucide-calendar"
-        class="w-4 h-4 text-subtle"
-      />
-    </div>
-
-    <USkeleton
+  <DashboardCard
+    :title="t('dashboard.todayKpi.title')"
+    :caption="t('dashboard.caption.today')"
+    class="h-full"
+  >
+    <div
       v-if="pending"
-      class="h-8 w-16 mb-2"
-    />
-    <p
-      v-else
-      class="text-display text-default tnum"
+      class="space-y-3"
     >
-      {{ counts.total }}
-    </p>
+      <USkeleton class="h-9 w-16" />
+      <USkeleton class="h-4 w-24" />
+      <USkeleton class="h-28 w-full" />
+    </div>
 
     <div
-      v-if="!pending && counts.total > 0"
-      class="flex flex-wrap items-center gap-x-3 gap-y-1 text-caption text-muted mt-1"
+      v-else
+      class="space-y-4"
     >
-      <span
-        v-if="counts.completed"
-        class="flex items-center gap-1"
+      <div>
+        <p class="text-display text-default tnum tracking-tight">
+          {{ counts.total }}
+        </p>
+        <p class="text-caption text-muted mt-1">
+          {{ counts.total > 0 ? t('dashboard.caption.today') : t('dashboard.todayKpi.empty') }}
+        </p>
+      </div>
+
+      <div
+        v-if="counts.total > 0"
+        class="grid grid-cols-2 gap-2"
       >
-        <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-success-accent)]" />
-        <span class="tnum">{{ counts.completed }}</span>
-        {{ t('dashboard.todayKpi.completed') }}
-      </span>
-      <span
-        v-if="counts.inProgress"
-        class="flex items-center gap-1"
-      >
-        <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]" />
-        <span class="tnum">{{ counts.inProgress }}</span>
-        {{ t('dashboard.todayKpi.inProgress') }}
-      </span>
-      <span
-        v-if="counts.upcoming"
-        class="flex items-center gap-1"
-      >
-        <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-info-accent)]" />
-        <span class="tnum">{{ counts.upcoming }}</span>
-        {{ t('dashboard.todayKpi.upcoming') }}
-      </span>
-      <span
-        v-if="counts.cancelled"
-        class="flex items-center gap-1"
-      >
-        <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-danger-accent)]" />
-        <span class="tnum">{{ counts.cancelled }}</span>
-        {{ t('dashboard.todayKpi.cancelled') }}
-      </span>
-      <span
-        v-if="counts.noShow"
-        class="flex items-center gap-1"
-      >
-        <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-warning-accent)]" />
-        <span class="tnum">{{ counts.noShow }}</span>
-        {{ t('dashboard.todayKpi.noShow') }}
-      </span>
+        <div
+          v-for="s in stats"
+          :key="s.key"
+          class="rounded-2xl bg-[var(--color-canvas)] px-3 py-2.5 shadow-[0_6px_16px_rgba(15,23,42,0.05)]"
+        >
+          <p class="text-h2 text-default tnum tracking-tight">
+            {{ s.value }}
+          </p>
+          <p class="text-caption text-muted truncate mt-0.5">
+            {{ s.label }}
+          </p>
+        </div>
+      </div>
     </div>
-    <p
-      v-else-if="!pending"
-      class="text-caption text-subtle mt-1"
-    >
-      {{ t('dashboard.todayKpi.empty') }}
-    </p>
-  </div>
+  </DashboardCard>
 </template>

@@ -7,6 +7,7 @@ const auth = useAuth()
   <SectionCard
     icon="i-lucide-user"
     :title="t('settings.profile')"
+    class="!rounded-[var(--radius-xl)]"
   >
     <div
       v-if="auth.user.value"

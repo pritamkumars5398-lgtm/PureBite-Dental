@@ -88,13 +88,13 @@ const drilldownCards = computed(() => [
 </script>
 
 <template>
-  <div class="space-y-6">
-    <!-- Sticky header: title + date range filter -->
-    <header
-      class="sticky top-0 z-10 -mx-4 px-4 py-3 bg-surface border-b border-default flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-    >
+  <div
+    class="overflow-hidden bg-[var(--color-surface)] space-y-6 p-5 sm:p-6"
+    style="border-radius: var(--radius-xl)"
+  >
+    <header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div class="min-w-0">
-        <h1 class="text-display text-default truncate">
+        <h1 class="sr-only">
           {{ t('reports.dashboard.title') }}
         </h1>
         <p class="text-caption text-muted truncate">
@@ -128,7 +128,7 @@ const drilldownCards = computed(() => [
       <nav
         v-if="drilldownCards.some(c => c.visible)"
         :aria-label="t('reports.dashboard.drilldown.title')"
-        class="-mx-4 px-4 flex gap-2 overflow-x-auto sm:flex-wrap sm:overflow-visible scrollbar-thin"
+        class="flex gap-2 overflow-x-auto sm:flex-wrap sm:overflow-visible scrollbar-thin"
       >
         <template
           v-for="card in drilldownCards"
@@ -137,11 +137,11 @@ const drilldownCards = computed(() => [
           <NuxtLink
             v-if="card.visible"
             :to="card.to"
-            class="inline-flex items-center gap-2 shrink-0 rounded-full border border-default bg-surface px-3 py-1.5 text-ui text-default transition-colors hover:bg-surface-muted hover:border-primary-accent"
+            class="inline-flex items-center gap-2 shrink-0 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 text-ui text-default transition-colors hover:bg-[var(--color-surface-muted)] hover:border-[var(--color-primary)]"
           >
             <UIcon
               :name="card.icon"
-              class="h-4 w-4 text-primary-accent"
+              class="h-4 w-4 text-[var(--color-primary)]"
             />
             <span class="truncate">{{ card.label }}</span>
           </NuxtLink>

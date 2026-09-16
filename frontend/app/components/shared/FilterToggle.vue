@@ -58,6 +58,7 @@ const displayIcon = computed(() => {
     :variant="isActive ? 'soft' : 'outline'"
     size="sm"
     :icon="displayIcon"
+    class="rounded-full"
     @click="cycle"
   >
     {{ displayLabel }}

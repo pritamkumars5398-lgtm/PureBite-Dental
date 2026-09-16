@@ -1,9 +1,6 @@
 <script setup lang="ts">
-import { PERMISSIONS } from '~/config/permissions'
-
 const { t, locale } = useI18n()
 const { user } = useAuth()
-const { can } = usePermissions()
 
 const now = ref(new Date())
 
@@ -32,47 +29,31 @@ const greetingKey = computed(() => {
 const firstName = computed(() => user.value?.first_name?.trim() ?? '')
 
 const title = computed(() => {
-  const g = t(greetingKey.value)
-  return firstName.value ? `${g}, ${firstName.value}` : g
+  const greeting = t(greetingKey.value)
+  if (firstName.value) {
+    return t('dashboard.greetings.named', { greeting, name: firstName.value })
+  }
+  return t('dashboard.greetings.unnamed', { greeting })
 })
 
-const formattedDate = computed(() =>
-  now.value.toLocaleDateString(locale.value, {
+const formattedDate = computed(() => {
+  const raw = now.value.toLocaleDateString(locale.value, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
     year: 'numeric'
   })
-)
-
-const canWriteAppointments = computed(() => can(PERMISSIONS.appointments.write))
-const canWritePatients = computed(() => can(PERMISSIONS.patients.write))
+  return raw.charAt(0).toUpperCase() + raw.slice(1)
+})
 </script>
 
 <template>
-  <PageHeader
-    :title="title"
-    :subtitle="formattedDate"
-  >
-    <template #actions>
-      <UButton
-        v-if="canWritePatients"
-        to="/patients?new=1"
-        variant="soft"
-        color="neutral"
-        icon="i-lucide-user-plus"
-      >
-        {{ t('dashboard.quickActions.newPatient') }}
-      </UButton>
-      <UButton
-        v-if="canWriteAppointments"
-        to="/appointments?new=1"
-        variant="solid"
-        color="primary"
-        icon="i-lucide-calendar-plus"
-      >
-        {{ t('dashboard.quickActions.newAppointment') }}
-      </UButton>
-    </template>
-  </PageHeader>
+  <div class="min-w-0">
+    <h1 class="text-display text-default text-pretty">
+      {{ title }}
+    </h1>
+    <p class="mt-1 text-body text-muted text-pretty">
+      {{ formattedDate }}
+    </p>
+  </div>
 </template>

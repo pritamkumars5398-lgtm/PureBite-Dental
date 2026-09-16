@@ -23,7 +23,7 @@ defineEmits<{
 <template>
   <button
     type="button"
-    class="flex items-center gap-1.5 px-2 py-1 rounded-token-sm text-ui transition-opacity"
+    class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-ui transition-opacity"
     :class="selected
       ? 'bg-surface-muted text-default ring-1 ring-[var(--color-border-strong)]'
       : 'text-muted opacity-60 hover:opacity-100'"

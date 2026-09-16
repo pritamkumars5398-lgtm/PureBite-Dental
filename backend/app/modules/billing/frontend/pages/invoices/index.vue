@@ -185,6 +185,8 @@ async function handleDelete(inv: InvoiceListItem, ev: Event) {
 <template>
   <DataListLayout
     :title="t('invoice.title')"
+    :show-title="false"
+    :noun="t('lists.noun.invoices')"
     :loading="isLoading"
     :empty="!invoices.length"
     :error="error"
@@ -200,6 +202,7 @@ async function handleDelete(inv: InvoiceListItem, ev: Event) {
         color="primary"
         variant="solid"
         icon="i-lucide-plus"
+        class="rounded-full"
         @click="createInvoice"
       >
         {{ t('invoice.new') }}
@@ -209,6 +212,7 @@ async function handleDelete(inv: InvoiceListItem, ev: Event) {
     <template #toolbar>
       <FilterBar
         :active-count="activeFilterCount"
+        always-collapsed
         @reset="resetFilters"
       >
         <template #search>
@@ -270,12 +274,23 @@ async function handleDelete(inv: InvoiceListItem, ev: Event) {
             color="primary"
             variant="solid"
             icon="i-lucide-plus"
+            class="rounded-full"
             @click="createInvoice"
           >
             {{ t('invoice.emptyAction') }}
           </UButton>
         </template>
       </EmptyState>
+    </template>
+
+    <template #columns>
+      <span class="w-9 shrink-0" />
+      <span class="flex-1">{{ t('lists.columns.patient') }}</span>
+      <span class="w-32">{{ t('lists.columns.number') }}</span>
+      <span class="w-24">{{ t('lists.columns.status') }}</span>
+      <span class="hidden lg:inline w-24">{{ t('lists.columns.date') }}</span>
+      <span class="w-28 text-right">{{ t('lists.columns.amount') }}</span>
+      <span class="w-10" />
     </template>
 
     <template #rows>
@@ -285,6 +300,10 @@ async function handleDelete(inv: InvoiceListItem, ev: Event) {
         :to="`/invoices/${invoice.id}`"
       >
         <template #row>
+          <UAvatar
+            :alt="patientName(invoice)"
+            size="sm"
+          />
           <div class="flex-1 min-w-0 flex items-center gap-3">
             <div class="min-w-0 flex-1">
               <div class="text-ui text-default flex items-center gap-2 flex-wrap">
@@ -356,7 +375,12 @@ async function handleDelete(inv: InvoiceListItem, ev: Event) {
 
         <template #card>
           <div class="flex items-center justify-between gap-2">
-            <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-3 min-w-0 flex-1">
+              <UAvatar
+                :alt="patientName(invoice)"
+                size="md"
+              />
+              <div class="min-w-0 flex-1">
               <div class="font-medium text-default truncate flex items-center gap-2 flex-wrap">
                 <span class="tnum">{{ invoice.invoice_number || t('invoice.draftNoNumber') }}</span>
                 <UBadge
@@ -373,6 +397,7 @@ async function handleDelete(inv: InvoiceListItem, ev: Event) {
               </div>
               <div class="text-caption text-subtle truncate">
                 {{ patientName(invoice) }}
+              </div>
               </div>
             </div>
             <div class="text-right shrink-0">

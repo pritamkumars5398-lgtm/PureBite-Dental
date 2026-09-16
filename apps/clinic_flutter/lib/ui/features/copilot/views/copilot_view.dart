@@ -8,7 +8,6 @@ import '../../../../ui/core/widgets/app_button.dart';
 import '../../../../ui/core/widgets/app_card.dart';
 import '../../../../ui/core/widgets/app_gap.dart';
 import '../../../../ui/core/widgets/app_icon.dart';
-import '../../../../ui/core/widgets/app_page_header.dart';
 import '../../../../ui/core/widgets/app_text_field.dart';
 import '../../../../ui/core/widgets/feedback.dart';
 import '../view_models/copilot_view_model.dart';
@@ -104,7 +103,6 @@ class _CopilotViewState extends State<CopilotView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          AppPageHeader(title: l10n.aiTitle),
           Expanded(child: _buildBody(l10n, messages, isLoading)),
           if (canSend) ...[
             AppGap.md(),

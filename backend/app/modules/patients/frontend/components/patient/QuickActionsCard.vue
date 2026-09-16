@@ -49,30 +49,33 @@ function uploadDocument() {
         color="primary"
         size="sm"
         icon="i-lucide-calendar-plus"
+        class="rounded-full"
         block
         @click="newAppointment"
       >
-        {{ t('patientDetail.actions.newAppointment', 'Cita') }}
+        {{ t('patientDetail.actions.newAppointment') }}
       </UButton>
       <UButton
         variant="soft"
         color="neutral"
         size="sm"
         icon="i-lucide-file-text"
+        class="rounded-full"
         block
         @click="newBudget"
       >
-        {{ t('patientDetail.actions.newBudget', 'Presupuesto') }}
+        {{ t('patientDetail.actions.newBudget') }}
       </UButton>
       <UButton
         variant="soft"
         color="neutral"
         size="sm"
         icon="i-lucide-upload"
+        class="rounded-full"
         block
         @click="uploadDocument"
       >
-        {{ t('patientDetail.actions.uploadDocument', 'Documento') }}
+        {{ t('patientDetail.actions.uploadDocument') }}
       </UButton>
       <!-- Module slot for sibling modules (recalls Set recall, etc.). -->
       <ModuleSlot

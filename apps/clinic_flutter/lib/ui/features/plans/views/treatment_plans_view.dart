@@ -110,6 +110,7 @@ class _TreatmentPlansViewState extends State<TreatmentPlansView> {
         children: [
           AppPageHeader(
             title: l10n.plansTitle,
+            showTitle: false,
             actions: [
               if (widget.onAdd != null)
                 AppButton(

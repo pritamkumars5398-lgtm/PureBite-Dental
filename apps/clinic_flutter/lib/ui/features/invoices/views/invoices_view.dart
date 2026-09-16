@@ -110,6 +110,7 @@ class _InvoicesViewState extends State<InvoicesView> {
         children: [
           AppPageHeader(
             title: l10n.invoicesTitle,
+            showTitle: false,
             actions: [
               if (widget.onAdd != null)
                 AppButton(

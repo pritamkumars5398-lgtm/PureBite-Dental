@@ -155,7 +155,7 @@ onUnmounted(() => {
 <template>
   <div class="space-y-8 max-w-5xl">
     <!-- Header info banner -->
-    <div class="p-4 rounded-token-lg bg-surface border border-subtle flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div class="p-5 sm:p-6 rounded-[var(--radius-xl)] bg-surface flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
       <div>
         <h2 class="text-h2 font-semibold text-default">
           {{ t('settings.branding.title') }}
@@ -178,7 +178,7 @@ onUnmounted(() => {
     <!-- Managed by Platform Admin Notice -->
     <div
       v-if="!isSuperadmin"
-      class="p-4 rounded-token-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 flex items-start gap-3 text-amber-800 dark:text-amber-300"
+      class="p-4 rounded-[var(--radius-xl)] bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 flex items-start gap-3 text-amber-800 dark:text-amber-300"
     >
       <UIcon
         name="i-lucide-shield-alert"
@@ -221,7 +221,7 @@ onUnmounted(() => {
       <!-- Left Column: Controls (7 cols) -->
       <div class="lg:col-span-7 space-y-6">
         <!-- 1. Clinic Logo Section -->
-        <UCard class="border border-subtle shadow-xs">
+        <UCard class="!rounded-[var(--radius-xl)]">
           <template #header>
             <div class="flex items-center gap-2">
               <UIcon
@@ -336,7 +336,7 @@ onUnmounted(() => {
         </UCard>
 
         <!-- 2. Theme Presets Section -->
-        <UCard class="border border-subtle shadow-xs">
+        <UCard class="!rounded-[var(--radius-xl)]">
           <template #header>
             <div class="flex items-center gap-2">
               <UIcon
@@ -459,7 +459,7 @@ onUnmounted(() => {
 
       <!-- Right Column: Live Mockup Card (5 cols) -->
       <div class="lg:col-span-5 space-y-6">
-        <UCard class="border border-subtle shadow-md sticky top-6 bg-surface">
+        <UCard class="!rounded-[var(--radius-xl)] sticky top-6 bg-surface">
           <template #header>
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
@@ -589,6 +589,7 @@ onUnmounted(() => {
                   block
                   size="md"
                   color="primary"
+                  variant="solid"
                   icon="i-lucide-check"
                   :loading="isSaving"
                   :disabled="!hasChanges"

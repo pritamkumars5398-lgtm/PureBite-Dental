@@ -42,7 +42,7 @@ class InvoiceDetailView extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.xl),
       children: [
         AppPageHeader(
-          title: l10n.invoicesTitle,
+          title: invoiceTitle,
           subtitle: patientName,
         ),
         AppSectionCard(

@@ -115,6 +115,7 @@ class _PaymentsViewState extends State<PaymentsView> {
         children: [
           AppPageHeader(
             title: l10n.paymentsTitle,
+            showTitle: false,
             actions: [
               if (widget.onAdd != null)
                 AppButton(

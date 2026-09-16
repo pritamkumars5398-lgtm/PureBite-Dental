@@ -25,58 +25,76 @@ const counts = computed(() => {
   return { inTreatment, waiting, total: inTreatment + waiting }
 })
 
-const isEmpty = computed(() => !pending.value && counts.value.total === 0)
+const bars = computed(() => {
+  const total = Math.max(counts.value.total, 1)
+  return [
+    {
+      key: 'inTreatment',
+      value: counts.value.inTreatment,
+      pct: (counts.value.inTreatment / total) * 100,
+      label: t('dashboard.inClinic.inTreatment', { n: counts.value.inTreatment }),
+      barClass: 'bg-[var(--color-primary)]'
+    },
+    {
+      key: 'waiting',
+      value: counts.value.waiting,
+      pct: (counts.value.waiting / total) * 100,
+      label: t('dashboard.inClinic.waiting', { n: counts.value.waiting }),
+      barClass: 'bg-[var(--color-info-accent)]'
+    }
+  ]
+})
 </script>
 
 <template>
-  <div
-    class="rounded-token-lg px-4 py-3"
-    :class="isEmpty
-      ? 'bg-surface ring-1 ring-[var(--color-border)] shadow-[var(--shadow-sm)]'
-      : 'alert-surface-info'"
+  <DashboardCard
+    :title="t('dashboard.inClinic.title')"
+    :caption="t('dashboard.caption.now')"
+    class="h-full"
   >
-    <div class="flex items-center justify-between mb-1">
-      <p
-        class="text-caption"
-        :class="isEmpty ? 'text-subtle' : 'opacity-75'"
-      >
-        {{ t('dashboard.inClinic.title') }}
-      </p>
-      <UIcon
-        name="i-lucide-activity"
-        class="w-4 h-4"
-        :class="isEmpty ? 'text-subtle' : 'opacity-75'"
-      />
+    <div v-if="pending">
+      <USkeleton class="h-9 w-16 mb-2" />
+      <USkeleton class="h-4 w-28 mb-4" />
+      <USkeleton class="h-16 w-full" />
     </div>
-
-    <USkeleton
-      v-if="pending"
-      class="h-8 w-16 mb-2"
-    />
-    <p
-      v-else
-      class="text-display tnum"
-      :class="isEmpty ? 'text-default' : ''"
-    >
-      {{ counts.total }}
-    </p>
 
     <div
-      v-if="!pending && !isEmpty"
-      class="flex flex-wrap items-center gap-x-3 text-caption mt-1 opacity-75"
+      v-else
+      class="space-y-4"
     >
-      <span v-if="counts.inTreatment">
-        {{ t('dashboard.inClinic.inTreatment', { n: counts.inTreatment }) }}
-      </span>
-      <span v-if="counts.waiting">
-        {{ t('dashboard.inClinic.waiting', { n: counts.waiting }) }}
-      </span>
+      <div>
+        <p class="text-display text-default tnum tracking-tight">
+          {{ counts.total }}
+        </p>
+        <p class="text-caption text-muted mt-1">
+          {{ counts.total > 0 ? t('dashboard.caption.now') : t('dashboard.inClinic.empty') }}
+        </p>
+      </div>
+
+      <div
+        v-if="counts.total > 0"
+        class="grid grid-cols-2 gap-3"
+      >
+        <div
+          v-for="bar in bars"
+          :key="bar.key"
+          class="rounded-2xl bg-[var(--color-canvas)] px-3 py-3 shadow-[0_6px_16px_rgba(15,23,42,0.05)]"
+        >
+          <p class="text-display text-default tnum tracking-tight">
+            {{ bar.value }}
+          </p>
+          <div class="mt-2 h-1.5 rounded-full bg-[var(--color-border-subtle)] overflow-hidden">
+            <div
+              class="h-full rounded-full"
+              :class="bar.barClass"
+              :style="{ width: `${Math.max(bar.pct, 6)}%` }"
+            />
+          </div>
+          <p class="text-caption text-muted mt-2 truncate">
+            {{ bar.label }}
+          </p>
+        </div>
+      </div>
     </div>
-    <p
-      v-else-if="!pending"
-      class="text-caption text-subtle mt-1"
-    >
-      {{ t('dashboard.inClinic.empty') }}
-    </p>
-  </div>
+  </DashboardCard>
 </template>

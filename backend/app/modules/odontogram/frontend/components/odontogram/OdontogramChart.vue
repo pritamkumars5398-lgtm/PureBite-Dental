@@ -647,7 +647,8 @@ defineExpose({
 </script>
 
 <template>
-  <div class="odontogram-chart">
+  <div class="odontogram-chart flex flex-col gap-4">
+    <div class="rounded-[20px] bg-surface ring-1 ring-[var(--color-border-subtle)] p-5">
     <!-- Header -->
     <div class="flex items-center justify-between mb-4">
       <div class="flex items-center gap-2">
@@ -711,11 +712,10 @@ defineExpose({
     <!-- Chart -->
     <div
       v-else
-      class="flex flex-col gap-4"
+      class="odontogram-wrapper"
     >
-      <div class="odontogram-wrapper">
         <div
-          class="odontogram-grid bg-surface rounded-lg border border-default p-4"
+          class="odontogram-grid"
           :class="{ 'cursor-crosshair': isClickToApplyMode }"
         >
           <!-- Upper arch -->
@@ -753,7 +753,7 @@ defineExpose({
                 @edit-treatment="handleEditTreatment"
               />
 
-              <div class="w-px bg-surface-sunken  mx-2" />
+              <div class="w-px bg-[var(--color-border)] mx-2" />
 
               <ToothQuadrant
                 :teeth="teethLayout.upperLeft"
@@ -778,7 +778,7 @@ defineExpose({
             </div>
           </div>
 
-          <div class="h-px bg-surface-sunken my-4" />
+          <div class="h-px bg-[var(--color-border)] my-4" />
 
           <!-- Lower arch -->
           <div
@@ -812,7 +812,7 @@ defineExpose({
                 @edit-treatment="handleEditTreatment"
               />
 
-              <div class="w-px bg-surface-sunken  mx-2" />
+              <div class="w-px bg-[var(--color-border)] mx-2" />
 
               <ToothQuadrant
                 :teeth="teethLayout.lowerLeft"
@@ -840,8 +840,10 @@ defineExpose({
             </div>
           </div>
         </div>
-      </div>
+    </div>
+    </div>
 
+    <template v-if="!(loading || treatmentsLoading || timelineLoading)">
       <!-- Globals strip (boca completa / arcada) — sits between the chart and the
            treatment bar so the dentist sees active global treatments without
            scrolling. -->
@@ -886,7 +888,7 @@ defineExpose({
         :loading="historyLoading"
         @update:expanded="onHistoryExpanded"
       />
-    </div>
+    </template>
 
     <!-- Surface selector popup -->
     <SurfaceSelectorPopup
@@ -921,7 +923,7 @@ defineExpose({
     <!-- Free-mode selection summary bar (prompts user to confirm) -->
     <div
       v-if="multiToothConfig && multiToothConfig.selectionMode === 'free' && multiToothSelection.teeth.length > 0 && !showMultiToothConfirm"
-      class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 rounded-lg border border-default bg-surface shadow-lg px-4 py-2"
+      class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 rounded-[20px] bg-surface ring-1 ring-[var(--color-border-subtle)] px-4 py-2.5"
     >
       <UIcon
         name="i-lucide-link"

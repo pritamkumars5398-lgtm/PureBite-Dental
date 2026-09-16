@@ -113,6 +113,7 @@ const isActive = computed(() => Boolean(props.modelValue))
       size="sm"
       :icon="icon"
       trailing-icon="i-lucide-chevron-down"
+      class="rounded-full"
     >
       {{ displayLabel }}
     </UButton>

@@ -36,39 +36,37 @@ async function copyValue() {
 </script>
 
 <template>
-  <div class="flex items-start gap-3 py-2">
+  <div class="flex items-center gap-3 py-3">
     <UIcon
       :name="icon"
-      class="w-4 h-4 text-subtle shrink-0 mt-1"
+      class="w-3.5 h-3.5 text-subtle shrink-0"
       aria-hidden="true"
     />
-    <div class="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center sm:gap-3">
-      <dt class="text-caption text-subtle sm:w-32 sm:shrink-0">
-        {{ label }}
-      </dt>
-      <dd class="text-body text-default min-w-0 break-words">
-        <a
-          v-if="hasValue && href"
-          :href="href"
-          class="text-primary-accent hover:underline"
-        >
-          {{ value }}
-        </a>
-        <span v-else-if="hasValue">{{ value }}</span>
-        <span
-          v-else
-          class="text-subtle"
-        >{{ placeholder }}</span>
-      </dd>
-    </div>
+    <dt class="text-[11px] font-semibold uppercase tracking-wide text-muted w-28 shrink-0">
+      {{ label }}
+    </dt>
+    <dd class="text-sm text-muted min-w-0 flex-1 break-words">
+      <a
+        v-if="hasValue && href"
+        :href="href"
+        class="inline-flex items-center gap-1.5 text-muted hover:text-[var(--color-primary)] transition-colors"
+      >
+        {{ value }}
+      </a>
+      <span v-else-if="hasValue">{{ value }}</span>
+      <span
+        v-else
+        class="text-subtle"
+      >{{ placeholder }}</span>
+    </dd>
     <UButton
       v-if="hasValue"
       variant="ghost"
       color="neutral"
-      size="sm"
+      size="xs"
       icon="i-lucide-copy"
       :aria-label="copyAriaLabel"
-      class="shrink-0"
+      class="shrink-0 rounded-full"
       @click="copyValue"
     />
   </div>

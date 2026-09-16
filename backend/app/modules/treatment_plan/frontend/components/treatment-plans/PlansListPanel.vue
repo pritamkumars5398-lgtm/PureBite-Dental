@@ -98,7 +98,11 @@ function getItemCount(plan: TreatmentPlan): number {
 
 <template>
   <div>
-    <div class="flex flex-wrap gap-[var(--density-gap,0.75rem)] mb-[var(--density-gap,1rem)]">
+    <div class="flex flex-wrap items-center justify-between gap-3 px-5 sm:px-6 py-3">
+      <p class="text-lg text-default">
+        <span class="font-semibold tnum">{{ total }}</span>
+        <span class="text-muted"> {{ t('lists.totalSuffix', { noun: t('lists.noun.plans') }) }}</span>
+      </p>
       <USelectMenu
         v-model="selectedStatuses"
         :items="statusOptions"
@@ -109,86 +113,113 @@ function getItemCount(plan: TreatmentPlan): number {
       />
     </div>
 
-    <UCard>
-      <div
-        v-if="loading"
-        class="space-y-3"
+    <div
+      v-if="loading"
+      class="px-5 sm:px-6 pb-6 space-y-3"
+    >
+      <USkeleton
+        v-for="i in 5"
+        :key="i"
+        class="h-16 w-full rounded-[var(--radius-lg)]"
+      />
+    </div>
+
+    <EmptyState
+      v-else-if="plans.length === 0"
+      icon="i-lucide-clipboard-list"
+      :title="props.q || selectedStatuses.length > 0 ? t('treatmentPlans.noItems') : t('treatmentPlans.empty')"
+    >
+      <template
+        v-if="!props.q && selectedStatuses.length === 0 && can(PERMISSIONS.treatmentPlans.write)"
+        #actions
       >
-        <USkeleton
-          v-for="i in 5"
-          :key="i"
-          class="h-16 w-full"
+        <UButton
+          color="primary"
+          variant="solid"
+          icon="i-lucide-plus"
+          class="rounded-full"
+          @click="createPlan"
+        >
+          {{ t('treatmentPlans.emptyAction') }}
+        </UButton>
+      </template>
+    </EmptyState>
+
+    <template v-else>
+      <div class="hidden md:flex items-center gap-3 px-5 sm:px-6 py-2.5 border-t border-b border-[var(--color-border-subtle)] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text-subtle)]">
+        <span class="w-9 shrink-0" />
+        <span class="flex-1">{{ t('lists.columns.patient') }}</span>
+        <span class="w-28">{{ t('lists.columns.number') }}</span>
+        <span class="w-24">{{ t('lists.columns.status') }}</span>
+        <span class="hidden sm:inline w-28">{{ t('lists.columns.date') }}</span>
+      </div>
+
+      <DataListItem
+        v-for="plan in plans"
+        :key="plan.id"
+        :to="`/treatment-plans/${plan.id}`"
+      >
+        <template #row>
+          <UAvatar
+            :alt="getPatientName(plan)"
+            size="sm"
+          />
+          <div class="flex-1 min-w-0">
+            <div class="text-ui text-default flex items-center gap-2 flex-wrap">
+              <span class="tnum">{{ plan.plan_number }}</span>
+              <TreatmentPlanStatusBadge :status="plan.status" />
+              <span class="truncate">{{ plan.title || t('treatmentPlans.untitled') }}</span>
+            </div>
+            <div class="text-caption text-subtle truncate">
+              {{ getPatientName(plan) }}
+            </div>
+          </div>
+          <span class="hidden sm:inline text-caption text-subtle tnum">
+            {{ t('treatmentPlans.itemCount', { count: getItemCount(plan) }, getItemCount(plan)) }}
+          </span>
+          <span class="hidden sm:inline text-caption text-subtle tnum w-28">
+            {{ formatDate(plan.created_at) }}
+          </span>
+          <UButton
+            v-if="can(PERMISSIONS.treatmentPlans.write) && plan.status === 'draft'"
+            variant="ghost"
+            color="error"
+            icon="i-lucide-trash-2"
+            size="xs"
+            :aria-label="t('treatmentPlans.delete')"
+            :title="t('treatmentPlans.delete')"
+            @click.prevent.stop="handleDelete(plan, $event)"
+          />
+          <UIcon
+            name="i-lucide-chevron-right"
+            class="text-subtle"
+          />
+        </template>
+        <template #card>
+          <div class="flex items-center gap-3">
+            <UAvatar
+              :alt="getPatientName(plan)"
+              size="md"
+            />
+            <div class="flex-1 min-w-0">
+              <div class="font-medium text-default truncate">
+                {{ plan.plan_number }} · {{ plan.title || t('treatmentPlans.untitled') }}
+              </div>
+              <div class="text-caption text-subtle truncate">
+                {{ getPatientName(plan) }}
+              </div>
+            </div>
+            <TreatmentPlanStatusBadge :status="plan.status" />
+          </div>
+        </template>
+      </DataListItem>
+
+      <div class="px-5 sm:px-6 py-3">
+        <PaginationBar
+          v-model:page="currentPage"
+          :total-pages="totalPages"
         />
       </div>
-
-      <EmptyState
-        v-else-if="plans.length === 0"
-        icon="i-lucide-clipboard-list"
-        :title="props.q || selectedStatuses.length > 0 ? t('treatmentPlans.noItems') : t('treatmentPlans.empty')"
-      >
-        <template
-          v-if="!props.q && selectedStatuses.length === 0 && can(PERMISSIONS.treatmentPlans.write)"
-          #actions
-        >
-          <UButton
-            color="primary"
-            variant="soft"
-            icon="i-lucide-plus"
-            @click="createPlan"
-          >
-            {{ t('treatmentPlans.emptyAction') }}
-          </UButton>
-        </template>
-      </EmptyState>
-
-      <div
-        v-else
-        class="divide-y divide-[var(--color-border-subtle)]"
-      >
-        <ListRow
-          v-for="plan in plans"
-          :key="plan.id"
-          :to="`/treatment-plans/${plan.id}`"
-        >
-          <template #title>
-            <span class="tnum">{{ plan.plan_number }}</span>
-            <TreatmentPlanStatusBadge :status="plan.status" />
-            <span class="text-default truncate">
-              {{ plan.title || t('treatmentPlans.untitled') }}
-            </span>
-          </template>
-          <template #subtitle>
-            {{ getPatientName(plan) }}
-          </template>
-          <template #meta>
-            <span class="hidden sm:inline text-caption text-subtle tnum">
-              {{ t('treatmentPlans.itemCount', { count: getItemCount(plan) }, getItemCount(plan)) }}
-            </span>
-            <span class="hidden sm:inline text-caption text-subtle tnum">
-              {{ formatDate(plan.created_at) }}
-            </span>
-          </template>
-          <template
-            v-if="can(PERMISSIONS.treatmentPlans.write) && plan.status === 'draft'"
-            #actions
-          >
-            <UButton
-              variant="ghost"
-              color="error"
-              icon="i-lucide-trash-2"
-              size="xs"
-              :aria-label="t('treatmentPlans.delete')"
-              :title="t('treatmentPlans.delete')"
-              @click="handleDelete(plan, $event)"
-            />
-          </template>
-        </ListRow>
-      </div>
-
-      <PaginationBar
-        v-model:page="currentPage"
-        :total-pages="totalPages"
-      />
-    </UCard>
+    </template>
   </div>
 </template>

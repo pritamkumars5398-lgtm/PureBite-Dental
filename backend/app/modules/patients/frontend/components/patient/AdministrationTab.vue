@@ -130,7 +130,7 @@ const { format: formatCurrency } = useCurrency()
 </script>
 
 <template>
-  <div class="administration-tab space-y-4">
+  <div class="administration-tab space-y-5">
     <!-- Mode pill-bar -->
     <AdministrationModeToggle
       v-model="currentMode"
@@ -160,6 +160,7 @@ const { format: formatCurrency } = useCurrency()
             size="sm"
             icon="i-lucide-plus"
             color="primary"
+            class="rounded-full"
             :to="`/budgets/new?patient_id=${patientId}&from=patient`"
           >
             {{ t('patientDetail.createBudget') }}
@@ -182,7 +183,8 @@ const { format: formatCurrency } = useCurrency()
       <!-- Empty state -->
       <UCard
         v-else-if="budgets.length === 0"
-        class="text-center py-8"
+        class="text-center py-10"
+        :ui="{ root: 'rounded-[var(--radius-xl)]' }"
       >
         <UIcon
           name="i-lucide-file-text"
@@ -195,26 +197,29 @@ const { format: formatCurrency } = useCurrency()
           v-if="can(PERMISSIONS.budget.write)"
           :to="`/budgets/new?patient_id=${patientId}&from=patient`"
           icon="i-lucide-plus"
+          class="rounded-full"
         >
           {{ t('patientDetail.createBudget') }}
         </UButton>
       </UCard>
 
       <!-- Budget list -->
-      <UCard v-else>
+      <UCard
+        v-else
+        :ui="{ root: 'rounded-[var(--radius-xl)]', body: 'p-0' }"
+      >
         <ul class="divide-y divide-[var(--color-border-subtle)]">
           <li
             v-for="budget in budgets"
             :key="budget.id"
-            class="py-3 first:pt-0 last:pb-0"
           >
             <NuxtLink
               :to="`/budgets/${budget.id}?from=patient&patientId=${patientId}`"
-              class="flex items-center justify-between hover:bg-surface-muted -mx-4 px-4 py-2 rounded-lg transition-colors"
+              class="flex items-center justify-between px-5 py-3.5 hover:bg-[var(--color-surface-muted)]/70 transition-colors"
             >
-              <div>
-                <div class="flex items-center gap-3">
-                  <span class="font-medium text-default">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-sm font-medium text-default">
                     {{ budget.budget_number }}
                   </span>
                   <UBadge
@@ -226,47 +231,49 @@ const { format: formatCurrency } = useCurrency()
                   </UBadge>
                   <BudgetStatusBadge :status="budget.status" />
                 </div>
-                <div class="flex items-center gap-2 mt-1">
-                  <span class="text-sm text-muted">
+                <div class="flex items-center gap-2 mt-1 text-sm text-muted">
+                  <span>
                     {{ formatDate(budget.created_at) }}
                   </span>
                   <span
                     v-if="budget.treatment_plan_id"
-                    class="text-caption text-subtle flex items-center gap-1"
+                    class="inline-flex items-center gap-1"
                   >
                     <UIcon
                       name="i-lucide-link"
-                      class="w-3 h-3"
+                      class="w-3 h-3 text-subtle"
                     />
                     {{ t('budget.linkedToPlan') }}
                   </span>
                 </div>
               </div>
-              <div class="flex items-center gap-4">
-                <span class="font-semibold text-default">
+              <div class="flex items-center gap-3 shrink-0">
+                <span class="text-sm font-semibold text-default tnum">
                   {{ formatCurrency(budget.total) }}
                 </span>
                 <UIcon
                   name="i-lucide-chevron-right"
-                  class="w-5 h-5 text-subtle"
+                  class="w-4 h-4 text-subtle"
                 />
               </div>
             </NuxtLink>
           </li>
         </ul>
 
-        <PaginationBar
-          v-model:page="budgetsPage"
-          :total-pages="budgetsTotalPages"
-          :total="budgetsTotal"
-          :page-size="budgetsPageSize"
-        />
+        <div class="px-5">
+          <PaginationBar
+            v-model:page="budgetsPage"
+            :total-pages="budgetsTotalPages"
+            :total="budgetsTotal"
+            :page-size="budgetsPageSize"
+          />
+        </div>
 
         <!-- View all link -->
-        <div class="pt-3 border-t border-default mt-3">
+        <div class="px-5 py-3 border-t border-[var(--color-border-subtle)]">
           <NuxtLink
             :to="`/budgets?patient_id=${patientId}`"
-            class="text-caption text-primary-accent hover:underline inline-flex items-center gap-1"
+            class="text-caption text-[var(--color-primary)] hover:underline inline-flex items-center gap-1"
           >
             {{ t('patientDetail.viewAllBudgets') }}
             <UIcon

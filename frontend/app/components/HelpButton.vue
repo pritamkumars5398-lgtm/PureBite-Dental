@@ -10,15 +10,26 @@
  *
  * Hidden when `NUXT_PUBLIC_DOCS_URL` is empty (e.g. in dev without a
  * portal running).
+ *
+ * Screens without a manual page used to say "open an issue". Those
+ * send platform admins to `/admin` instead.
  */
 import { ref } from 'vue'
 
 const { t } = useI18n()
+const auth = useAuth()
 const { helpUrl, fullManualUrl, isAvailable } = useHelp()
 
 const open = ref(false)
 const loadFailed = ref(false)
 const loading = ref(true)
+const missingHelp = ref(false)
+
+const isSuperadmin = computed(() =>
+  auth.clinics.value?.[0]?.name === 'Platform Administration'
+)
+
+const showAdminCta = computed(() => isSuperadmin.value && (missingHelp.value || loadFailed.value))
 
 function onIframeLoad() {
   loading.value = false
@@ -29,12 +40,34 @@ function onIframeError() {
   loadFailed.value = true
 }
 
+async function inspectHelpFragment() {
+  missingHelp.value = false
+  if (!helpUrl.value) {
+    missingHelp.value = true
+    return
+  }
+  try {
+    const res = await fetch(helpUrl.value)
+    const html = await res.text()
+    missingHelp.value = /No help for this screen yet|Aún no hay ayuda para esta pantalla/.test(html)
+  } catch {
+    missingHelp.value = false
+  }
+}
+
 function handleOpen(value: boolean) {
   open.value = value
   if (value) {
     loadFailed.value = false
+    missingHelp.value = false
     loading.value = true
+    void inspectHelpFragment()
   }
+}
+
+async function goToAdmin() {
+  handleOpen(false)
+  await navigateTo('/admin')
 }
 </script>
 
@@ -92,20 +125,30 @@ function handleOpen(value: boolean) {
           </div>
 
           <div
-            v-if="loadFailed"
-            class="absolute inset-0 flex flex-col items-center justify-center text-center px-6 gap-2 bg-surface"
+            v-if="loadFailed || missingHelp"
+            class="absolute inset-0 flex flex-col items-center justify-center text-center px-6 gap-3 bg-surface"
           >
             <UIcon
               name="i-lucide-circle-alert"
               class="w-6 h-6 text-warning"
             />
             <p class="text-default">
-              {{ t('help.unavailable', 'No contextual help available for this page yet.') }}
+              {{ t('help.unavailable') }}
             </p>
+            <UButton
+              v-if="showAdminCta"
+              color="primary"
+              variant="solid"
+              size="sm"
+              icon="i-lucide-layout-dashboard"
+              @click="goToAdmin"
+            >
+              {{ t('help.goToAdmin') }}
+            </UButton>
           </div>
 
           <iframe
-            v-show="!loadFailed"
+            v-show="!loadFailed && !missingHelp"
             :src="helpUrl"
             class="w-full h-full border-0"
             :title="t('help.drawerTitle', 'Help for this page')"
@@ -120,13 +163,23 @@ function handleOpen(value: boolean) {
           <UButton
             v-if="fullManualUrl"
             variant="link"
-            color="primary"
+            color="neutral"
             size="sm"
             icon="i-lucide-external-link"
             :to="fullManualUrl"
             target="_blank"
           >
             {{ t('help.openFullManual', 'Open full manual') }}
+          </UButton>
+          <UButton
+            v-if="isSuperadmin"
+            variant="link"
+            color="primary"
+            size="sm"
+            icon="i-lucide-layout-dashboard"
+            @click="goToAdmin"
+          >
+            {{ t('help.goToAdmin') }}
           </UButton>
         </footer>
       </div>

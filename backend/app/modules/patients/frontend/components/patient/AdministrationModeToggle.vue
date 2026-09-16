@@ -83,10 +83,36 @@ const options = computed(() => {
 </script>
 
 <template>
-  <SegmentedControl
-    :model-value="modelValue"
-    :options="options"
-    full-width
-    @update:model-value="(v) => emit('update:modelValue', v as AdministrationMode)"
-  />
+  <div
+    class="flex items-center gap-6 overflow-x-auto border-b border-[var(--color-border-subtle)]"
+    role="tablist"
+  >
+    <button
+      v-for="opt in options"
+      :key="opt.value"
+      type="button"
+      role="tab"
+      :aria-selected="modelValue === opt.value"
+      class="relative pb-3 text-sm whitespace-nowrap transition-colors shrink-0 inline-flex items-center gap-1.5"
+      :class="modelValue === opt.value
+        ? 'font-medium text-[var(--color-primary)]'
+        : 'text-muted hover:text-default'"
+      @click="emit('update:modelValue', opt.value as AdministrationMode)"
+    >
+      {{ opt.label }}
+      <UBadge
+        v-if="opt.badge != null && opt.badge !== ''"
+        :color="opt.badgeColor ?? 'neutral'"
+        variant="subtle"
+        size="xs"
+        class="tnum"
+      >
+        {{ opt.badge }}
+      </UBadge>
+      <span
+        v-if="modelValue === opt.value"
+        class="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-[var(--color-primary)]"
+      />
+    </button>
+  </div>
 </template>

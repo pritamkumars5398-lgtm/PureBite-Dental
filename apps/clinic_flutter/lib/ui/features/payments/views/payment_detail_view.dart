@@ -42,8 +42,8 @@ class PaymentDetailView extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.xl),
       children: [
         AppPageHeader(
-          title: l10n.paymentsTitle,
-          subtitle: patientName,
+          title: title ?? patientName ?? status ?? l10n.comingSoon,
+          subtitle: title != null ? patientName : null,
         ),
         AppSectionCard(
           title: title ?? l10n.kpiOverduePayments,

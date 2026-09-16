@@ -39,7 +39,7 @@ const showOnboarding = computed(() => categoryId.value === (registry.firstVisibl
     <!-- No-access state for known but gated categories -->
     <div
       v-if="!category"
-      class="rounded-[var(--radius-lg)] ring-1 ring-[var(--color-border)] bg-(--color-surface) p-8"
+      class="rounded-[var(--radius-xl)] bg-(--color-surface) p-8"
     >
       <EmptyState
         icon="i-lucide-lock"
@@ -48,7 +48,8 @@ const showOnboarding = computed(() => categoryId.value === (registry.firstVisibl
       >
         <template #actions>
           <UButton
-            variant="soft"
+            color="primary"
+            variant="solid"
             icon="i-lucide-arrow-left"
             @click="router.push('/settings')"
           >
@@ -61,27 +62,29 @@ const showOnboarding = computed(() => categoryId.value === (registry.firstVisibl
     <template v-else>
       <OnboardingChecklist
         v-if="showOnboarding"
-        class="mb-6"
+        class="mb-8"
       />
 
       <!-- Mobile: full-screen category nav when on first-visible category landing -->
       <div
         v-if="!isDesktop && showOnboarding"
-        class="mb-6"
+        class="mb-8"
       >
-        <h2 class="text-h2 text-default mb-3">
+        <h2 class="text-h2 text-default mb-4">
           {{ t('settings.allCategories') }}
         </h2>
-        <SettingsCategoryNav
-          :active-id="null"
-          :full-width="true"
-        />
+        <div class="rounded-[var(--radius-xl)] bg-surface p-2">
+          <SettingsCategoryNav
+            :active-id="null"
+            :full-width="true"
+          />
+        </div>
       </div>
 
       <!-- Registered pages -->
       <div
         v-if="visiblePages.length > 0"
-        class="grid grid-cols-1 md:grid-cols-2 gap-4"
+        class="grid grid-cols-1 md:grid-cols-2 gap-5"
       >
         <SettingsSection
           v-for="page in visiblePages"

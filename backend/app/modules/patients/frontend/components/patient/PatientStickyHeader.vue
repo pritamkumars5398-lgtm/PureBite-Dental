@@ -2,12 +2,12 @@
 /**
  * PatientStickyHeader — persistent patient context bar.
  *
- * Renders at the top of the patient-detail page above the UTabs strip
+ * Renders at the top of the patient-detail page above the tab strip
  * and stays in view as the user scrolls into deep tabs. Two visual
  * lanes:
  *
- * - Identity lane (left): avatar · name + status · age · ID · contact
- *   actions (phone + email as icon buttons with tooltip).
+ * - Identity lane (left): avatar · name + status · muted meta rows
+ *   (phone, email, age, ID).
  * - Signals lane (right): clinical alert chips from
  *   ``patient.header.alerts`` + Edit and Acciones buttons.
  *
@@ -18,6 +18,7 @@
  */
 
 import type { PatientExtended } from '~~/app/types'
+import { patientAvatarTone, patientInitials } from '../../utils/avatarTone'
 
 interface Props {
   patient: PatientExtended
@@ -38,11 +39,8 @@ const { t } = useI18n()
 
 const fullName = computed(() => `${props.patient.first_name} ${props.patient.last_name}`)
 
-const initials = computed(() => {
-  const first = props.patient.first_name?.[0] ?? ''
-  const last = props.patient.last_name?.[0] ?? ''
-  return (first + last).toUpperCase() || '?'
-})
+const initials = computed(() => patientInitials(props.patient.first_name, props.patient.last_name))
+const avatarTone = computed(() => patientAvatarTone(props.patient.id))
 
 const age = computed(() => {
   if (!props.patient.date_of_birth) return null
@@ -66,7 +64,6 @@ const genderLabel = computed(() => {
   return map[g] ?? null
 })
 
-const statusColor = computed(() => props.patient.status === 'active' ? 'success' : 'neutral')
 const isArchived = computed(() => props.patient.status === 'archived')
 
 const actionItems = computed(() => [
@@ -99,40 +96,38 @@ const actionItems = computed(() => [
 
 <template>
   <header
-    class="patient-sticky-header sticky top-0 z-30 -mx-4 sm:mx-0 bg-surface/90 backdrop-blur border-b border-default px-4 sm:px-3 py-2.5"
-    aria-label="Cabecera del paciente"
+    class="patient-sticky-header sticky top-0 z-30 bg-[var(--color-surface)]/95 backdrop-blur px-5 sm:px-6 pt-5 pb-4"
+    :aria-label="t('patientDetail.headerAria')"
   >
-    <div class="flex items-center gap-3 sm:gap-4">
+    <div class="flex items-start gap-3 sm:gap-4">
       <UButton
         variant="ghost"
         color="neutral"
         size="sm"
-        icon="i-lucide-arrow-left"
+        icon="i-lucide-chevron-left"
         :aria-label="t('common.back', 'Volver')"
-        class="shrink-0"
+        class="shrink-0 mt-1 -ml-1.5"
         @click="emit('back')"
       />
 
-      <UAvatar
+      <img
         v-if="patient.photo_url"
         :src="patient.photo_url"
         :alt="fullName"
-        size="lg"
-        class="shrink-0 ring-2 ring-[var(--color-border-subtle)]"
-      />
-      <UAvatar
+        class="w-12 h-12 rounded-full object-cover shrink-0 ring-1 ring-[var(--color-border-subtle)]"
+      >
+      <div
         v-else
-        :text="initials"
-        size="lg"
-        class="shrink-0 ring-2 ring-[var(--color-border-subtle)]"
-        :ui="{ text: 'font-semibold' }"
-      />
+        class="w-12 h-12 rounded-full flex items-center justify-center text-sm font-semibold shrink-0"
+        :class="avatarTone"
+        aria-hidden="true"
+      >
+        {{ initials }}
+      </div>
 
-      <!-- Identity column -->
-      <div class="min-w-0 flex-1 flex flex-col gap-0.5">
-        <!-- Name + status -->
+      <div class="min-w-0 flex-1 flex flex-col gap-1">
         <div class="flex items-center gap-2 min-w-0">
-          <h1 class="text-h1 text-default font-semibold truncate">
+          <h1 class="text-display text-default truncate">
             {{ fullName }}
           </h1>
           <UBadge
@@ -151,11 +146,10 @@ const actionItems = computed(() => [
           />
         </div>
 
-        <!-- Metadata strip — patient id · age · gender · DNI · contact icons -->
-        <div class="flex items-center gap-x-2.5 gap-y-1 flex-wrap text-caption text-muted">
+        <div class="flex items-center gap-x-3 gap-y-1 flex-wrap text-sm text-muted">
           <span
             v-if="patient.patient_number"
-            class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-surface-muted border border-default text-subtle"
+            class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-mono font-medium text-subtle bg-[var(--color-surface-muted)]"
           >
             {{ patient.patient_number }}
           </span>
@@ -163,58 +157,45 @@ const actionItems = computed(() => [
             v-if="age != null"
             class="tnum"
           >
-            <span v-if="patient.patient_number" class="mr-2 text-subtle">·</span>
             {{ age }} {{ t('patients.years') }}
           </span>
-          <span
-            v-if="genderLabel"
-            class="text-subtle"
-          >
-            ·  {{ genderLabel }}
+          <span v-if="genderLabel">
+            {{ genderLabel }}
           </span>
           <span
             v-if="patient.national_id"
-            class="tnum text-subtle inline-flex items-center gap-1"
+            class="tnum inline-flex items-center gap-1.5"
           >
-            <span aria-hidden="true">·</span>
             <UIcon
               name="i-lucide-id-card"
-              class="w-3.5 h-3.5"
+              class="w-3.5 h-3.5 text-subtle"
             />
-            <span>{{ patient.national_id_type?.toUpperCase() }} {{ patient.national_id }}</span>
+            {{ patient.national_id_type?.toUpperCase() }} {{ patient.national_id }}
           </span>
-
-          <!-- Contact icons — click to call/mail. No full string in the bar. -->
-          <UTooltip
+          <a
             v-if="patient.phone"
-            :text="patient.phone"
+            :href="`tel:${patient.phone}`"
+            class="inline-flex items-center gap-1.5 hover:text-default transition-colors"
+            :aria-label="`${t('patients.phone')}: ${patient.phone}`"
           >
-            <a
-              :href="`tel:${patient.phone}`"
-              class="inline-flex items-center justify-center w-7 h-7 rounded-token-sm text-primary-accent hover:bg-surface-muted transition-colors"
-              :aria-label="`${t('patients.phone', 'Phone')}: ${patient.phone}`"
-            >
-              <UIcon
-                name="i-lucide-phone"
-                class="w-4 h-4"
-              />
-            </a>
-          </UTooltip>
-          <UTooltip
+            <UIcon
+              name="i-lucide-phone"
+              class="w-3.5 h-3.5 text-subtle"
+            />
+            {{ patient.phone }}
+          </a>
+          <a
             v-if="patient.email"
-            :text="patient.email"
+            :href="`mailto:${patient.email}`"
+            class="inline-flex items-center gap-1.5 min-w-0 hover:text-default transition-colors"
+            :aria-label="`${t('patients.email')}: ${patient.email}`"
           >
-            <a
-              :href="`mailto:${patient.email}`"
-              class="inline-flex items-center justify-center w-7 h-7 rounded-token-sm text-primary-accent hover:bg-surface-muted transition-colors"
-              :aria-label="`${t('patients.email', 'Email')}: ${patient.email}`"
-            >
-              <UIcon
-                name="i-lucide-mail"
-                class="w-4 h-4"
-              />
-            </a>
-          </UTooltip>
+            <UIcon
+              name="i-lucide-mail"
+              class="w-3.5 h-3.5 text-subtle shrink-0"
+            />
+            <span class="truncate max-w-[220px]">{{ patient.email }}</span>
+          </a>
         </div>
       </div>
 
@@ -231,17 +212,16 @@ const actionItems = computed(() => [
         </div>
       </ClientOnly>
 
-      <!-- Edit + Acciones — always visible -->
       <UButton
         variant="outline"
         color="neutral"
         size="sm"
         icon="i-lucide-pencil"
-        :aria-label="t('patientDetail.editPatient', 'Editar paciente')"
-        class="shrink-0"
+        :aria-label="t('patientDetail.editPatient')"
+        class="shrink-0 rounded-full"
         @click="emit('edit')"
       >
-        <span class="hidden sm:inline">{{ t('patientDetail.edit', 'Editar') }}</span>
+        <span class="hidden sm:inline">{{ t('patientDetail.edit') }}</span>
       </UButton>
 
       <UDropdownMenu :items="actionItems">
@@ -250,9 +230,9 @@ const actionItems = computed(() => [
           size="sm"
           trailing-icon="i-lucide-chevron-down"
           icon="i-lucide-plus"
-          class="shrink-0"
+          class="shrink-0 rounded-full"
         >
-          <span class="hidden sm:inline">{{ t('patientDetail.actions.label', 'Acciones') }}</span>
+          <span class="hidden sm:inline">{{ t('patientDetail.actions.label') }}</span>
         </UButton>
       </UDropdownMenu>
     </div>
@@ -261,7 +241,7 @@ const actionItems = computed(() => [
          Hidden when the slot has no providers via :empty:hidden. Same
          <ClientOnly> reasoning as the desktop slot above. -->
     <ClientOnly>
-      <div class="xl:hidden mt-2 empty:hidden flex flex-wrap items-center gap-1.5">
+      <div class="xl:hidden mt-3 empty:hidden flex flex-wrap items-center gap-1.5">
         <ModuleSlot
           name="patient.header.alerts"
           :ctx="{ patient }"

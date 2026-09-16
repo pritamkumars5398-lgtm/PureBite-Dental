@@ -11,7 +11,6 @@ import '../../../../ui/core/layout/window_size.dart';
 import '../../../../ui/core/widgets/app_card.dart';
 import '../../../../ui/core/widgets/app_gap.dart';
 import '../../../../ui/core/widgets/app_icon.dart';
-import '../../../../ui/core/widgets/app_page_header.dart';
 import '../../../../ui/core/widgets/app_text_field.dart';
 import '../widgets/settings_hub_page.dart';
 import 'branding_page.dart';
@@ -145,10 +144,6 @@ class _SettingsViewState extends State<SettingsView> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            child: AppPageHeader(title: l10n.settingsTitle),
-          ),
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),

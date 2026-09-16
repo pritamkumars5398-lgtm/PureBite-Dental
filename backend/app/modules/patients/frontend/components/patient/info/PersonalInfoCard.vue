@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { PatientExtended } from '~~/app/types'
+import { patientAvatarTone, patientInitials } from '../../../utils/avatarTone'
 import { computeAge, formatPatientDate } from '../../../utils/medicalSnapshot'
 
 interface Props {
@@ -15,11 +16,8 @@ const { t, locale } = useI18n()
 
 const age = computed(() => computeAge(props.patient.date_of_birth))
 
-const initials = computed(() => {
-  const first = props.patient.first_name?.[0] ?? ''
-  const last = props.patient.last_name?.[0] ?? ''
-  return (first + last).toUpperCase()
-})
+const initials = computed(() => patientInitials(props.patient.first_name, props.patient.last_name))
+const avatarTone = computed(() => patientAvatarTone(props.patient.id))
 
 const statusColor = computed<'success' | 'neutral'>(() =>
   props.patient.status === 'active' ? 'success' : 'neutral',
@@ -47,28 +45,23 @@ const genderLabel = computed(() =>
   <UCard
     role="region"
     aria-labelledby="personal-info-title"
+    :ui="{ root: 'rounded-[var(--radius-xl)]', header: 'px-5 py-4', body: 'px-5 py-2' }"
   >
     <template #header>
       <div class="flex items-center justify-between gap-3">
-        <div class="flex items-center gap-2 min-w-0">
-          <UIcon
-            name="i-lucide-user"
-            class="w-5 h-5 text-default shrink-0"
-            aria-hidden="true"
-          />
-          <h2
-            id="personal-info-title"
-            class="text-h2 text-default truncate"
-          >
-            {{ t('patients.personalInfo.title') }}
-          </h2>
-        </div>
+        <h2
+          id="personal-info-title"
+          class="text-[11px] font-semibold uppercase tracking-wide text-muted truncate"
+        >
+          {{ t('patients.personalInfo.title') }}
+        </h2>
         <UButton
           v-if="canEdit"
-          variant="soft"
+          variant="ghost"
           color="neutral"
           icon="i-lucide-pencil"
           size="sm"
+          class="rounded-full"
           :aria-label="t('patients.editDemographics')"
           @click="emit('edit')"
         >
@@ -77,30 +70,27 @@ const genderLabel = computed(() =>
       </div>
     </template>
 
-    <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-4 pb-4 border-b border-default">
-      <UAvatar
+    <div class="flex items-center gap-3 py-3 border-b border-[var(--color-border-subtle)]">
+      <img
         v-if="patient.photo_url"
         :src="patient.photo_url"
         :alt="`${patient.first_name} ${patient.last_name}`"
-        size="lg"
-        class="sm:size-2xl"
-      />
-      <UAvatar
+        class="w-10 h-10 rounded-full object-cover shrink-0"
+      >
+      <div
         v-else
-        :text="initials"
-        size="lg"
-      />
+        class="w-10 h-10 rounded-full flex items-center justify-center text-xs font-semibold shrink-0"
+        :class="avatarTone"
+        aria-hidden="true"
+      >
+        {{ initials }}
+      </div>
       <div class="min-w-0 flex-1">
-        <p class="text-h2 text-default break-words">
+        <p class="text-sm font-medium text-default break-words">
           {{ patient.first_name }} {{ patient.last_name }}
         </p>
-        <div class="flex flex-wrap items-center gap-2 mt-1">
-          <span
-            v-if="age !== null"
-            class="text-caption text-subtle"
-          >
-            {{ t('patients.personalInfo.ageLabel', { age }) }}
-          </span>
+        <p class="text-caption text-muted mt-0.5 flex flex-wrap items-center gap-2">
+          <span v-if="age !== null">{{ t('patients.personalInfo.ageLabel', { age }) }}</span>
           <UBadge
             :color="statusColor"
             variant="subtle"
@@ -108,112 +98,102 @@ const genderLabel = computed(() =>
           >
             {{ patient.status === 'active' ? t('patients.status.active') : t('patients.status.archived') }}
           </UBadge>
-        </div>
+        </p>
       </div>
     </div>
 
-    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
-      <div class="flex items-start gap-3 py-2">
+    <dl class="divide-y divide-[var(--color-border-subtle)]">
+      <div class="flex items-center gap-3 py-3">
         <UIcon
           name="i-lucide-cake"
-          class="w-4 h-4 text-subtle shrink-0 mt-1"
+          class="w-3.5 h-3.5 text-subtle shrink-0"
           aria-hidden="true"
         />
-        <div class="min-w-0">
-          <dt class="text-caption text-subtle">
-            {{ t('patients.dateOfBirth') }}
-          </dt>
-          <dd class="text-body text-default break-words">
-            {{ birthDisplay ?? '—' }}
-          </dd>
-        </div>
+        <dt class="text-[11px] font-semibold uppercase tracking-wide text-muted w-28 shrink-0">
+          {{ t('patients.dateOfBirth') }}
+        </dt>
+        <dd class="text-sm text-muted min-w-0 break-words">
+          {{ birthDisplay ?? '—' }}
+        </dd>
       </div>
 
       <div
         v-if="genderLabel"
-        class="flex items-start gap-3 py-2"
+        class="flex items-center gap-3 py-3"
       >
         <UIcon
           name="i-lucide-user-2"
-          class="w-4 h-4 text-subtle shrink-0 mt-1"
+          class="w-3.5 h-3.5 text-subtle shrink-0"
           aria-hidden="true"
         />
-        <div class="min-w-0">
-          <dt class="text-caption text-subtle">
-            {{ t('patients.gender.label') }}
-          </dt>
-          <dd class="text-body text-default break-words">
-            {{ genderLabel }}
-          </dd>
-        </div>
+        <dt class="text-[11px] font-semibold uppercase tracking-wide text-muted w-28 shrink-0">
+          {{ t('patients.gender.label') }}
+        </dt>
+        <dd class="text-sm text-muted min-w-0 break-words">
+          {{ genderLabel }}
+        </dd>
       </div>
 
       <div
         v-if="documentDisplay"
-        class="flex items-start gap-3 py-2"
+        class="flex items-center gap-3 py-3"
       >
         <UIcon
           name="i-lucide-id-card"
-          class="w-4 h-4 text-subtle shrink-0 mt-1"
+          class="w-3.5 h-3.5 text-subtle shrink-0"
           aria-hidden="true"
         />
-        <div class="min-w-0">
-          <dt class="text-caption text-subtle">
-            {{ t('patients.nationalId') }}
-          </dt>
-          <dd class="text-body text-default break-words">
-            {{ documentDisplay }}
-          </dd>
-        </div>
+        <dt class="text-[11px] font-semibold uppercase tracking-wide text-muted w-28 shrink-0">
+          {{ t('patients.nationalId') }}
+        </dt>
+        <dd class="text-sm text-muted min-w-0 break-words">
+          {{ documentDisplay }}
+        </dd>
       </div>
 
       <div
         v-if="patient.profession"
-        class="flex items-start gap-3 py-2"
+        class="flex items-center gap-3 py-3"
       >
         <UIcon
           name="i-lucide-briefcase"
-          class="w-4 h-4 text-subtle shrink-0 mt-1"
+          class="w-3.5 h-3.5 text-subtle shrink-0"
           aria-hidden="true"
         />
-        <div class="min-w-0">
-          <dt class="text-caption text-subtle">
-            {{ t('patients.profession') }}
-          </dt>
-          <dd class="text-body text-default break-words">
-            {{ patient.profession }}
-          </dd>
-        </div>
+        <dt class="text-[11px] font-semibold uppercase tracking-wide text-muted w-28 shrink-0">
+          {{ t('patients.profession') }}
+        </dt>
+        <dd class="text-sm text-muted min-w-0 break-words">
+          {{ patient.profession }}
+        </dd>
       </div>
 
       <div
         v-if="patient.workplace"
-        class="flex items-start gap-3 py-2"
+        class="flex items-center gap-3 py-3"
       >
         <UIcon
           name="i-lucide-building-2"
-          class="w-4 h-4 text-subtle shrink-0 mt-1"
+          class="w-3.5 h-3.5 text-subtle shrink-0"
           aria-hidden="true"
         />
-        <div class="min-w-0">
-          <dt class="text-caption text-subtle">
-            {{ t('patients.workplace') }}
-          </dt>
-          <dd class="text-body text-default break-words">
-            {{ patient.workplace }}
-          </dd>
-        </div>
+        <dt class="text-[11px] font-semibold uppercase tracking-wide text-muted w-28 shrink-0">
+          {{ t('patients.workplace') }}
+        </dt>
+        <dd class="text-sm text-muted min-w-0 break-words">
+          {{ patient.workplace }}
+        </dd>
       </div>
     </dl>
 
     <div
       v-if="patient.notes"
-      class="mt-4 pt-4 border-t border-default"
+      class="py-3 border-t border-[var(--color-border-subtle)]"
     >
-      <dt class="text-caption text-subtle mb-1">
+      <dt class="text-[11px] font-semibold uppercase tracking-wide text-muted mb-1">
         {{ t('patients.notes') }}
       </dt>
-      <dd class="text-body text-default whitespace-pre-wrap break-words">
+      <dd class="text-sm text-muted whitespace-pre-wrap break-words">
         {{ patient.notes }}
       </dd>
     </div>

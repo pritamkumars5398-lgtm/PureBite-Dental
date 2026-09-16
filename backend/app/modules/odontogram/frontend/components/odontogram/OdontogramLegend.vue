@@ -40,11 +40,12 @@ function toggleExpanded() {
 </script>
 
 <template>
-  <div class="odontogram-legend">
+  <div class="odontogram-legend overflow-hidden rounded-[20px] bg-surface ring-1 ring-[var(--color-border-subtle)]">
     <!-- Header (always visible) -->
     <button
       type="button"
       class="legend-header"
+      :aria-expanded="isExpanded"
       @click="toggleExpanded"
     >
       <div class="header-content">
@@ -52,7 +53,7 @@ function toggleExpanded() {
           name="i-lucide-info"
           class="w-4 h-4"
         />
-        <span class="header-title">{{ t('odontogram.legend', 'Leyenda') }}</span>
+        <span class="header-title">{{ t('odontogram.legend') }}</span>
       </div>
       <UIcon
         :name="isExpanded ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
@@ -138,99 +139,64 @@ function toggleExpanded() {
 </template>
 
 <style scoped>
-.odontogram-legend {
-  background: var(--color-gray-50);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-:root.dark .odontogram-legend {
-  background: var(--color-gray-800);
-}
-
-/* Header */
 .legend-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 10px 12px;
+  padding: 14px 20px;
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: background-color var(--motion-base) var(--motion-ease);
 }
 
 .legend-header:hover {
-  background: var(--color-gray-100);
-}
-
-:root.dark .legend-header:hover {
-  background: var(--color-gray-700);
+  background: var(--color-canvas);
 }
 
 .header-content {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--color-gray-600);
-}
-
-:root.dark .header-content {
-  color: var(--color-gray-400);
+  color: var(--color-text-muted);
 }
 
 .header-title {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
+  color: var(--color-text);
 }
 
 .chevron-icon {
-  color: var(--color-gray-400);
-  transition: transform 0.2s ease;
+  color: var(--color-text-subtle);
+  transition: transform var(--motion-base) var(--motion-ease);
 }
 
-:root.dark .chevron-icon {
-  color: var(--color-gray-500);
-}
-
-/* Content */
 .legend-content {
-  padding: 0 12px 12px;
-  border-top: 1px solid var(--color-gray-200);
-}
-
-:root.dark .legend-content {
-  border-color: var(--color-gray-700);
+  padding: 0 20px 16px;
+  border-top: 1px solid var(--color-border-subtle);
 }
 
 .legend-section {
-  padding: 10px 0;
+  padding: 12px 0;
 }
 
 .legend-section:last-child {
-  padding-bottom: 0;
+  padding-bottom: 4px;
 }
 
 .legend-section + .legend-section {
-  border-top: 1px solid var(--color-gray-200);
-}
-
-:root.dark .legend-section + .legend-section {
-  border-color: var(--color-gray-700);
+  border-top: 1px solid var(--color-border-subtle);
 }
 
 .section-title {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  color: var(--color-gray-600);
+  color: var(--color-text-subtle);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   margin-bottom: 8px;
-}
-
-:root.dark .section-title {
-  color: var(--color-gray-400);
 }
 
 /* Status list */
@@ -304,14 +270,10 @@ function toggleExpanded() {
 
 .item-label {
   font-size: 12px;
-  color: var(--color-gray-600);
+  color: var(--color-text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-:root.dark .item-label {
-  color: var(--color-gray-400);
 }
 
 /* Responsive */

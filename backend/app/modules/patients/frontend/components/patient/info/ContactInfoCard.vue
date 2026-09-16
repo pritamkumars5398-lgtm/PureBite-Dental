@@ -54,28 +54,23 @@ const guardianRelationshipLabel = computed(() => {
   <UCard
     role="region"
     aria-labelledby="contact-info-title"
+    :ui="{ root: 'rounded-[var(--radius-xl)]', header: 'px-5 py-4', body: 'px-5 py-2' }"
   >
     <template #header>
       <div class="flex items-center justify-between gap-3">
-        <div class="flex items-center gap-2 min-w-0">
-          <UIcon
-            name="i-lucide-phone"
-            class="w-5 h-5 text-default shrink-0"
-            aria-hidden="true"
-          />
-          <h2
-            id="contact-info-title"
-            class="text-h2 text-default truncate"
-          >
-            {{ t('patients.contactInfo.title') }}
-          </h2>
-        </div>
+        <h2
+          id="contact-info-title"
+          class="text-[11px] font-semibold uppercase tracking-wide text-muted truncate"
+        >
+          {{ t('patients.contactInfo.title') }}
+        </h2>
         <UButton
           v-if="canEdit"
-          variant="soft"
+          variant="ghost"
           color="neutral"
           icon="i-lucide-pencil"
           size="sm"
+          class="rounded-full"
           :aria-label="t('patients.editDemographics')"
           @click="emit('editContact')"
         >
@@ -84,7 +79,7 @@ const guardianRelationshipLabel = computed(() => {
       </div>
     </template>
 
-    <dl class="divide-y divide-default">
+    <dl class="divide-y divide-[var(--color-border-subtle)]">
       <CopyableField
         icon="i-lucide-phone"
         :label="t('patients.phone')"
@@ -102,37 +97,35 @@ const guardianRelationshipLabel = computed(() => {
 
       <div
         v-if="formattedAddress"
-        class="flex items-start gap-3 py-2"
+        class="flex items-start gap-3 py-3"
       >
         <UIcon
           name="i-lucide-map-pin"
-          class="w-4 h-4 text-subtle shrink-0 mt-1"
+          class="w-3.5 h-3.5 text-subtle shrink-0 mt-0.5"
           aria-hidden="true"
         />
-        <div class="flex-1 min-w-0 flex flex-col sm:flex-row sm:gap-3">
-          <dt class="text-caption text-subtle sm:w-32 sm:shrink-0">
-            {{ t('patients.contactInfo.address') }}
-          </dt>
-          <dd class="text-body text-default break-words">
-            <span
-              v-for="(line, idx) in formattedAddress"
-              :key="idx"
-              class="block"
-            >{{ line }}</span>
-          </dd>
-        </div>
+        <dt class="text-[11px] font-semibold uppercase tracking-wide text-muted w-28 shrink-0">
+          {{ t('patients.contactInfo.address') }}
+        </dt>
+        <dd class="text-sm text-muted min-w-0 flex-1 break-words">
+          <span
+            v-for="(line, idx) in formattedAddress"
+            :key="idx"
+            class="block"
+          >{{ line }}</span>
+        </dd>
       </div>
     </dl>
 
     <!-- Emergency contact sub-block -->
     <section
-      class="mt-4 pt-4 border-t border-default"
+      class="mt-2 pt-3 border-t border-[var(--color-border-subtle)]"
       aria-labelledby="emergency-contact-title"
     >
       <div class="flex items-center justify-between gap-3 mb-2">
         <h3
           id="emergency-contact-title"
-          class="text-caption uppercase tracking-wide text-subtle flex items-center gap-1.5"
+          class="text-[11px] font-semibold uppercase tracking-wide text-muted flex items-center gap-1.5"
         >
           <UIcon
             name="i-lucide-phone-call"
@@ -153,22 +146,26 @@ const guardianRelationshipLabel = computed(() => {
       </div>
 
       <div v-if="patient.emergency_contact">
-        <p class="text-body text-default break-words">
+        <p class="text-sm font-medium text-default break-words">
           {{ patient.emergency_contact.name }}
           <span
             v-if="emergencyRelationshipLabel"
-            class="text-subtle"
+            class="text-muted font-normal"
           >· {{ emergencyRelationshipLabel }}</span>
         </p>
         <a
           :href="`tel:${patient.emergency_contact.phone}`"
-          class="text-primary-accent hover:underline break-words"
+          class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-[var(--color-primary)] break-words"
         >
+          <UIcon
+            name="i-lucide-phone"
+            class="w-3.5 h-3.5 text-subtle"
+          />
           {{ patient.emergency_contact.phone }}
         </a>
         <p
           v-if="patient.emergency_contact.email"
-          class="text-caption text-subtle break-words"
+          class="text-sm text-muted break-words"
         >
           {{ patient.emergency_contact.email }}
         </p>
@@ -201,13 +198,13 @@ const guardianRelationshipLabel = computed(() => {
     <!-- Legal guardian sub-block (only if minor) -->
     <section
       v-if="isMinor"
-      class="mt-4 pt-4 border-t border-default"
+      class="mt-2 pt-3 border-t border-[var(--color-border-subtle)]"
       aria-labelledby="legal-guardian-title"
     >
       <div class="flex items-center justify-between gap-3 mb-2">
         <h3
           id="legal-guardian-title"
-          class="text-caption uppercase tracking-wide text-subtle flex items-center gap-1.5"
+          class="text-[11px] font-semibold uppercase tracking-wide text-muted flex items-center gap-1.5"
         >
           <UIcon
             name="i-lucide-shield-check"
@@ -228,23 +225,27 @@ const guardianRelationshipLabel = computed(() => {
       </div>
 
       <div v-if="patient.legal_guardian">
-        <p class="text-body text-default break-words">
+        <p class="text-sm font-medium text-default break-words">
           {{ patient.legal_guardian.name }}
           <span
             v-if="guardianRelationshipLabel"
-            class="text-subtle"
+            class="text-muted font-normal"
           >· {{ guardianRelationshipLabel }}</span>
         </p>
         <p
           v-if="patient.legal_guardian.dni"
-          class="text-caption text-subtle break-words"
+          class="text-sm text-muted break-words"
         >
           {{ patient.legal_guardian.dni }}
         </p>
         <a
           :href="`tel:${patient.legal_guardian.phone}`"
-          class="text-primary-accent hover:underline break-words"
+          class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-[var(--color-primary)] break-words"
         >
+          <UIcon
+            name="i-lucide-phone"
+            class="w-3.5 h-3.5 text-subtle"
+          />
           {{ patient.legal_guardian.phone }}
         </a>
       </div>

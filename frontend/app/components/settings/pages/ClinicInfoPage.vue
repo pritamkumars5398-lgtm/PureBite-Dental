@@ -206,6 +206,7 @@ function formatAddress(address?: Record<string, string>): string {
   <SectionCard
     icon="i-lucide-building-2"
     :title="t('settings.clinicInfo')"
+    class="!rounded-[var(--radius-xl)]"
   >
     <template
       v-if="canEdit && !editing"
@@ -297,7 +298,7 @@ function formatAddress(address?: Record<string, string>): string {
         to="/settings/general/branding"
         size="xs"
         color="primary"
-        variant="soft"
+        variant="solid"
         icon="i-lucide-arrow-right"
         trailing
       >
@@ -430,6 +431,8 @@ function formatAddress(address?: Record<string, string>): string {
         </UButton>
         <UButton
           type="submit"
+          color="primary"
+          variant="solid"
           :loading="isSaving"
         >
           {{ t('settings.saveChanges') }}

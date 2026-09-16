@@ -21,6 +21,28 @@ const form = ref({
   internal_notes: ''
 })
 
+const AVATAR_TONES = [
+  'bg-violet-100 text-violet-700',
+  'bg-sky-100 text-sky-700',
+  'bg-blue-100 text-blue-700',
+  'bg-pink-100 text-pink-700',
+  'bg-emerald-100 text-emerald-800',
+  'bg-amber-100 text-amber-800',
+  'bg-rose-100 text-rose-700',
+] as const
+
+function patientInitials(p: Patient): string {
+  const a = (p.first_name || '').trim().charAt(0)
+  const b = (p.last_name || '').trim().charAt(0)
+  return `${a}${b}`.toUpperCase() || '?'
+}
+
+function avatarTone(id: string): string {
+  let h = 0
+  for (let i = 0; i < id.length; i++) h = (h + id.charCodeAt(i) * (i + 1)) % AVATAR_TONES.length
+  return AVATAR_TONES[h] ?? AVATAR_TONES[0]
+}
+
 // Fetch professionals on mount
 onMounted(() => {
   fetchProfessionals()
@@ -94,88 +116,234 @@ function goBack() {
 </script>
 
 <template>
-  <div class="max-w-2xl mx-auto space-y-6">
-    <!-- Header -->
-    <div class="flex items-center gap-4">
+  <div
+    class="overflow-hidden bg-[var(--color-surface)]"
+    style="border-radius: var(--radius-xl)"
+  >
+    <header class="px-5 sm:px-6 pt-5 sm:pt-6">
       <UButton
         variant="ghost"
         color="neutral"
         icon="i-lucide-arrow-left"
+        size="sm"
+        class="-ml-2 mb-3"
         @click="goBack"
-      />
-      <h1 class="text-display text-default">
+      >
+        {{ t('clinical.plans.backToList') }}
+      </UButton>
+      <h1 class="text-display text-default text-pretty">
         {{ t('treatmentPlans.create') }}
       </h1>
-    </div>
+      <p class="mt-1 text-body text-muted text-pretty">
+        {{ t('treatmentPlans.createSubtitle') }}
+      </p>
+    </header>
 
-    <UCard>
-      <form
-        class="space-y-6"
-        @submit.prevent="handleSubmit"
-      >
-        <!-- Patient selection -->
-        <UFormField
-          :label="t('treatmentPlans.patient')"
-          required
+    <form @submit.prevent="handleSubmit">
+      <div class="px-5 sm:px-6 py-4 border-t border-[var(--color-border-subtle)] mt-4">
+        <p class="text-[11px] font-semibold uppercase tracking-wide text-muted mb-3">
+          {{ t('treatmentPlans.patient') }}
+        </p>
+
+        <div
+          v-if="selectedPatient"
+          class="overflow-hidden rounded-[var(--radius-lg)] ring-1 ring-[var(--color-border)]"
         >
-          <!-- Selected patient -->
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-subtle">
+                <th class="px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted">
+                  {{ t('patients.columns.patientName') }}
+                </th>
+                <th class="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted hidden sm:table-cell">
+                  {{ t('patients.phone') }}
+                </th>
+                <th class="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted hidden md:table-cell">
+                  {{ t('patients.email') }}
+                </th>
+                <th class="w-24 px-3 py-3" />
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="px-4 py-3.5">
+                  <div class="flex items-center gap-3 min-w-0">
+                    <div
+                      class="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-semibold shrink-0"
+                      :class="avatarTone(selectedPatient.id)"
+                    >
+                      {{ patientInitials(selectedPatient) }}
+                    </div>
+                    <div class="min-w-0">
+                      <div class="text-sm font-medium text-default truncate">
+                        {{ selectedPatient.first_name }} {{ selectedPatient.last_name }}
+                      </div>
+                      <div
+                        v-if="selectedPatient.patient_number"
+                        class="text-caption text-subtle font-mono truncate"
+                      >
+                        {{ selectedPatient.patient_number }}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-3 py-3.5 hidden sm:table-cell">
+                  <span
+                    v-if="selectedPatient.phone"
+                    class="inline-flex items-center gap-1.5 text-sm text-muted"
+                  >
+                    <UIcon
+                      name="i-lucide-phone"
+                      class="w-3.5 h-3.5 text-subtle shrink-0"
+                    />
+                    {{ selectedPatient.phone }}
+                  </span>
+                  <span
+                    v-else
+                    class="text-sm text-subtle"
+                  >—</span>
+                </td>
+                <td class="px-3 py-3.5 hidden md:table-cell">
+                  <span
+                    v-if="selectedPatient.email"
+                    class="inline-flex items-center gap-1.5 text-sm text-muted"
+                  >
+                    <UIcon
+                      name="i-lucide-mail"
+                      class="w-3.5 h-3.5 text-subtle shrink-0"
+                    />
+                    {{ selectedPatient.email }}
+                  </span>
+                  <span
+                    v-else
+                    class="text-sm text-subtle"
+                  >—</span>
+                </td>
+                <td class="px-3 py-3.5 text-right">
+                  <UButton
+                    type="button"
+                    variant="ghost"
+                    color="neutral"
+                    size="sm"
+                    class="rounded-full"
+                    @click="clearPatient"
+                  >
+                    {{ t('treatmentPlans.changePatient') }}
+                  </UButton>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div
+          v-else
+          class="space-y-3"
+        >
+          <UInput
+            v-model="searchQuery"
+            :placeholder="t('patients.searchPlaceholder')"
+            icon="i-lucide-search"
+            :loading="searchLoading"
+            class="max-w-sm rounded-full w-full"
+          />
+          <p class="text-caption text-subtle">
+            {{ t('treatmentPlans.selectPatientHint') }}
+          </p>
+
           <div
-            v-if="selectedPatient"
-            class="flex items-center justify-between p-3 bg-surface-muted rounded-lg"
+            v-if="patients.length > 0"
+            class="overflow-hidden rounded-[var(--radius-lg)] ring-1 ring-[var(--color-border)]"
           >
-            <div>
-              <p class="font-medium">
-                {{ selectedPatient.last_name }}, {{ selectedPatient.first_name }}
-              </p>
-              <p class="text-caption text-subtle">
-                {{ selectedPatient.phone }}
-              </p>
-            </div>
-            <UButton
-              variant="ghost"
-              color="neutral"
-              icon="i-lucide-x"
-              size="sm"
-              @click="clearPatient"
-            />
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-subtle">
+                  <th class="px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted">
+                    {{ t('patients.columns.patientName') }}
+                  </th>
+                  <th class="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted hidden sm:table-cell">
+                    {{ t('patients.phone') }}
+                  </th>
+                  <th class="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted hidden md:table-cell">
+                    {{ t('patients.email') }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="patient in patients"
+                  :key="patient.id"
+                  class="border-b border-subtle last:border-b-0 hover:bg-surface-muted/70 cursor-pointer transition-colors"
+                  @click="selectPatient(patient)"
+                >
+                  <td class="px-4 py-3.5">
+                    <div class="flex items-center gap-3 min-w-0">
+                      <div
+                        class="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-semibold shrink-0"
+                        :class="avatarTone(patient.id)"
+                      >
+                        {{ patientInitials(patient) }}
+                      </div>
+                      <div class="min-w-0">
+                        <div class="text-sm font-medium text-default truncate">
+                          {{ patient.first_name }} {{ patient.last_name }}
+                        </div>
+                        <div
+                          v-if="patient.patient_number"
+                          class="text-caption text-subtle font-mono truncate"
+                        >
+                          {{ patient.patient_number }}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-3 py-3.5 hidden sm:table-cell">
+                    <span
+                      v-if="patient.phone"
+                      class="inline-flex items-center gap-1.5 text-sm text-muted"
+                    >
+                      <UIcon
+                        name="i-lucide-phone"
+                        class="w-3.5 h-3.5 text-subtle shrink-0"
+                      />
+                      {{ patient.phone }}
+                    </span>
+                    <span
+                      v-else
+                      class="text-sm text-subtle"
+                    >—</span>
+                  </td>
+                  <td class="px-3 py-3.5 hidden md:table-cell">
+                    <span
+                      v-if="patient.email"
+                      class="inline-flex items-center gap-1.5 text-sm text-muted"
+                    >
+                      <UIcon
+                        name="i-lucide-mail"
+                        class="w-3.5 h-3.5 text-subtle shrink-0"
+                      />
+                      {{ patient.email }}
+                    </span>
+                    <span
+                      v-else
+                      class="text-sm text-subtle"
+                    >—</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
 
-          <!-- Search input -->
-          <div
-            v-else
-            class="relative"
+          <p
+            v-else-if="searchQuery.length >= 2 && !searchLoading"
+            class="text-sm text-muted"
           >
-            <UInput
-              v-model="searchQuery"
-              :placeholder="t('patients.searchPlaceholder')"
-              icon="i-lucide-search"
-              :loading="searchLoading"
-            />
+            {{ t('treatmentPlans.noPatientResults') }}
+          </p>
+        </div>
+      </div>
 
-            <!-- Search results dropdown -->
-            <div
-              v-if="patients.length > 0"
-              class="absolute z-10 mt-1 w-full bg-surface border border-default rounded-lg shadow-lg max-h-60 overflow-auto"
-            >
-              <button
-                v-for="patient in patients"
-                :key="patient.id"
-                type="button"
-                class="w-full px-4 py-2 text-left hover:bg-surface-muted"
-                @click="selectPatient(patient)"
-              >
-                <p class="font-medium">
-                  {{ patient.last_name }}, {{ patient.first_name }}
-                </p>
-                <p class="text-caption text-subtle">
-                  {{ patient.phone }}
-                </p>
-              </button>
-            </div>
-          </div>
-        </UFormField>
-
-        <!-- Title -->
+      <div class="px-5 sm:px-6 py-5 border-t border-[var(--color-border-subtle)] space-y-5">
         <UFormField :label="t('treatmentPlans.fields.title')">
           <UInput
             v-model="form.title"
@@ -183,7 +351,6 @@ function goBack() {
           />
         </UFormField>
 
-        <!-- Assigned professional -->
         <UFormField :label="t('treatmentPlans.fields.assignedProfessional')">
           <USelect
             v-model="form.assigned_professional_id"
@@ -193,7 +360,6 @@ function goBack() {
           />
         </UFormField>
 
-        <!-- Diagnosis notes -->
         <UFormField :label="t('treatmentPlans.fields.diagnosisNotes')">
           <UTextarea
             v-model="form.diagnosis_notes"
@@ -202,7 +368,6 @@ function goBack() {
           />
         </UFormField>
 
-        <!-- Internal notes -->
         <UFormField :label="t('treatmentPlans.fields.internalNotes')">
           <UTextarea
             v-model="form.internal_notes"
@@ -210,25 +375,28 @@ function goBack() {
             :placeholder="t('treatmentPlans.fields.internalNotesPlaceholder')"
           />
         </UFormField>
+      </div>
 
-        <!-- Actions -->
-        <div class="flex justify-end gap-3 pt-4 border-t">
-          <UButton
-            variant="ghost"
-            color="neutral"
-            @click="goBack"
-          >
-            {{ t('actions.cancel') }}
-          </UButton>
-          <UButton
-            type="submit"
-            :loading="loading"
-            :disabled="!selectedPatient"
-          >
-            {{ t('actions.create') }}
-          </UButton>
-        </div>
-      </form>
-    </UCard>
+      <div class="px-5 sm:px-6 py-4 border-t border-[var(--color-border-subtle)] flex justify-end gap-3">
+        <UButton
+          type="button"
+          variant="ghost"
+          color="neutral"
+          class="rounded-full"
+          @click="goBack"
+        >
+          {{ t('actions.cancel') }}
+        </UButton>
+        <UButton
+          type="submit"
+          color="primary"
+          class="rounded-full"
+          :loading="loading"
+          :disabled="!selectedPatient"
+        >
+          {{ t('actions.create') }}
+        </UButton>
+      </div>
+    </form>
   </div>
 </template>

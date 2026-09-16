@@ -77,6 +77,7 @@ async function handleDelete() {
   <SectionCard
     icon="i-lucide-door-open"
     :title="t('settings.cabinets')"
+    class="!rounded-[var(--radius-xl)]"
   >
     <template
       v-if="isAdmin"
@@ -84,8 +85,9 @@ async function handleDelete() {
     >
       <UButton
         icon="i-lucide-plus"
-        size="xs"
-        variant="ghost"
+        size="sm"
+        color="primary"
+        variant="solid"
         @click="openCreate"
       >
         {{ t('settings.addCabinet') }}
@@ -160,7 +162,7 @@ async function handleDelete() {
       description="Create a new dental cabinet or operatory"
     >
       <template #content>
-        <UCard>
+        <UCard class="!rounded-[var(--radius-xl)]">
           <template #header>
             <div class="flex items-center gap-2">
               <UIcon
@@ -207,6 +209,8 @@ async function handleDelete() {
               </UButton>
               <UButton
                 type="submit"
+                color="primary"
+                variant="solid"
                 :loading="isCreating"
               >
                 {{ t('settings.createCabinet') }}
@@ -224,7 +228,7 @@ async function handleDelete() {
       description="Update dental cabinet details"
     >
       <template #content>
-        <UCard>
+        <UCard class="!rounded-[var(--radius-xl)]">
           <template #header>
             <div class="flex items-center gap-2">
               <UIcon
@@ -271,6 +275,8 @@ async function handleDelete() {
               </UButton>
               <UButton
                 type="submit"
+                color="primary"
+                variant="solid"
                 :loading="isEditing"
               >
                 {{ t('settings.saveChanges') }}
@@ -288,7 +294,7 @@ async function handleDelete() {
       description="Delete dental cabinet operatory"
     >
       <template #content>
-        <UCard>
+        <UCard class="!rounded-[var(--radius-xl)]">
           <template #header>
             <div class="flex items-center gap-2">
               <UIcon

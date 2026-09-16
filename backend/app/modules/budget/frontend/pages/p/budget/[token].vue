@@ -251,7 +251,7 @@ const greeting = computed(() => {
 
     <!-- Cold states -->
     <div v-else-if="meta.locked || meta.expired" class="container py-8 space-y-4">
-      <UCard>
+      <UCard class="!rounded-[20px] border-subtle ring-1 ring-[var(--color-border-subtle)]">
         <div class="flex flex-col items-center text-center gap-3 py-8 px-4">
           <div
             class="w-14 h-14 rounded-full flex items-center justify-center"
@@ -286,7 +286,7 @@ const greeting = computed(() => {
       v-else-if="meta.already_decided"
       class="container py-8 space-y-4"
     >
-      <UCard>
+      <UCard class="!rounded-[20px] border-subtle ring-1 ring-[var(--color-border-subtle)]">
         <div class="flex flex-col items-center text-center gap-3 py-8 px-4">
           <div
             class="w-14 h-14 rounded-full flex items-center justify-center"
@@ -405,7 +405,7 @@ const greeting = computed(() => {
         />
 
         <!-- Treatments card -->
-        <UCard class="treatments-card">
+        <UCard class="treatments-card !rounded-[20px] border-subtle">
           <template #header>
             <div class="flex items-center justify-between">
               <h2 class="card-title">{{ t('budget.public.items') }}</h2>
@@ -435,7 +435,7 @@ const greeting = computed(() => {
         </UCard>
 
         <!-- Total card (visually loud) -->
-        <UCard class="total-card">
+        <UCard class="total-card !rounded-[20px]">
           <dl class="totals">
             <div class="totals-row">
               <dt>{{ t('budget.public.subtotal') }}</dt>
@@ -915,10 +915,11 @@ const greeting = computed(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 16px;
-  border-radius: 12px;
-  background: var(--ui-bg-elevated);
-  border: 1px solid var(--ui-border);
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: var(--color-surface, #fff);
+  border: 1px solid var(--color-border-subtle, var(--ui-border));
+  box-shadow: var(--shadow-md);
 }
 
 .contact-title {

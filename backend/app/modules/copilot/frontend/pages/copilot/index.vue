@@ -11,22 +11,26 @@ if (!can(PERMISSIONS.copilot.chat)) {
 </script>
 
 <template>
-  <div class="mx-auto flex h-[calc(100vh-8rem)] max-w-3xl flex-col">
-    <div class="mb-3 flex items-start justify-between gap-3">
+  <div
+    class="mx-auto flex h-[calc(100vh-8rem)] max-w-3xl flex-col overflow-hidden bg-[var(--color-surface)]"
+    style="border-radius: var(--radius-xl)"
+  >
+    <div class="flex items-start justify-between gap-3 px-5 sm:px-6 pt-5 pb-3">
       <div>
-        <h1 class="text-xl font-semibold">
+        <h1 class="sr-only">
           {{ t('copilot.page.title') }}
         </h1>
-        <p class="text-sm text-muted">
+        <p class="text-body text-muted">
           {{ t('copilot.page.subtitle') }}
         </p>
       </div>
       <UButton
         v-if="messages.length"
         icon="i-lucide-plus"
-        color="neutral"
-        variant="outline"
+        color="primary"
+        variant="solid"
         size="sm"
+        class="rounded-full"
         :disabled="busy"
         @click="reset"
       >
@@ -34,11 +38,8 @@ if (!can(PERMISSIONS.copilot.chat)) {
       </UButton>
     </div>
 
-    <UCard
-      class="flex-1 overflow-hidden"
-      :ui="{ body: 'h-full p-3 sm:p-4' }"
-    >
+    <div class="flex-1 overflow-hidden px-3 sm:px-4 pb-4">
       <CopilotDrawer />
-    </UCard>
+    </div>
   </div>
 </template>

@@ -101,14 +101,14 @@ function getTreatmentLabel(type: string): string {
 </script>
 
 <template>
-  <div class="treatment-summary">
+  <div class="treatment-summary rounded-[20px] bg-surface ring-1 ring-[var(--color-border-subtle)] p-5">
     <!-- Header -->
     <div class="summary-header">
-      <h4 class="text-sm font-semibold text-muted">
+      <h4 class="text-h3 text-default">
         {{ t('odontogram.treatments.title') }}
       </h4>
       <span class="text-caption text-subtle">
-        {{ totalTreatments }} total
+        {{ t('odontogram.summary.total', { n: totalTreatments }) }}
       </span>
     </div>
 
@@ -156,7 +156,7 @@ function getTreatmentLabel(type: string): string {
         </div>
         <div class="treatment-stats">
           <span class="treatment-count">{{ entry.count }}</span>
-          <span class="teeth-count">{{ entry.teeth.length }} {{ t('odontogram.tooth').toLowerCase() }}{{ entry.teeth.length > 1 ? 's' : '' }}</span>
+          <span class="teeth-count">{{ t('odontogram.summary.toothCount', entry.teeth.length) }}</span>
         </div>
       </div>
 
@@ -180,7 +180,7 @@ function getTreatmentLabel(type: string): string {
     >
       <div class="stat">
         <span class="stat-value">{{ uniqueTeethCount }}</span>
-        <span class="stat-label">{{ t('odontogram.tooth') }}{{ uniqueTeethCount > 1 ? 's' : '' }}</span>
+        <span class="stat-label">{{ t('odontogram.summary.teethLabel', uniqueTeethCount) }}</span>
       </div>
       <div class="stat">
         <span class="stat-value">{{ treatmentsByStatus.planned }}</span>
@@ -195,18 +195,6 @@ function getTreatmentLabel(type: string): string {
 </template>
 
 <style scoped>
-.treatment-summary {
-  background: white;
-  border: 1px solid #E5E7EB;
-  border-radius: 12px;
-  padding: 16px;
-}
-
-:root.dark .treatment-summary {
-  background: #1F2937;
-  border-color: #374151;
-}
-
 .summary-header {
   display: flex;
   justify-content: space-between;
@@ -226,23 +214,15 @@ function getTreatmentLabel(type: string): string {
   align-items: center;
   gap: 4px;
   padding: 4px 10px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   font-size: 12px;
-  background: #F4F4F5;
+  background: var(--color-canvas);
   border: 1px solid transparent;
-  transition: all 0.15s ease;
-}
-
-:root.dark .status-badge {
-  background: #27272A;
+  transition: background var(--motion-base) var(--motion-ease), border-color var(--motion-base) var(--motion-ease);
 }
 
 .status-badge:hover {
-  background: #E4E4E7;
-}
-
-:root.dark .status-badge:hover {
-  background: #3F3F46;
+  background: var(--color-surface-muted);
 }
 
 .status-badge.active {
@@ -250,13 +230,13 @@ function getTreatmentLabel(type: string): string {
 }
 
 .status-badge.active.planned {
-  background: #FEF2F2;
-  color: #DC2626;
+  background: var(--color-warning-soft);
+  color: var(--color-warning-text);
 }
 
 .status-badge.active.existing {
-  background: #F4F4F5;
-  color: #52525B;
+  background: var(--color-canvas);
+  color: var(--color-text);
 }
 
 .status-dot {
@@ -270,18 +250,13 @@ function getTreatmentLabel(type: string): string {
 }
 
 .status-label {
-  color: #6B7280;
+  color: var(--color-text-muted);
 }
 
-/* Divider */
 .divider {
   height: 1px;
-  background: #E5E7EB;
+  background: var(--color-border-subtle);
   margin: 12px 0;
-}
-
-:root.dark .divider {
-  background: #374151;
 }
 
 /* Treatments list */
@@ -298,17 +273,13 @@ function getTreatmentLabel(type: string): string {
   justify-content: space-between;
   align-items: center;
   padding: 8px 10px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background var(--motion-base) var(--motion-ease);
 }
 
 .treatment-row:hover {
-  background: #F4F4F5;
-}
-
-:root.dark .treatment-row:hover {
-  background: #27272A;
+  background: var(--color-canvas);
 }
 
 .treatment-info {
@@ -326,11 +297,7 @@ function getTreatmentLabel(type: string): string {
 .treatment-name {
   font-size: 13px;
   font-weight: 500;
-  color: #374151;
-}
-
-:root.dark .treatment-name {
-  color: #E5E7EB;
+  color: var(--color-text);
 }
 
 .treatment-stats {
@@ -342,16 +309,12 @@ function getTreatmentLabel(type: string): string {
 .treatment-count {
   font-size: 14px;
   font-weight: 600;
-  color: #374151;
-}
-
-:root.dark .treatment-count {
-  color: #E5E7EB;
+  color: var(--color-text);
 }
 
 .teeth-count {
   font-size: 11px;
-  color: #9CA3AF;
+  color: var(--color-text-subtle);
 }
 
 /* Empty state */
@@ -369,11 +332,7 @@ function getTreatmentLabel(type: string): string {
   justify-content: space-around;
   padding-top: 12px;
   margin-top: 12px;
-  border-top: 1px solid #E5E7EB;
-}
-
-:root.dark .summary-footer {
-  border-color: #374151;
+  border-top: 1px solid var(--color-border-subtle);
 }
 
 .stat {
@@ -383,19 +342,17 @@ function getTreatmentLabel(type: string): string {
 }
 
 .stat-value {
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 700;
-  color: #374151;
-}
-
-:root.dark .stat-value {
-  color: #E5E7EB;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
 }
 
 .stat-label {
   font-size: 10px;
   text-transform: uppercase;
-  color: #9CA3AF;
+  color: var(--color-text-subtle);
   letter-spacing: 0.05em;
+  text-align: center;
 }
 </style>

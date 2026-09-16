@@ -26,6 +26,14 @@ function loadModuleLayers(): string[] {
 
 const moduleLayers = loadModuleLayers()
 const modulesJsonPath = resolve(__dirname, 'modules.json')
+const appVersion = (() => {
+  try {
+    const pkg = JSON.parse(readFileSync(resolve(__dirname, 'package.json'), 'utf-8')) as { version?: string }
+    return pkg.version || '2.0.0'
+  } catch {
+    return '2.0.0'
+  }
+})()
 
 export default defineNuxtConfig({
 
@@ -75,7 +83,8 @@ export default defineNuxtConfig({
       demoMode: process.env.NUXT_PUBLIC_DEMO_MODE === 'true',
       // Documentation portal origin used by the in-app help drawer
       // (Fase 5 of issue #75). Empty disables the help button.
-      docsUrl: process.env.NUXT_PUBLIC_DOCS_URL || 'https://docs.dentalpin.com'
+      docsUrl: process.env.NUXT_PUBLIC_DOCS_URL || 'https://docs.dentalpin.com',
+      appVersion
     }
   },
   srcDir: 'app',

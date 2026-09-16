@@ -522,6 +522,12 @@ function getItemName(item: BudgetItem): string {
   if (!item.catalog_item) return '-'
   return item.catalog_item.names[locale.value] || item.catalog_item.names.es || item.catalog_item.internal_code
 }
+
+const clinicCardClass = '!rounded-[20px] border-subtle ring-1 ring-[var(--color-border-subtle)] bg-surface'
+
+const hasLineDiscounts = computed(() =>
+  (currentBudget.value?.items ?? []).some(item => item.line_discount > 0)
+)
 </script>
 
 <template>
@@ -532,7 +538,13 @@ function getItemName(item: BudgetItem): string {
       class="space-y-4"
     >
       <USkeleton class="h-12 w-1/3" />
-      <USkeleton class="h-64 w-full" />
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <USkeleton class="h-24 rounded-[20px]" />
+        <USkeleton class="h-24 rounded-[20px]" />
+        <USkeleton class="h-24 rounded-[20px]" />
+        <USkeleton class="h-24 rounded-[20px]" />
+      </div>
+      <USkeleton class="h-64 w-full rounded-[20px]" />
     </div>
 
     <template v-else-if="currentBudget">
@@ -565,15 +577,53 @@ function getItemName(item: BudgetItem): string {
         </template>
       </DetailPageHeader>
 
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div :class="clinicCardClass" class="p-5">
+          <p class="text-caption text-subtle">
+            {{ t('budget.total') }}
+          </p>
+          <p class="mt-1 text-h1 text-default tabular-nums tracking-tight">
+            {{ formatMoney(currentBudget.total) }}
+          </p>
+        </div>
+        <div :class="clinicCardClass" class="p-5">
+          <p class="text-caption text-subtle">
+            {{ t('budget.items.title') }}
+          </p>
+          <p class="mt-1 text-h1 text-default tabular-nums tracking-tight">
+            {{ currentBudget.items.length }}
+          </p>
+          <p class="mt-1 text-caption text-muted">
+            {{ currentBudget.items.length === 1 ? t('budget.items.singular') : t('budget.items.plural') }}
+          </p>
+        </div>
+        <div :class="clinicCardClass" class="p-5">
+          <p class="text-caption text-subtle">
+            {{ t('budget.validUntil') }}
+          </p>
+          <p class="mt-1 text-h2 text-default">
+            {{ currentBudget.valid_until ? formatDate(currentBudget.valid_until) : t('budget.noExpiry') }}
+          </p>
+        </div>
+        <div :class="clinicCardClass" class="p-5">
+          <p class="text-caption text-subtle">
+            {{ t('budget.subtotal') }}
+          </p>
+          <p class="mt-1 text-h1 text-default tabular-nums tracking-tight">
+            {{ formatMoney(currentBudget.subtotal) }}
+          </p>
+        </div>
+      </div>
+
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Main content -->
         <div class="lg:col-span-2 space-y-6">
           <!-- Budget details -->
-          <UCard>
+          <UCard :class="clinicCardClass">
             <template #header>
               <div class="flex items-center justify-between">
-                <h2 class="text-h1 text-default">
-                  {{ t('budget.view') }}
+                <h2 class="text-h2 text-default">
+                  {{ t('budget.details') }}
                 </h2>
                 <UButton
                   v-if="canEdit(currentBudget) && can(PERMISSIONS.budget.write) && !isEditing"
@@ -591,32 +641,44 @@ function getItemName(item: BudgetItem): string {
             <!-- View mode -->
             <div
               v-if="!isEditing"
-              class="grid grid-cols-1 sm:grid-cols-2 gap-4"
+              class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5"
             >
               <div>
                 <span class="text-caption text-subtle">{{ t('budget.validFrom') }}</span>
-                <p class="font-medium">
+                <p class="mt-0.5 font-medium text-default">
                   {{ formatDate(currentBudget.valid_from) }}
                 </p>
               </div>
               <div>
                 <span class="text-caption text-subtle">{{ t('budget.validUntil') }}</span>
-                <p class="font-medium">
+                <p class="mt-0.5 font-medium text-default">
                   {{ currentBudget.valid_until ? formatDate(currentBudget.valid_until) : t('budget.noExpiry') }}
                 </p>
               </div>
               <div v-if="currentBudget.global_discount_value">
                 <span class="text-caption text-subtle">{{ t('budget.globalDiscount') }}</span>
-                <p class="font-medium">
+                <p class="mt-0.5 font-medium text-default">
                   {{ currentBudget.global_discount_type === 'percentage'
                     ? `${currentBudget.global_discount_value}%`
                     : formatMoney(currentBudget.global_discount_value) }}
                 </p>
               </div>
-              <div v-if="currentBudget.patient_notes">
+              <div
+                v-if="currentBudget.patient_notes"
+                class="sm:col-span-2"
+              >
                 <span class="text-caption text-subtle">{{ t('budget.patientNotes') }}</span>
-                <p class="mt-1">
+                <p class="mt-0.5 text-body text-default">
                   {{ currentBudget.patient_notes }}
+                </p>
+              </div>
+              <div
+                v-if="currentBudget.internal_notes"
+                class="sm:col-span-2"
+              >
+                <span class="text-caption text-subtle">{{ t('budget.internalNotes') }}</span>
+                <p class="mt-0.5 text-body text-muted">
+                  {{ currentBudget.internal_notes }}
                 </p>
               </div>
             </div>
@@ -698,12 +760,18 @@ function getItemName(item: BudgetItem): string {
           </UCard>
 
           <!-- Items -->
-          <UCard>
+          <UCard :class="clinicCardClass">
             <template #header>
-              <div class="flex items-center justify-between">
-                <h2 class="text-h1 text-default">
-                  {{ t('budget.items.title') }}
-                </h2>
+              <div class="flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                  <h2 class="text-h2 text-default">
+                    {{ t('budget.items.title') }}
+                  </h2>
+                  <p class="text-caption text-subtle mt-0.5">
+                    {{ currentBudget.items.length }}
+                    {{ currentBudget.items.length === 1 ? t('budget.items.singular') : t('budget.items.plural') }}
+                  </p>
+                </div>
                 <UButton
                   v-if="canEdit(currentBudget) && can(PERMISSIONS.budget.write)"
                   icon="i-lucide-plus"
@@ -717,67 +785,95 @@ function getItemName(item: BudgetItem): string {
 
             <div
               v-if="currentBudget.items.length === 0"
-              class="text-center py-8 text-subtle"
+              class="text-center py-10 px-4 rounded-2xl bg-canvas"
             >
-              {{ t('budget.items.empty') }}
+              <p class="text-subtle">
+                {{ t('budget.items.empty') }}
+              </p>
             </div>
 
-            <div v-else>
-              <div class="divide-y divide-[var(--color-border-subtle)]">
-                <div
-                  v-for="item in currentBudget.items"
-                  :key="item.id"
-                  class="py-4 -mx-4 px-4 flex items-start gap-4 hover:bg-[var(--ui-bg-elevated)] transition-colors"
-                >
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2 flex-wrap">
-                      <span class="font-medium">{{ getItemName(item) }}</span>
-                      <span
-                        v-if="item.tooth_number"
-                        class="inline-flex items-center px-1.5 py-0.5 rounded bg-[var(--ui-bg-elevated)] text-caption font-medium text-default"
-                      >
-                        #{{ item.tooth_number }}
-                        <span
-                          v-if="item.surfaces?.length"
-                          class="ml-1 text-subtle font-normal"
-                        >
-                          {{ item.surfaces.join(', ') }}
-                        </span>
-                      </span>
-                    </div>
-                    <div class="text-caption text-subtle mt-1 tabular-nums">
-                      {{ item.quantity }} × {{ formatMoney(item.unit_price) }}
-                      <span
-                        v-if="item.line_discount > 0"
-                        class="text-success-accent"
-                      >
-                        -{{ formatMoney(item.line_discount) }}
-                      </span>
-                    </div>
-                    <p
-                      v-if="item.notes"
-                      class="text-caption text-subtle mt-1"
+            <div v-else class="overflow-x-auto -mx-1">
+              <table class="w-full min-w-[36rem] text-left">
+                <thead>
+                  <tr class="text-caption text-subtle">
+                    <th class="font-medium pb-3 pr-3">{{ t('budget.items.treatment') }}</th>
+                    <th class="font-medium pb-3 px-3 text-right">{{ t('budget.items.quantity') }}</th>
+                    <th class="font-medium pb-3 px-3 text-right">{{ t('budget.items.unitPrice') }}</th>
+                    <th
+                      v-if="hasLineDiscounts"
+                      class="font-medium pb-3 px-3 text-right"
                     >
-                      {{ item.notes }}
-                    </p>
-                  </div>
-                  <div class="text-right shrink-0">
-                    <p class="font-semibold tabular-nums">
+                      {{ t('budget.items.discount') }}
+                    </th>
+                    <th class="font-medium pb-3 px-3 text-right">{{ t('budget.items.lineTotal') }}</th>
+                    <th
+                      v-if="canEdit(currentBudget) && can(PERMISSIONS.budget.write)"
+                      class="w-10 pb-3"
+                    />
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="item in currentBudget.items"
+                    :key="item.id"
+                    class="border-t border-[var(--color-border-subtle)] align-top"
+                  >
+                    <td class="py-3.5 pr-3">
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <span class="font-medium text-default">{{ getItemName(item) }}</span>
+                        <span
+                          v-if="item.tooth_number"
+                          class="inline-flex items-center px-1.5 py-0.5 rounded-md bg-canvas text-caption font-medium text-default"
+                        >
+                          #{{ item.tooth_number }}
+                          <span
+                            v-if="item.surfaces?.length"
+                            class="ml-1 text-subtle font-normal"
+                          >
+                            {{ item.surfaces.join(', ') }}
+                          </span>
+                        </span>
+                      </div>
+                      <p
+                        v-if="item.notes"
+                        class="text-caption text-subtle mt-1"
+                      >
+                        {{ item.notes }}
+                      </p>
+                    </td>
+                    <td class="py-3.5 px-3 text-right tabular-nums text-muted">
+                      {{ item.quantity }}
+                    </td>
+                    <td class="py-3.5 px-3 text-right tabular-nums text-muted">
+                      {{ formatMoney(item.unit_price) }}
+                    </td>
+                    <td
+                      v-if="hasLineDiscounts"
+                      class="py-3.5 px-3 text-right tabular-nums"
+                      :class="item.line_discount > 0 ? 'text-success-accent' : 'text-muted'"
+                    >
+                      {{ item.line_discount > 0 ? `-${formatMoney(item.line_discount)}` : '—' }}
+                    </td>
+                    <td class="py-3.5 px-3 text-right tabular-nums font-semibold text-default">
                       {{ formatMoney(item.line_total) }}
-                    </p>
-                  </div>
-                  <UButton
-                    v-if="canEdit(currentBudget) && can(PERMISSIONS.budget.write)"
-                    variant="ghost"
-                    color="error"
-                    icon="i-lucide-trash-2"
-                    size="sm"
-                    @click="handleRemoveItem(item)"
-                  />
-                </div>
-              </div>
+                    </td>
+                    <td
+                      v-if="canEdit(currentBudget) && can(PERMISSIONS.budget.write)"
+                      class="py-3.5 pl-2 text-right"
+                    >
+                      <UButton
+                        variant="ghost"
+                        color="error"
+                        icon="i-lucide-trash-2"
+                        size="sm"
+                        @click="handleRemoveItem(item)"
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
 
-              <div class="pt-3 mt-3 border-t border-default flex justify-between text-caption text-subtle">
+              <div class="pt-3 mt-1 border-t border-default flex justify-between text-caption text-subtle">
                 <span>{{ currentBudget.items.length }} {{ currentBudget.items.length === 1 ? t('budget.items.singular') : t('budget.items.plural') }}</span>
                 <span class="tabular-nums">{{ t('budget.subtotal') }}: {{ formatMoney(currentBudget.subtotal) }}</span>
               </div>
@@ -796,11 +892,15 @@ function getItemName(item: BudgetItem): string {
           />
 
           <EntityTotalsCard
+            :class="clinicCardClass"
             :title="t('budget.total')"
             :lines="totalsLines"
           />
 
-          <EntityInfoCard :items="infoItems" />
+          <EntityInfoCard
+            :class="clinicCardClass"
+            :items="infoItems"
+          />
         </div>
       </div>
     </template>
@@ -815,7 +915,7 @@ function getItemName(item: BudgetItem): string {
     <!-- Send Modal -->
     <UModal v-model:open="isSendModalOpen">
       <template #content>
-        <UCard>
+        <UCard :class="clinicCardClass">
           <template #header>
             <div class="flex items-center justify-between">
               <h2 class="text-h1 text-default">
@@ -901,7 +1001,7 @@ function getItemName(item: BudgetItem): string {
     <!-- Signature Modal -->
     <UModal v-model:open="isSignatureModalOpen">
       <template #content>
-        <UCard>
+        <UCard :class="clinicCardClass">
           <template #header>
             <div class="flex items-center justify-between">
               <h2 class="text-h1 text-default">

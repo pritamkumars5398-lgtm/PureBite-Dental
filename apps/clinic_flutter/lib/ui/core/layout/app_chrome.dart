@@ -5,11 +5,13 @@ import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/app_lucide.dart';
 import '../../../core/constants/app_radii.dart';
 import '../../../core/constants/app_spacing.dart';
+import '../../../core/constants/app_version.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/string_utils.dart';
 import '../../../domain/models/session.dart';
 import '../../../l10n/app_localizations.dart';
 import '../widgets/app_avatar.dart';
+import '../widgets/app_gap.dart';
 import '../widgets/app_icon.dart';
 import '../widgets/offline_banner.dart';
 import 'window_size.dart';
@@ -53,7 +55,6 @@ class _AppChromeState extends State<AppChrome> {
     return switch (size) {
       WindowSizeClass.compact => _mobileChrome(
         l10n: l10n,
-        clinicName: clinicName,
         user: user,
       ),
       WindowSizeClass.medium => _sidebarChrome(
@@ -79,7 +80,6 @@ class _AppChromeState extends State<AppChrome> {
 
   Widget _mobileChrome({
     required AppLocalizations l10n,
-    required String clinicName,
     required User? user,
   }) {
     final primary = clinicMobilePrimaryNav(l10n);
@@ -92,7 +92,7 @@ class _AppChromeState extends State<AppChrome> {
           _TopBar(
             compact: true,
             collapsed: false,
-            clinicName: clinicName,
+            title: chromePageTitle(widget.location, l10n),
             onLogout: widget.onLogout,
             onSettings: () => widget.onNavigate('/settings'),
           ),
@@ -169,7 +169,7 @@ class _AppChromeState extends State<AppChrome> {
                 _TopBar(
                   compact: false,
                   collapsed: collapsed,
-                  clinicName: clinicName,
+                  title: chromePageTitle(widget.location, l10n),
                   onMenu: showSidebarToggle
                       ? () => setState(() => _collapsed = !_collapsed)
                       : null,
@@ -286,7 +286,7 @@ class _TopBar extends StatelessWidget {
   const _TopBar({
     required this.compact,
     required this.collapsed,
-    required this.clinicName,
+    required this.title,
     required this.onLogout,
     this.onMenu,
     this.onSettings,
@@ -294,7 +294,7 @@ class _TopBar extends StatelessWidget {
 
   final bool compact;
   final bool collapsed;
-  final String clinicName;
+  final String title;
   final VoidCallback onLogout;
   final VoidCallback? onMenu;
   final VoidCallback? onSettings;
@@ -325,16 +325,10 @@ class _TopBar extends StatelessWidget {
                     size: AppIcons.md,
                   ),
                 ),
-              AppIcon(
-                icon: AppLucide.clinic,
-                size: AppIcons.sm,
-                color: AppColors.textSubtle,
-              ),
-              const SizedBox(width: AppSpacing.xs),
               Expanded(
                 child: Text(
-                  clinicName,
-                  style: text.labelMedium,
+                  title,
+                  style: text.headlineMedium,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -412,24 +406,52 @@ class _Sidebar extends StatelessWidget {
           : AppColors.surfaceMuted,
       child: Column(
         children: [
-          SizedBox(
-            height: AppSpacing.topBarHeight,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-              child: Row(
-                children: [
-                  const AppIcon(icon: AppLucide.clinic, size: AppIcons.lg),
-                  if (!collapsed) ...[
-                    const SizedBox(width: AppSpacing.xs),
-                    Expanded(
-                      child: Text(
-                        clinicName,
-                        style: scheme.textTheme.headlineMedium,
-                        overflow: TextOverflow.ellipsis,
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              collapsed ? AppSpacing.xxs : AppSpacing.sm,
+              AppSpacing.sm,
+              collapsed ? AppSpacing.xxs : AppSpacing.sm,
+              AppSpacing.xs,
+            ),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: scheme.brightness == Brightness.dark
+                    ? AppColors.surfaceSunkenDark
+                    : AppColors.canvas,
+                borderRadius: BorderRadius.circular(AppRadii.xl),
+              ),
+              child: Padding(
+                padding: EdgeInsets.all(
+                  collapsed ? AppSpacing.xxs : AppSpacing.xs,
+                ),
+                child: Row(
+                  children: [
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: scheme.colorScheme.surface,
+                        borderRadius: BorderRadius.circular(AppRadii.lg),
+                      ),
+                      child: const Padding(
+                        padding: EdgeInsets.all(AppSpacing.xs),
+                        child: AppIcon(
+                          icon: AppLucide.clinic,
+                          size: AppIcons.sm,
+                          color: AppColors.textMuted,
+                        ),
                       ),
                     ),
+                    if (!collapsed) ...[
+                      const AppGap.horizontal(AppSpacing.xs),
+                      Expanded(
+                        child: Text(
+                          clinicName,
+                          style: scheme.textTheme.labelMedium,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),
@@ -452,6 +474,59 @@ class _Sidebar extends StatelessWidget {
             ),
           ),
           const Divider(height: 1),
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              collapsed ? AppSpacing.xxs : AppSpacing.sm,
+              AppSpacing.xs,
+              collapsed ? AppSpacing.xxs : AppSpacing.sm,
+              AppSpacing.xxs,
+            ),
+            child: collapsed
+                ? const AppIcon(
+                    icon: AppLucide.ai,
+                    size: AppIcons.sm,
+                    color: AppColors.primarySoftText,
+                  )
+                : Row(
+                    children: [
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: selected,
+                          borderRadius: BorderRadius.circular(AppRadii.lg),
+                        ),
+                        child: const Padding(
+                          padding: EdgeInsets.all(AppSpacing.xs),
+                          child: AppIcon(
+                            icon: AppLucide.ai,
+                            size: AppIcons.sm,
+                            color: AppColors.primarySoftText,
+                          ),
+                        ),
+                      ),
+                      const AppGap.horizontal(AppSpacing.xs),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.appName,
+                              style: scheme.textTheme.labelSmall?.copyWith(
+                                color: AppColors.textMuted,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              l10n.appVersion(kAppVersion),
+                              style: scheme.textTheme.bodySmall?.copyWith(
+                                color: AppColors.textSubtle,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
           Padding(
             padding: const EdgeInsets.all(AppSpacing.sm),
             child: collapsed

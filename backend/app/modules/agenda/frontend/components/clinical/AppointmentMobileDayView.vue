@@ -14,9 +14,12 @@ import type {
   FreeSlotEntry,
   ResourceKind,
   ResourceRef,
-  DayBounds
+  DayBounds,
+  TimelineEntry,
+  BusyEntry,
+  BlockedEntry
 } from '../../composables/useFreeSlots'
-import { useFreeSlots } from '../../composables/useFreeSlots'
+import { useFreeSlots, formatDuration } from '../../composables/useFreeSlots'
 import type { AvailabilityPayload } from '../../composables/useScheduleAvailability'
 import { useScheduleAvailability } from '../../composables/useScheduleAvailability'
 
@@ -44,6 +47,8 @@ const emit = defineEmits<{
 const { t, locale } = useI18n()
 const auth = useAuth()
 const { fetch: fetchAvailability } = useScheduleAvailability()
+const notesIndicator = useAppointmentNotesIndicator()
+const { statusLabel, statusIcon } = useAppointmentStatus()
 
 const STORAGE_PREFIX = 'agenda:mobile:'
 
@@ -292,12 +297,120 @@ function createNow() {
 }
 
 const hasAnyEntry = computed(() => entries.value.length > 0)
+
+const selectedProfessional = computed(() => {
+  if (resourceKind.value !== 'professional' || !resourceId.value) return null
+  return props.professionals.find(p => p.id === resourceId.value) ?? null
+})
+
+const selectedCabinet = computed(() => {
+  if (resourceKind.value !== 'cabinet' || !resourceId.value) return null
+  return props.cabinets.find(c => c.name === resourceId.value) ?? null
+})
+
+const resourceTitle = computed(() => {
+  if (selectedProfessional.value) {
+    return `${selectedProfessional.value.first_name} ${selectedProfessional.value.last_name}`.trim()
+  }
+  return selectedCabinet.value?.name ?? ''
+})
+
+const resourceCount = computed(() => {
+  return entries.value.filter(e => e.type === 'busy').length
+})
+
+function initials(prof: ProfessionalWithColor): string {
+  return `${prof.first_name.charAt(0)}${prof.last_name.charAt(0)}`.toUpperCase()
+}
+
+function isFree(e: TimelineEntry): e is FreeSlotEntry { return e.type === 'free' }
+function isBusy(e: TimelineEntry): e is BusyEntry { return e.type === 'busy' }
+function isBlocked(e: TimelineEntry): e is BlockedEntry { return e.type === 'blocked' }
+
+function formatTime(d: Date): string {
+  return d.toLocaleTimeString(locale.value, { hour: '2-digit', minute: '2-digit' })
+}
+
+function formatHourLabel(d: Date): string {
+  return d.toLocaleTimeString(locale.value, { hour: 'numeric' }).toLowerCase()
+}
+
+function patientName(apt: Appointment): string {
+  if (!apt.patient) return t('appointments.noPatient')
+  return `${apt.patient.first_name} ${apt.patient.last_name}`.trim()
+}
+
+function treatmentLabel(apt: Appointment): string {
+  if (apt.treatment_type) return apt.treatment_type
+  const first = apt.treatments?.[0]
+  if (!first) return ''
+  const names = first.names
+  return names[locale.value] || names.es || names.en || first.internal_code
+}
+
+function professionalFor(apt: Appointment): ProfessionalWithColor | undefined {
+  return props.professionals.find(p => p.id === apt.professional_id)
+}
+
+function getCardPastel(apt: Appointment): Record<string, string> {
+  const byStatus: Partial<Record<Appointment['status'], [string, string]>> = {
+    scheduled: ['rgba(251, 207, 232, 0.72)', 'rgba(244, 114, 182, 0.22)'],
+    confirmed: ['rgba(191, 219, 254, 0.72)', 'rgba(96, 165, 250, 0.28)'],
+    checked_in: ['rgba(254, 215, 170, 0.78)', 'rgba(251, 146, 60, 0.28)'],
+    in_treatment: ['rgba(253, 230, 138, 0.82)', 'rgba(245, 158, 11, 0.32)'],
+    completed: ['rgba(187, 247, 208, 0.72)', 'rgba(74, 222, 128, 0.28)'],
+    cancelled: ['rgba(226, 232, 240, 0.78)', 'rgba(148, 163, 184, 0.28)'],
+    no_show: ['rgba(254, 202, 202, 0.72)', 'rgba(248, 113, 113, 0.28)']
+  }
+  const pair = byStatus[apt.status]
+  if (pair) return { backgroundColor: pair[0], borderColor: pair[1] }
+  return { backgroundColor: 'rgba(241, 245, 249, 0.9)', borderColor: 'rgba(203, 213, 225, 0.5)' }
+}
+
+function getStatusChipClass(status: Appointment['status']): string {
+  switch (status) {
+    case 'completed':
+      return 'bg-white/80 text-emerald-600'
+    case 'in_treatment':
+      return 'bg-white/80 text-amber-700'
+    case 'checked_in':
+      return 'bg-white/80 text-orange-600'
+    case 'cancelled':
+    case 'no_show':
+      return 'bg-white/80 text-rose-600'
+    default:
+      return 'bg-white/75 text-slate-500'
+  }
+}
+
+function professionalAccent(apt: Appointment): string {
+  return professionalFor(apt)?.color || '#0284C7'
+}
+
+function blockedLabel(e: BlockedEntry): string {
+  if (e.reason === 'clinic_closed') return t('appointments.freeSlots.clinicClosed', 'Clínica cerrada')
+  if (e.reason === 'on_break') return t('appointments.freeSlots.onBreak', 'Pausa')
+  return t('appointments.notAvailable')
+}
+
+function freeAriaLabel(e: FreeSlotEntry): string {
+  return t(
+    'appointments.freeSlots.tapToBookAria',
+    'Hueco libre de {duration} a las {time}',
+    { duration: formatDuration(e.durationMin), time: formatTime(e.start) }
+  )
+}
+
+function entryKey(e: TimelineEntry, i: number): string {
+  if (isBusy(e)) return `b-${e.appointment.id}`
+  if (isFree(e)) return `f-${e.start.toISOString()}-${e.end.toISOString()}`
+  return `x-${i}-${e.start.toISOString()}`
+}
 </script>
 
 <template>
   <div class="flex flex-col h-full w-full min-w-0">
-    <!-- Sticky header: date nav + week strip + day summary -->
-    <div class="sticky top-0 z-20 bg-surface border-b border-subtle">
+    <div class="sticky top-0 z-20 bg-surface shadow-xs">
       <div class="flex items-center justify-between px-3 py-2">
         <UButton
           variant="ghost"
@@ -309,7 +422,7 @@ const hasAnyEntry = computed(() => entries.value.length > 0)
         />
         <button
           type="button"
-          class="text-ui text-default capitalize px-3 py-1 rounded-token-md hover:bg-surface-muted min-h-[36px]"
+          class="text-sm font-semibold text-default capitalize px-3 py-1 rounded-token-md hover:bg-canvas min-h-[36px]"
           @click="emit('date-change', new Date())"
         >
           {{ formatHeaderDate(currentDate) }}
@@ -324,23 +437,22 @@ const hasAnyEntry = computed(() => entries.value.length > 0)
         />
       </div>
 
-      <!-- 7-day strip -->
       <div class="grid grid-cols-7 gap-1 px-2 pb-2">
         <button
           v-for="d in weekDays"
           :key="d.toISOString()"
           type="button"
-          class="flex flex-col items-center gap-1 py-2 rounded-token-md transition-colors"
+          class="flex flex-col items-center gap-1 py-2 rounded-xl transition-colors min-h-[44px]"
           :class="[
             isSameDay(d, currentDate)
               ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary-soft-text)]'
-              : 'text-muted hover:bg-surface-muted',
+              : 'text-muted hover:bg-canvas',
             isToday(d) && !isSameDay(d, currentDate) ? 'ring-1 ring-[var(--color-primary)]' : ''
           ]"
           @click="selectDay(d)"
         >
-          <span class="text-caption uppercase">{{ formatWeekdayShort(d) }}</span>
-          <span class="text-ui tnum font-medium">{{ d.getDate() }}</span>
+          <span class="text-[10px] uppercase tracking-wide">{{ formatWeekdayShort(d) }}</span>
+          <span class="text-ui tnum font-semibold">{{ d.getDate() }}</span>
           <span
             v-if="countForDay(d) > 0"
             class="text-[10px] leading-none px-1.5 py-0.5 rounded-full bg-[var(--color-primary)] text-white tnum"
@@ -365,7 +477,6 @@ const hasAnyEntry = computed(() => entries.value.length > 0)
       />
     </div>
 
-    <!-- Timeline body -->
     <div class="flex-1 overflow-y-auto pb-24">
       <div v-if="isLoading" class="p-6 flex justify-center">
         <UIcon
@@ -405,17 +516,136 @@ const hasAnyEntry = computed(() => entries.value.length > 0)
         </UButton>
       </div>
 
-      <AppointmentMobileTimeline
+      <div
         v-else
-        :entries="entries"
-        :professionals="professionals"
-        :highlighted-appointment-id="highlightedAppointmentId"
-        @appointment-click="emit('appointment-click', $event)"
-        @free-slot-tap="onFreeSlotTap"
-      />
+        class="mx-2 mt-2 mb-4 rounded-2xl bg-surface shadow-sm overflow-hidden"
+      >
+        <div
+          v-if="resourceTitle"
+          class="flex items-center gap-2.5 px-3 py-3 border-b border-subtle"
+        >
+          <span
+            v-if="selectedProfessional"
+            class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-semibold shrink-0"
+            :style="{ backgroundColor: selectedProfessional.color }"
+          >
+            {{ initials(selectedProfessional) }}
+          </span>
+          <span
+            v-else
+            class="w-10 h-10 rounded-full flex items-center justify-center bg-slate-200 text-slate-600 shrink-0"
+          >
+            <UIcon name="i-lucide-door-open" class="w-4 h-4" />
+          </span>
+          <div class="min-w-0">
+            <div class="text-sm font-semibold text-default truncate">{{ resourceTitle }}</div>
+            <div class="text-[11px] text-muted truncate">
+              {{ t('appointments.todaysAppointmentCount', { count: resourceCount }) }}
+            </div>
+          </div>
+        </div>
+
+        <ul>
+          <li
+            v-for="(entry, i) in entries"
+            :key="entryKey(entry, i)"
+            class="grid grid-cols-[56px_1fr] border-t border-dashed border-slate-100 dark:border-white/5 first:border-t-0"
+          >
+            <div class="px-2 py-3 text-right">
+              <span class="text-[11px] text-subtle tnum">{{ formatHourLabel(entry.start) }}</span>
+            </div>
+
+            <div class="pr-2 py-2 min-w-0">
+              <button
+                v-if="isBusy(entry)"
+                type="button"
+                class="w-full text-left rounded-2xl border p-2.5 min-h-[60px] transition-shadow"
+                :class="entry.appointment.id === highlightedAppointmentId ? 'ring-2 ring-warning-500' : ''"
+                :style="getCardPastel(entry.appointment)"
+                @click="emit('appointment-click', entry.appointment)"
+              >
+                <div class="flex items-start justify-between gap-1 min-w-0">
+                  <div class="flex items-center gap-1.5 min-w-0">
+                    <span
+                      class="w-5 h-5 rounded-md flex items-center justify-center text-white shrink-0"
+                      :style="{ backgroundColor: professionalAccent(entry.appointment) }"
+                    >
+                      <UIcon :name="statusIcon(entry.appointment.status)" class="w-3 h-3" />
+                    </span>
+                    <span class="text-[13px] font-semibold truncate">{{ patientName(entry.appointment) }}</span>
+                    <UIcon
+                      v-if="notesIndicator.has(entry.appointment.id)"
+                      name="i-lucide-sticky-note"
+                      class="w-3 h-3 text-primary shrink-0"
+                      :title="t('appointments.hasNotes', 'Tiene notas')"
+                    />
+                  </div>
+                  <span
+                    class="text-[10px] font-medium px-1.5 py-0.5 rounded-md shrink-0"
+                    :class="getStatusChipClass(entry.appointment.status)"
+                  >
+                    {{ statusLabel(entry.appointment.status) }}
+                  </span>
+                </div>
+                <div class="text-[11px] text-muted tnum mt-0.5 pl-6">
+                  {{ formatTime(entry.start) }} > {{ formatTime(entry.end) }}
+                </div>
+                <div v-if="treatmentLabel(entry.appointment)" class="mt-1.5 pl-6">
+                  <span class="inline-flex text-[10px] text-muted px-2 py-0.5 rounded-md bg-white/70 truncate max-w-full">
+                    {{ treatmentLabel(entry.appointment) }}
+                  </span>
+                </div>
+              </button>
+
+              <button
+                v-else-if="isFree(entry) && entry.qualifies"
+                type="button"
+                class="group w-full min-h-[56px] rounded-2xl border border-dashed border-slate-200 dark:border-white/10 bg-slate-50/80 dark:bg-white/5 px-3 py-2 flex items-center justify-between gap-2 text-left"
+                :aria-label="freeAriaLabel(entry)"
+                @click="onFreeSlotTap(entry)"
+              >
+                <div class="min-w-0">
+                  <div class="text-[13px] font-semibold text-[var(--color-primary)]">
+                    {{ formatDuration(entry.durationMin) }}
+                    <span class="text-default font-normal">
+                      {{ t('appointments.freeSlots.freeSuffix', 'libre') }}
+                    </span>
+                  </div>
+                  <div class="text-[11px] text-muted tnum">
+                    {{ formatTime(entry.start) }} > {{ formatTime(entry.end) }}
+                  </div>
+                </div>
+                <UIcon name="i-lucide-plus" class="w-5 h-5 text-slate-400 group-hover:text-[var(--color-primary)]" />
+              </button>
+
+              <button
+                v-else-if="isFree(entry)"
+                type="button"
+                class="w-full min-h-[44px] rounded-xl px-2 py-1.5 flex items-center justify-between text-caption text-muted"
+                :aria-label="freeAriaLabel(entry)"
+                @click="onFreeSlotTap(entry)"
+              >
+                <span class="tnum">{{ formatTime(entry.start) }} > {{ formatTime(entry.end) }}</span>
+                <span>
+                  {{ formatDuration(entry.durationMin) }}
+                  {{ t('appointments.freeSlots.freeSuffix', 'libre') }}
+                </span>
+              </button>
+
+              <div
+                v-else-if="isBlocked(entry)"
+                class="schedules-blocked min-h-[48px] rounded-2xl flex items-center justify-center px-2"
+              >
+                <span class="text-[10px] font-semibold tracking-[0.14em] uppercase text-slate-400">
+                  {{ blockedLabel(entry) }}
+                </span>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
     </div>
 
-    <!-- FAB: create appointment -->
     <UButton
       class="fixed right-4 z-30 shadow-lg"
       :style="{ bottom: 'calc(1rem + env(safe-area-inset-bottom))' }"
@@ -427,3 +657,15 @@ const hasAnyEntry = computed(() => entries.value.length > 0)
     />
   </div>
 </template>
+
+<style scoped>
+.schedules-blocked {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(226, 232, 240, 0.55),
+    rgba(226, 232, 240, 0.55) 8px,
+    rgba(203, 213, 225, 0.7) 8px,
+    rgba(203, 213, 225, 0.7) 16px
+  );
+}
+</style>

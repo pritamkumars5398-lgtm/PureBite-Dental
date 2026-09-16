@@ -9,6 +9,8 @@ const toast = useToast()
 const { can } = usePermissions()
 const { createBudget } = useBudgets()
 
+const clinicCardClass = '!rounded-[20px] border-subtle ring-1 ring-[var(--color-border-subtle)] bg-surface'
+
 // Track if coming from patient page
 const comesFromPatient = computed(() => route.query.from === 'patient' && route.query.patient_id)
 const backLabel = computed(() => comesFromPatient.value ? t('actions.back') : t('budget.title'))
@@ -80,8 +82,7 @@ async function handleCreate() {
 </script>
 
 <template>
-  <div class="max-w-2xl mx-auto space-y-6">
-    <!-- Header -->
+  <div class="space-y-6">
     <div class="flex items-center gap-4">
       <UButton
         variant="ghost"
@@ -91,75 +92,109 @@ async function handleCreate() {
       >
         {{ backLabel }}
       </UButton>
-      <h1 class="text-display text-default">
-        {{ t('budget.new') }}
-      </h1>
+      <div class="min-w-0">
+        <h1 class="text-display text-default">
+          {{ t('budget.new') }}
+        </h1>
+        <p class="mt-1 text-caption text-muted">
+          {{ t('budget.newHint') }}
+        </p>
+      </div>
     </div>
 
-    <UCard>
-      <form
-        class="space-y-6"
-        @submit.prevent="handleCreate"
-      >
-        <!-- Patient selection -->
-        <UFormField
-          :label="t('budget.patient')"
-          required
-        >
-          <PatientVisualSelector
-            v-model="selectedPatient"
-            :placeholder="t('budget.selectPatient')"
-          />
-          <p class="text-caption text-subtle mt-1">
-            {{ t('budget.selectPatientHint') }}
-          </p>
-        </UFormField>
+    <form
+      class="grid grid-cols-1 lg:grid-cols-3 gap-6"
+      @submit.prevent="handleCreate"
+    >
+      <div class="lg:col-span-2 space-y-6">
+        <UCard :class="clinicCardClass">
+          <template #header>
+            <h2 class="text-h2 text-default">
+              {{ t('budget.patient') }}
+            </h2>
+          </template>
 
-        <!-- Validity dates -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <UFormField
-            :label="t('budget.validFrom')"
+            :label="t('budget.selectPatient')"
             required
           >
-            <UInput
-              v-model="form.valid_from"
-              type="date"
-              required
-            />
-          </UFormField>
-          <UFormField :label="t('budget.validUntil')">
-            <UInput
-              v-model="form.valid_until"
-              type="date"
+            <PatientVisualSelector
+              v-model="selectedPatient"
+              :placeholder="t('budget.selectPatient')"
             />
             <p class="text-caption text-subtle mt-1">
-              {{ t('budget.validUntilHint') }}
+              {{ t('budget.selectPatientHint') }}
             </p>
           </UFormField>
+        </UCard>
+
+        <UCard :class="clinicCardClass">
+          <template #header>
+            <h2 class="text-h2 text-default">
+              {{ t('budget.details') }}
+            </h2>
+          </template>
+
+          <div class="space-y-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <UFormField
+                :label="t('budget.validFrom')"
+                required
+              >
+                <UInput
+                  v-model="form.valid_from"
+                  type="date"
+                  required
+                />
+              </UFormField>
+              <UFormField :label="t('budget.validUntil')">
+                <UInput
+                  v-model="form.valid_until"
+                  type="date"
+                />
+                <p class="text-caption text-subtle mt-1">
+                  {{ t('budget.validUntilHint') }}
+                </p>
+              </UFormField>
+            </div>
+
+            <UFormField :label="t('budget.patientNotes')">
+              <UTextarea
+                v-model="form.patient_notes"
+                :placeholder="t('budget.patientNotesPlaceholder')"
+                :rows="3"
+              />
+            </UFormField>
+
+            <UFormField :label="t('budget.internalNotes')">
+              <UTextarea
+                v-model="form.internal_notes"
+                :placeholder="t('budget.internalNotesPlaceholder')"
+                :rows="3"
+              />
+            </UFormField>
+          </div>
+        </UCard>
+      </div>
+
+      <aside class="space-y-6">
+        <div :class="clinicCardClass" class="p-5">
+          <p class="text-caption text-subtle">
+            {{ t('budget.items.title') }}
+          </p>
+          <p class="mt-1 text-h2 text-default">
+            {{ t('budget.createAndAddItems') }}
+          </p>
+          <p class="mt-2 text-caption text-muted">
+            {{ t('budget.newHint') }}
+          </p>
         </div>
 
-        <!-- Notes -->
-        <UFormField :label="t('budget.patientNotes')">
-          <UTextarea
-            v-model="form.patient_notes"
-            :placeholder="t('budget.patientNotesPlaceholder')"
-            :rows="3"
-          />
-        </UFormField>
-
-        <UFormField :label="t('budget.internalNotes')">
-          <UTextarea
-            v-model="form.internal_notes"
-            :placeholder="t('budget.internalNotesPlaceholder')"
-            :rows="3"
-          />
-        </UFormField>
-
-        <!-- Actions -->
-        <div class="flex justify-end gap-3 pt-4 border-t border-default">
+        <div class="flex flex-col-reverse sm:flex-row lg:flex-col-reverse gap-3">
           <UButton
             variant="outline"
             color="neutral"
+            block
             @click="goBack"
           >
             {{ t('common.cancel') }}
@@ -168,13 +203,14 @@ async function handleCreate() {
             type="submit"
             color="primary"
             icon="i-lucide-plus"
+            block
             :disabled="!canSubmit"
             :loading="isCreating"
           >
             {{ t('budget.createAndAddItems') }}
           </UButton>
         </div>
-      </form>
-    </UCard>
+      </aside>
+    </form>
   </div>
 </template>

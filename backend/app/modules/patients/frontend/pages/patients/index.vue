@@ -29,12 +29,13 @@ interface PatientDebtSummary {
   on_account_balance: string
 }
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const api = useApi()
 const toast = useToast()
 const router = useRouter()
 const route = useRoute()
 const { can } = usePermissions()
+const canWrite = computed(() => can(PERMISSIONS.patients.write))
 
 // --- Filter shape (URL-synced) ------------------------------------------
 interface PatientListFilters {
@@ -145,7 +146,12 @@ const {
   fetcher,
 })
 
-const statusItems = computed(() => [
+const statusTab = computed({
+  get: () => (filters.value.status.includes('archived') ? 'archived' : 'active'),
+  set: (value: string) => setFilter('status', [value]),
+})
+
+const statusTabs = computed(() => [
   { label: t('patients.status.active'), value: 'active' },
   { label: t('patients.status.archived'), value: 'archived' },
 ])
@@ -160,12 +166,86 @@ const sortOptions = computed(() => [
 
 const activeFilterCount = computed(() => {
   let n = 0
-  if (filters.value.status.length && filters.value.status.join(',') !== 'active') n++
   if (filters.value.city) n++
   if (filters.value.do_not_contact !== null) n++
   if (filters.value.with_debt) n++
+  if (filters.value.q) n++
   return n
 })
+
+const selectedIds = ref<Set<string>>(new Set())
+
+watch(patients, () => {
+  selectedIds.value = new Set()
+})
+
+const allPageSelected = computed(() =>
+  patients.value.length > 0 && patients.value.every(p => selectedIds.value.has(p.id)),
+)
+
+const somePageSelected = computed(() =>
+  patients.value.some(p => selectedIds.value.has(p.id)) && !allPageSelected.value,
+)
+
+function toggleSelected(id: string, checked: boolean) {
+  const next = new Set(selectedIds.value)
+  if (checked) next.add(id)
+  else next.delete(id)
+  selectedIds.value = next
+}
+
+function toggleSelectAll(checked: boolean) {
+  selectedIds.value = checked ? new Set(patients.value.map(p => p.id)) : new Set()
+}
+
+const AVATAR_TONES = [
+  'bg-violet-100 text-violet-700',
+  'bg-sky-100 text-sky-700',
+  'bg-blue-100 text-blue-700',
+  'bg-pink-100 text-pink-700',
+  'bg-emerald-100 text-emerald-800',
+  'bg-amber-100 text-amber-800',
+  'bg-rose-100 text-rose-700',
+] as const
+
+function patientInitials(p: Patient): string {
+  const a = (p.first_name || '').trim().charAt(0)
+  const b = (p.last_name || '').trim().charAt(0)
+  return `${a}${b}`.toUpperCase() || '?'
+}
+
+function avatarTone(id: string): string {
+  let h = 0
+  for (let i = 0; i < id.length; i++) h = (h + id.charCodeAt(i) * (i + 1)) % AVATAR_TONES.length
+  return AVATAR_TONES[h] ?? AVATAR_TONES[0]
+}
+
+function formatListDate(value?: string | null): string {
+  if (!value) return '—'
+  const d = new Date(value)
+  if (Number.isNaN(d.getTime())) return '—'
+  return new Intl.DateTimeFormat(locale.value, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(d)
+}
+
+function sortField(): string {
+  return sort.value.split(':')[0] ?? ''
+}
+
+function sortDir(): string {
+  return sort.value.split(':')[1] ?? 'asc'
+}
+
+function toggleSort(field: string, defaultDir: 'asc' | 'desc') {
+  if (sortField() === field) {
+    sort.value = `${field}:${sortDir() === 'asc' ? 'desc' : 'asc'}`
+    return
+  }
+  sort.value = `${field}:${defaultDir}`
+}
 
 function debtFilterCtx() {
   return {
@@ -236,15 +316,13 @@ async function createPatient() {
   }
 }
 
-function patientCity(p: Patient): string {
-  const addr = (p as Patient & { address?: { city?: string } }).address
-  return addr?.city || ''
-}
 </script>
 
 <template>
   <DataListLayout
     :title="t('patients.title')"
+    :show-title="false"
+    :noun="t('lists.noun.patients')"
     :loading="isLoading"
     :empty="!patients.length"
     :error="error"
@@ -254,19 +332,49 @@ function patientCity(p: Patient): string {
     :total-pages="totalPages"
     @update:page="(v) => (page = v)"
   >
+    <template #tabs>
+      <div
+        class="flex items-center gap-6 border-b border-[var(--color-border-subtle)]"
+        role="tablist"
+      >
+        <button
+          v-for="tab in statusTabs"
+          :key="tab.value"
+          type="button"
+          role="tab"
+          class="relative pb-3 text-sm transition-colors"
+          :class="statusTab === tab.value
+            ? 'font-medium text-primary'
+            : 'text-muted hover:text-default'"
+          :aria-selected="statusTab === tab.value"
+          @click="statusTab = tab.value"
+        >
+          {{ tab.label }}
+          <span
+            v-if="statusTab === tab.value"
+            class="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-primary"
+          />
+        </button>
+      </div>
+    </template>
+
     <template #actions>
+      <DensityToggle />
       <UButton
+        v-if="canWrite"
         color="primary"
-        variant="soft"
+        variant="solid"
         icon="i-lucide-plus"
+        class="rounded-full"
         @click="isCreateModalOpen = true"
       >
-        {{ t('patients.create') }}
+        {{ t('patients.addPatient') }}
       </UButton>
     </template>
 
     <template #toolbar>
       <FilterBar
+        always-collapsed
         :active-count="activeFilterCount"
         @reset="resetFilters"
       >
@@ -274,19 +382,10 @@ function patientCity(p: Patient): string {
           <SearchBar
             :model-value="filters.q"
             :placeholder="t('patients.searchPlaceholder')"
-            max-width="max-w-md"
+            max-width="max-w-sm"
             @update:model-value="(v) => setFilter('q', v)"
           />
         </template>
-
-        <FilterChipMulti
-          :model-value="filters.status"
-          :items="statusItems"
-          :label="t('patients.filters.status')"
-          icon="i-lucide-circle-dot"
-          @update:model-value="(v) => setFilter('status', v)"
-        />
-
         <FilterToggle
           :model-value="filters.do_not_contact"
           :label="t('patients.filters.doNotContactOnly')"
@@ -295,12 +394,10 @@ function patientCity(p: Patient): string {
           tristate
           @update:model-value="(v) => setFilter('do_not_contact', v)"
         />
-
         <ModuleSlot
           name="patients.list.filter"
           :ctx="debtFilterCtx()"
         />
-
         <template #right>
           <SortMenu
             :model-value="sort"
@@ -318,19 +415,61 @@ function patientCity(p: Patient): string {
         :description="activeFilterCount || filters.q ? undefined : t('dashboard.welcomeMessage')"
       >
         <template
-          v-if="!activeFilterCount && !filters.q"
+          v-if="canWrite && !activeFilterCount && !filters.q"
           #actions
         >
           <UButton
             color="primary"
-            variant="soft"
+            variant="solid"
             icon="i-lucide-plus"
+            class="rounded-full"
             @click="isCreateModalOpen = true"
           >
             {{ t('patients.emptyAction') }}
           </UButton>
         </template>
       </EmptyState>
+    </template>
+
+    <template #columns>
+      <span
+        class="w-10 shrink-0"
+        @click.stop
+      >
+        <UCheckbox
+          :model-value="allPageSelected"
+          :indeterminate="somePageSelected"
+          :aria-label="t('patients.columns.selectAll')"
+          @update:model-value="(v: boolean | 'indeterminate') => toggleSelectAll(v === true)"
+        />
+      </span>
+      <button
+        type="button"
+        class="flex-1 min-w-0 inline-flex items-center gap-1 uppercase tracking-[0.08em] hover:text-default"
+        @click="toggleSort('last_name', 'asc')"
+      >
+        {{ t('patients.columns.patientName') }}
+        <UIcon
+          name="i-lucide-arrow-up-down"
+          class="w-3 h-3"
+          :class="sortField() === 'last_name' ? 'text-primary' : 'opacity-40'"
+        />
+      </button>
+      <span class="hidden md:inline w-40 shrink-0">{{ t('patients.phone') }}</span>
+      <span class="hidden xl:inline w-52 shrink-0">{{ t('patients.email') }}</span>
+      <button
+        type="button"
+        class="hidden lg:inline-flex w-32 shrink-0 items-center gap-1 uppercase tracking-[0.08em] hover:text-default"
+        @click="toggleSort('created_at', 'desc')"
+      >
+        {{ t('patients.columns.registered') }}
+        <UIcon
+          name="i-lucide-arrow-up-down"
+          class="w-3 h-3"
+          :class="sortField() === 'created_at' ? 'text-primary' : 'opacity-40'"
+        />
+      </button>
+      <span class="w-28 shrink-0 text-right">{{ t('patients.columns.debt') }}</span>
     </template>
 
     <template #rows>
@@ -340,53 +479,86 @@ function patientCity(p: Patient): string {
         :to="`/patients/${patient.id}`"
       >
         <template #row>
-          <UAvatar
-            :alt="patient.first_name"
-            size="sm"
-          />
-          <div class="flex-1 min-w-0">
-            <div class="text-ui text-default truncate flex items-center gap-2">
-              {{ patient.last_name }}, {{ patient.first_name }}
-              <UIcon
-                v-if="patient.do_not_contact"
-                name="i-lucide-bell-off"
-                class="w-3.5 h-3.5 text-warning shrink-0"
-                :title="t('patients.doNotContact.label')"
-              />
+          <div
+            class="w-10 shrink-0"
+            @click.prevent.stop
+          >
+            <UCheckbox
+              :model-value="selectedIds.has(patient.id)"
+              :aria-label="t('patients.columns.select')"
+              @update:model-value="(v: boolean | 'indeterminate') => toggleSelected(patient.id, v === true)"
+            />
+          </div>
+          <div class="flex-1 min-w-0 flex items-center gap-3">
+            <div
+              class="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-semibold shrink-0"
+              :class="avatarTone(patient.id)"
+            >
+              {{ patientInitials(patient) }}
             </div>
-            <div class="text-caption text-subtle truncate flex items-center gap-2 mt-0.5">
-              <span v-if="patient.patient_number" class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-surface-muted border border-default text-subtle">
+            <div class="min-w-0">
+              <div class="text-ui text-default truncate flex items-center gap-1.5">
+                {{ patient.first_name }} {{ patient.last_name }}
+                <UIcon
+                  v-if="patient.do_not_contact"
+                  name="i-lucide-bell-off"
+                  class="w-3.5 h-3.5 text-warning shrink-0"
+                  :title="t('patients.doNotContact.label')"
+                />
+              </div>
+              <div
+                v-if="patient.patient_number"
+                class="text-caption text-subtle font-mono truncate"
+              >
                 {{ patient.patient_number }}
-              </span>
-              <span v-if="patient.patient_number && (patientCity(patient) || patient.phone || patient.email)">·</span>
-              <span v-if="patientCity(patient)">{{ patientCity(patient) }} · </span>{{ patient.phone || patient.email || '—' }}
+              </div>
             </div>
           </div>
-          <div class="shrink-0 flex items-center gap-3 ml-auto">
+          <div class="hidden md:flex w-40 shrink-0 items-center gap-1.5 text-caption text-muted">
+            <template v-if="patient.phone">
+              <UIcon
+                name="i-lucide-phone"
+                class="w-3.5 h-3.5 text-subtle shrink-0"
+              />
+              <span class="truncate">{{ patient.phone }}</span>
+            </template>
+            <span v-else class="text-subtle">—</span>
+          </div>
+          <div class="hidden xl:flex w-52 shrink-0 items-center gap-1.5 text-caption text-muted">
+            <template v-if="patient.email">
+              <UIcon
+                name="i-lucide-mail"
+                class="w-3.5 h-3.5 text-subtle shrink-0"
+              />
+              <span class="truncate">{{ patient.email }}</span>
+            </template>
+            <span v-else class="text-subtle">—</span>
+          </div>
+          <div class="hidden lg:block w-32 shrink-0 text-caption text-muted whitespace-nowrap">
+            {{ formatListDate(patient.created_at) }}
+          </div>
+          <div
+            class="w-28 shrink-0 flex justify-end"
+            @click.prevent.stop
+          >
             <ModuleSlot
               name="patients.list.row.financial"
               :ctx="{ patient_id: patient.id, summary: debtSummaries[patient.id] ?? null }"
-            />
-            <StatusBadge
-              :role="PATIENT_STATUS_ROLE[patient.status as PatientStatus] || 'neutral'"
-              :label="t(`patients.status.${patient.status}`)"
-            />
-            <UIcon
-              name="i-lucide-chevron-right"
-              class="text-subtle"
             />
           </div>
         </template>
 
         <template #card>
           <div class="flex items-center gap-3">
-            <UAvatar
-              :alt="patient.first_name"
-              size="md"
-            />
+            <div
+              class="w-10 h-10 rounded-full flex items-center justify-center text-xs font-semibold shrink-0"
+              :class="avatarTone(patient.id)"
+            >
+              {{ patientInitials(patient) }}
+            </div>
             <div class="flex-1 min-w-0">
               <div class="font-medium text-default truncate flex items-center gap-2">
-                {{ patient.last_name }}, {{ patient.first_name }}
+                {{ patient.first_name }} {{ patient.last_name }}
                 <UIcon
                   v-if="patient.do_not_contact"
                   name="i-lucide-bell-off"
@@ -394,11 +566,26 @@ function patientCity(p: Patient): string {
                 />
               </div>
               <div class="text-caption text-subtle truncate flex items-center gap-2 mt-0.5">
-                <span v-if="patient.patient_number" class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-surface-muted border border-default text-subtle">
-                  {{ patient.patient_number }}
+                <span
+                  v-if="patient.phone"
+                  class="inline-flex items-center gap-1"
+                >
+                  <UIcon
+                    name="i-lucide-phone"
+                    class="w-3 h-3"
+                  />
+                  {{ patient.phone }}
                 </span>
-                <span v-if="patient.patient_number && (patient.phone || patient.email)">·</span>
-                {{ patient.phone || patient.email || '—' }}
+                <span
+                  v-else-if="patient.email"
+                  class="inline-flex items-center gap-1"
+                >
+                  <UIcon
+                    name="i-lucide-mail"
+                    class="w-3 h-3"
+                  />
+                  {{ patient.email }}
+                </span>
               </div>
             </div>
             <StatusBadge
@@ -408,8 +595,8 @@ function patientCity(p: Patient): string {
             />
           </div>
           <div class="flex items-center justify-between gap-2">
-            <span class="text-caption text-subtle truncate">
-              {{ patientCity(patient) || '—' }}
+            <span class="text-caption text-subtle">
+              {{ formatListDate(patient.created_at) }}
             </span>
             <ModuleSlot
               name="patients.list.row.financial"

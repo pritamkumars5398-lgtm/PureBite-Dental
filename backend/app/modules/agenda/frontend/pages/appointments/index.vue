@@ -11,7 +11,7 @@ const AppointmentDailyView = defineAsyncComponent(() => import('../../components
 const AppointmentKanbanView = defineAsyncComponent(() => import('../../components/clinical/AppointmentKanbanView.vue'))
 const AppointmentMobileDayView = defineAsyncComponent(() => import('../../components/clinical/AppointmentMobileDayView.vue'))
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const toast = useToast()
 const route = useRoute()
 const router = useRouter()
@@ -118,6 +118,111 @@ const professionalsWithColors = computed(() => {
     color: getProfessionalColor(prof.id)
   }))
 })
+
+// Day grid shows one column per selected professional (Zendenta-style).
+const visibleProfessionals = computed(() => {
+  if (selectedProfessionals.value.length === 0) return professionalsWithColors.value
+  return professionalsWithColors.value.filter(p => selectedProfessionals.value.includes(p.id))
+})
+
+const filtersOpen = ref(false)
+
+const dentistSelectItems = computed(() => [
+  { label: t('appointments.allDentists'), value: 'all' },
+  ...professionalFilterOptions.value
+])
+
+const dentistSelect = computed({
+  get() {
+    if (
+      selectedProfessionals.value.length === 0
+      || selectedProfessionals.value.length === professionals.value.length
+    ) {
+      return 'all'
+    }
+    if (selectedProfessionals.value.length === 1) {
+      return selectedProfessionals.value[0] ?? 'all'
+    }
+    return 'all'
+  },
+  set(value: string | { value?: string } | null) {
+    const next = typeof value === 'string' ? value : (value?.value ?? 'all')
+    if (next === 'all') {
+      selectAllProfessionals()
+    } else {
+      selectedProfessionals.value = [next]
+    }
+  }
+})
+
+const appointmentCount = computed(() =>
+  filteredAppointments.value.filter(apt => apt.status !== 'cancelled').length
+)
+
+const filtersActive = computed(() =>
+  cabinetFilterOptions.value.length > 0
+  && selectedCabinets.value.length < cabinetFilterOptions.value.length
+)
+
+const toolbarDateLabel = computed(() => {
+  if (viewMode.value === 'week') {
+    const start = currentWeekStart.value
+    const end = new Date(start)
+    end.setDate(end.getDate() + 6)
+    const startStr = start.toLocaleDateString(locale.value, { month: 'short', day: 'numeric' })
+    const endStr = end.toLocaleDateString(locale.value, { month: 'short', day: 'numeric', year: 'numeric' })
+    return `${startStr} – ${endStr}`
+  }
+  return currentDate.value.toLocaleDateString(locale.value, {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  })
+})
+
+function goToTodayToolbar() {
+  const today = new Date()
+  currentDate.value = today
+  currentWeekStart.value = getMonday(today)
+  if (!isMobile.value && viewMode.value === 'week') {
+    void loadWeekAppointments()
+  } else {
+    void loadDayAppointments()
+  }
+}
+
+function pagerPrev() {
+  if (viewMode.value === 'week') {
+    const next = new Date(currentWeekStart.value)
+    next.setDate(next.getDate() - 7)
+    currentDate.value = next
+    void handleWeekChange(next)
+  } else {
+    const next = new Date(currentDate.value)
+    next.setDate(next.getDate() - 1)
+    handleDateChange(next)
+  }
+}
+
+function pagerNext() {
+  if (viewMode.value === 'week') {
+    const next = new Date(currentWeekStart.value)
+    next.setDate(next.getDate() + 7)
+    currentDate.value = next
+    void handleWeekChange(next)
+  } else {
+    const next = new Date(currentDate.value)
+    next.setDate(next.getDate() + 1)
+    handleDateChange(next)
+  }
+}
+
+function setCalendarGranularity(mode: string) {
+  if (mode === 'week' || mode === 'day') {
+    viewMode.value = mode
+  }
+}
 
 // Toggle cabinet filter
 function toggleCabinet(cabinetName: string) {
@@ -602,18 +707,11 @@ watch(isMobile, async (mobile) => {
 
 <template>
   <div class="h-full flex flex-col w-full min-w-0 overflow-hidden">
-    <PageHeader :title="t('appointments.title')">
+    <PageHeader
+      :title="t('appointments.title')"
+      :show-title="false"
+    >
       <template #actions>
-        <SegmentedControl
-          v-if="!isMobile"
-          :model-value="viewMode"
-          :options="[
-            { value: 'week', label: t('appointments.weeklyView'), icon: 'i-lucide-calendar-days' },
-            { value: 'day', label: t('appointments.dailyView'), icon: 'i-lucide-calendar' },
-            { value: 'kanban', label: t('appointments.kanbanView'), icon: 'i-lucide-kanban-square' }
-          ]"
-          @update:model-value="(v) => (viewMode = v as 'week' | 'day' | 'kanban')"
-        />
         <UButton
           v-if="!isMobile"
           color="primary"
@@ -624,67 +722,133 @@ watch(isMobile, async (mobile) => {
           {{ t('appointments.create') }}
         </UButton>
       </template>
+      <template
+        v-if="!isMobile"
+        #tabs
+      >
+        <nav class="flex items-center gap-6 border-b border-default">
+          <button
+            v-for="tab in [
+              { value: 'week', label: t('appointments.weeklyView') },
+              { value: 'day', label: t('appointments.dailyView') },
+              { value: 'kanban', label: t('appointments.kanbanView') }
+            ]"
+            :key="tab.value"
+            type="button"
+            class="relative -mb-px pb-2.5 text-sm font-medium transition-colors"
+            :class="viewMode === tab.value ? 'text-[var(--color-primary)]' : 'text-muted hover:text-default'"
+            @click="viewMode = tab.value as 'week' | 'day' | 'kanban'"
+          >
+            {{ tab.label }}
+            <span
+              v-if="viewMode === tab.value"
+              class="absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-[var(--color-primary)]"
+            />
+          </button>
+        </nav>
+      </template>
     </PageHeader>
 
-    <!-- Filters (hidden on mobile to save space; mobile uses simple day view) -->
+    <!-- Zendenta-style toolbar (desktop). Log History omitted: list APIs have no history feed. -->
     <div
       v-if="!isMobile"
-      class="flex flex-wrap items-center gap-x-6 gap-y-[var(--density-gap,0.75rem)] mb-[var(--density-gap,1rem)] shrink-0"
+      class="flex flex-wrap items-center gap-3 mb-3 shrink-0"
     >
-      <div
-        v-if="cabinetFilterOptions.length > 0"
-        class="flex items-center gap-2 flex-wrap"
-      >
-        <span class="text-caption text-subtle">
-          {{ t('appointments.cabinet') }}
-        </span>
-        <FilterChip
-          v-for="cabinet in cabinetFilterOptions"
-          :key="cabinet.value"
-          :label="cabinet.label"
-          :color="cabinet.color"
-          :selected="selectedCabinets.includes(cabinet.value)"
-          @toggle="toggleCabinet(cabinet.value)"
+      <div class="flex items-center gap-2 text-default min-w-0">
+        <UIcon
+          name="i-lucide-calendar-days"
+          class="w-5 h-5 text-[var(--color-primary)] shrink-0"
         />
-        <UButton
-          v-if="selectedCabinets.length < cabinetFilterOptions.length"
-          variant="ghost"
-          color="neutral"
-          size="xs"
-          @click="selectAllCabinets"
-        >
-          {{ t('common.selectAll') }}
-        </UButton>
+        <span class="text-lg font-semibold tnum leading-none">{{ appointmentCount }}</span>
+        <span class="text-sm text-muted truncate">
+          {{ t('appointments.totalAppointmentsLabel') }}
+        </span>
       </div>
 
-      <div
-        v-if="professionalFilterOptions.length > 0"
-        class="flex items-center gap-2 min-w-0 flex-1"
-      >
-        <span class="text-caption text-subtle shrink-0">
-          {{ t('appointments.professional') }}
-        </span>
-        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar min-w-0 [&>*]:shrink-0">
-          <FilterChip
-            v-for="prof in professionalFilterOptions"
-            :key="prof.value"
-            :label="prof.label"
-            :color="prof.color"
-            :initials="prof.label.split(' ').map((n: string) => n.charAt(0)).join('').substring(0, 2).toUpperCase()"
-            :selected="selectedProfessionals.includes(prof.value)"
-            @toggle="toggleProfessional(prof.value)"
-          />
-        </div>
+      <div class="flex items-center gap-2 flex-1 min-w-0 justify-center">
         <UButton
-          v-if="selectedProfessionals.length < professionalFilterOptions.length"
+          size="sm"
+          variant="outline"
+          color="neutral"
+          class="rounded-full px-4"
+          @click="goToTodayToolbar"
+        >
+          {{ t('appointments.today') }}
+        </UButton>
+        <UButton
+          size="sm"
           variant="ghost"
           color="neutral"
-          size="xs"
-          class="shrink-0"
-          @click="selectAllProfessionals"
-        >
-          {{ t('common.selectAll') }}
-        </UButton>
+          icon="i-lucide-chevron-left"
+          :aria-label="t('common.previous')"
+          @click="pagerPrev"
+        />
+        <span class="text-sm font-semibold text-default whitespace-nowrap">
+          {{ toolbarDateLabel }}
+        </span>
+        <UButton
+          size="sm"
+          variant="ghost"
+          color="neutral"
+          icon="i-lucide-chevron-right"
+          :aria-label="t('common.next')"
+          @click="pagerNext"
+        />
+      </div>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <SegmentedControl
+          v-if="viewMode !== 'kanban'"
+          :model-value="viewMode"
+          :options="[
+            { value: 'day', label: t('appointments.dailyView') },
+            { value: 'week', label: t('appointments.weeklyView') }
+          ]"
+          @update:model-value="setCalendarGranularity"
+        />
+        <USelectMenu
+          v-if="dentistSelectItems.length > 1"
+          v-model="dentistSelect"
+          :items="dentistSelectItems"
+          value-key="value"
+          label-key="label"
+          class="w-48"
+        />
+        <UPopover v-if="cabinetFilterOptions.length > 0" v-model:open="filtersOpen">
+          <UButton
+            size="sm"
+            variant="outline"
+            color="neutral"
+            icon="i-lucide-sliders-horizontal"
+            :class="filtersActive ? 'ring-1 ring-[var(--color-primary)]' : ''"
+          >
+            {{ t('lists.filter.more') }}
+          </UButton>
+          <template #content>
+            <div class="p-3 w-64 space-y-2">
+              <p class="text-caption text-subtle">{{ t('appointments.cabinet') }}</p>
+              <div class="flex flex-wrap gap-1.5">
+                <FilterChip
+                  v-for="cabinet in cabinetFilterOptions"
+                  :key="cabinet.value"
+                  :label="cabinet.label"
+                  :color="cabinet.color"
+                  :selected="selectedCabinets.includes(cabinet.value)"
+                  @toggle="toggleCabinet(cabinet.value)"
+                />
+              </div>
+              <UButton
+                v-if="filtersActive"
+                variant="ghost"
+                color="neutral"
+                size="xs"
+                @click="selectAllCabinets"
+              >
+                {{ t('common.selectAll') }}
+              </UButton>
+            </div>
+          </template>
+        </UPopover>
       </div>
     </div>
 
@@ -715,6 +879,7 @@ watch(isMobile, async (mobile) => {
         :current-week-start="currentWeekStart"
         :is-loading="isLoading"
         :highlighted-appointment-id="highlightedAppointmentId"
+        hide-chrome
         @slot-click="handleSlotClick"
         @slot-drag-create="handleSlotDragCreate"
         @appointment-click="handleAppointmentClick"
@@ -728,10 +893,11 @@ watch(isMobile, async (mobile) => {
       <AppointmentDailyView
         v-else-if="viewMode === 'day'"
         :appointments="filteredAppointments"
-        :professionals="professionalsWithColors"
+        :professionals="visibleProfessionals"
         :current-date="currentDate"
         :is-loading="isLoading"
         :highlighted-appointment-id="highlightedAppointmentId"
+        hide-chrome
         @slot-click="handleDailySlotClick"
         @slot-drag-create="handleDailySlotDragCreate"
         @appointment-click="handleAppointmentClick"
@@ -749,6 +915,7 @@ watch(isMobile, async (mobile) => {
         :professionals="professionalsWithColors"
         :current-date="currentDate"
         :is-loading="isLoading"
+        hide-chrome
         @appointment-click="handleAppointmentClick"
         @date-change="handleDateChange"
         @professional-filter="handleProfessionalFilter"

@@ -155,7 +155,7 @@ const NOT_FOUND_BY_LOCALE: Record<string, { title: string; body: string }> = {
 the user manual yet. We're filling the gaps as each module is
 revisited — see <a href="/user-manual/en/" target="_top">the user
 manual</a> for what is already documented.</p>
-<p>If you'd like a guide for this screen, please open an issue.</p>`,
+<p>Platform administrators can continue from the SaaS admin panel.</p>`,
   },
   es: {
     title: "Ayuda — pantalla aún sin documentar",
@@ -164,7 +164,7 @@ manual</a> for what is already documented.</p>
 contextual en el manual de usuario. Iremos cubriendo huecos a medida
 que se revisen los módulos — consulta <a href="/user-manual/es/"
 target="_top">el manual</a> para ver lo que ya está documentado.</p>
-<p>Si necesitas una guía para esta pantalla, abre una incidencia.</p>`,
+<p>Los administradores de la plataforma pueden continuar en el panel SaaS.</p>`,
   },
 };
 

@@ -1,23 +1,47 @@
 <script setup lang="ts">
-import type { Patient, ApiResponse } from '~~/app/types'
+import type { Patient, ApiResponse, PaginatedResponse } from '~~/app/types'
 
 defineProps<{ ctx?: unknown }>()
+
+interface FirstVisitsSummary {
+  new_patients: number
+  total_appointments: number
+  first_visit_rate: number
+}
 
 const { t, locale } = useI18n()
 const api = useApi()
 
 const patients = ref<Patient[]>([])
+const total = ref<number | null>(null)
+const firstVisits = ref<FirstVisitsSummary | null>(null)
 const pending = ref(true)
 
+function isoDate(d: Date): string {
+  return d.toISOString().split('T')[0] as string
+}
+
+function monthRange(): { from: string, to: string } {
+  const now = new Date()
+  const start = new Date(now.getFullYear(), now.getMonth(), 1)
+  return { from: isoDate(start), to: isoDate(now) }
+}
+
 async function load() {
-  try {
-    const res = await api.get<ApiResponse<Patient[]>>('/api/v1/patients/recent?limit=6')
-    patients.value = res.data
-  } catch {
-    patients.value = []
-  } finally {
-    pending.value = false
-  }
+  const { from, to } = monthRange()
+
+  const [recentRes, countRes, visitsRes] = await Promise.all([
+    api.get<ApiResponse<Patient[]>>('/api/v1/patients/recent?limit=8').catch(() => null),
+    api.get<PaginatedResponse<Patient>>('/api/v1/patients?page=1&page_size=1').catch(() => null),
+    api.get<ApiResponse<FirstVisitsSummary>>(
+      `/api/v1/reports/scheduling/first-visits?date_from=${from}&date_to=${to}`
+    ).catch(() => null)
+  ])
+
+  patients.value = recentRes?.data ?? []
+  total.value = typeof countRes?.total === 'number' ? countRes.total : null
+  firstVisits.value = visitsRes?.data ?? null
+  pending.value = false
 }
 
 onMounted(load)
@@ -27,22 +51,42 @@ function initials(p: Patient): string {
   return [p.first_name?.[0], p.last_name?.[0]].filter(Boolean).join('').toUpperCase() || '?'
 }
 
-function relative(iso: string): string {
-  const then = new Date(iso).getTime()
-  const now = Date.now()
-  const diffDays = Math.round((now - then) / 86_400_000)
-  const rtf = new Intl.RelativeTimeFormat(locale.value, { numeric: 'auto' })
-  if (diffDays < 1) return rtf.format(-Math.round((now - then) / 3_600_000), 'hour')
-  if (diffDays < 30) return rtf.format(-diffDays, 'day')
-  return new Date(iso).toLocaleDateString(locale.value, { day: 'numeric', month: 'short' })
+function fullName(p: Patient): string {
+  return `${p.first_name} ${p.last_name}`.trim()
 }
+
+function formatCount(n: number): string {
+  return n.toLocaleString(locale.value)
+}
+
+const mix = computed(() => {
+  const fv = firstVisits.value
+  if (!fv) return null
+  const newCount = fv.new_patients
+  const returningCount = Math.max(0, fv.total_appointments - fv.new_patients)
+  if (newCount <= 0 && returningCount <= 0) return null
+  const newPct = fv.first_visit_rate
+  const returningPct = fv.total_appointments > 0
+    ? Math.round((returningCount / fv.total_appointments) * 1000) / 10
+    : 0
+  return { newCount, returningCount, newPct, returningPct }
+})
+
+const isEmpty = computed(() =>
+  !pending.value && patients.value.length === 0 && (total.value === 0 || total.value === null)
+)
+
+const displayTotal = computed(() => {
+  if (total.value !== null) return total.value
+  return patients.value.length
+})
 </script>
 
 <template>
-  <SectionCard
-    icon="i-lucide-users"
-    icon-role="info"
+  <DashboardCard
     :title="t('dashboard.recent.title')"
+    :caption="t('dashboard.caption.thisMonth')"
+    class="h-full"
   >
     <template #actions>
       <UButton
@@ -56,50 +100,93 @@ function relative(iso: string): string {
 
     <div
       v-if="pending"
-      class="space-y-2"
+      class="space-y-4"
     >
-      <USkeleton
-        v-for="i in 3"
-        :key="i"
-        class="h-10 w-full"
-      />
+      <USkeleton class="h-8 w-20" />
+      <div class="grid grid-cols-2 gap-4">
+        <USkeleton class="h-16 w-full" />
+        <USkeleton class="h-16 w-full" />
+      </div>
+      <USkeleton class="h-8 w-40" />
     </div>
 
     <EmptyState
-      v-else-if="patients.length === 0"
+      v-else-if="isEmpty"
+      compact
       icon="i-lucide-users"
       :title="t('dashboard.recent.empty')"
     />
 
-    <ul
+    <div
       v-else
-      class="divide-y divide-[var(--color-border-subtle)]"
+      class="flex flex-col gap-5"
     >
-      <li
-        v-for="p in patients"
-        :key="p.id"
+      <p class="text-display text-default tnum">
+        {{ formatCount(displayTotal) }}
+      </p>
+
+      <div
+        v-if="mix"
+        class="grid grid-cols-2 gap-5"
       >
-        <ListRow :to="`/patients/${p.id}`">
-          <template #leading>
-            <UAvatar
-              :alt="`${p.first_name} ${p.last_name}`"
-              :text="initials(p)"
-              size="sm"
+        <div class="min-w-0">
+          <p class="text-h1 text-default tnum">
+            {{ formatCount(mix.newCount) }}
+          </p>
+          <p class="text-caption text-subtle tnum mt-0.5">
+            {{ mix.newPct.toFixed(1) }}%
+          </p>
+          <div class="h-1.5 rounded-full bg-[var(--color-surface-muted)] overflow-hidden mt-2">
+            <div
+              class="h-full rounded-full bg-[var(--color-primary)]"
+              :style="{ width: `${Math.min(mix.newPct, 100)}%` }"
             />
-          </template>
-          <template #title>
-            {{ p.first_name }} {{ p.last_name }}
-          </template>
-          <template #subtitle>
-            {{ p.phone || p.email || '—' }}
-          </template>
-          <template #meta>
-            <span class="text-caption text-subtle tnum">
-              {{ relative(p.created_at) }}
-            </span>
-          </template>
-        </ListRow>
-      </li>
-    </ul>
-  </SectionCard>
+          </div>
+          <p class="text-caption text-muted mt-2">
+            {{ t('dashboard.recent.new') }}
+          </p>
+        </div>
+
+        <div class="min-w-0">
+          <p class="text-h1 text-default tnum">
+            {{ formatCount(mix.returningCount) }}
+          </p>
+          <p class="text-caption text-subtle tnum mt-0.5">
+            {{ mix.returningPct.toFixed(1) }}%
+          </p>
+          <div class="h-1.5 rounded-full bg-[var(--color-surface-muted)] overflow-hidden mt-2">
+            <div
+              class="h-full rounded-full bg-[var(--color-primary)]"
+              :style="{ width: `${Math.min(mix.returningPct, 100)}%` }"
+            />
+          </div>
+          <p class="text-caption text-muted mt-2">
+            {{ t('dashboard.recent.returning') }}
+          </p>
+        </div>
+      </div>
+
+      <div
+        v-if="patients.length"
+        class="flex items-center"
+      >
+        <NuxtLink
+          v-for="(p, i) in patients"
+          :key="p.id"
+          :to="`/patients/${p.id}`"
+          class="relative rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+          :style="{ marginLeft: i === 0 ? '0' : '-0.5rem', zIndex: patients.length - i }"
+          :title="fullName(p)"
+          :aria-label="fullName(p)"
+        >
+          <UAvatar
+            :alt="fullName(p)"
+            :text="initials(p)"
+            size="sm"
+            class="ring-2 ring-[var(--color-surface)]"
+          />
+        </NuxtLink>
+      </div>
+    </div>
+  </DashboardCard>
 </template>

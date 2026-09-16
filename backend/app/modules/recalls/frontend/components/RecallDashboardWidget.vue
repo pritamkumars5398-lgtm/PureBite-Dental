@@ -28,26 +28,19 @@ const conversionPct = computed(() =>
 </script>
 
 <template>
-  <UCard
+  <DashboardCard
     v-if="stats || isLoading"
-    :ui="{ body: 'p-3' }"
+    :title="t('recalls.dashboard.title')"
+    :caption="t('dashboard.caption.thisWeek')"
+    class="h-full md:col-span-2"
   >
-    <template #header>
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <UIcon
-            name="i-lucide-bell"
-            class="w-4 h-4 text-default"
-          />
-          <span class="font-medium">{{ t('recalls.dashboard.title') }}</span>
-        </div>
-        <NuxtLink
-          to="/recalls"
-          class="text-primary-accent hover:underline text-caption"
-        >
-          {{ t('recalls.callList') }} →
-        </NuxtLink>
-      </div>
+    <template #actions>
+      <NuxtLink
+        to="/recalls"
+        class="text-primary-accent hover:underline text-caption"
+      >
+        {{ t('recalls.callList') }} →
+      </NuxtLink>
     </template>
 
     <USkeleton
@@ -92,5 +85,5 @@ const conversionPct = computed(() =>
         </div>
       </div>
     </div>
-  </UCard>
+  </DashboardCard>
 </template>

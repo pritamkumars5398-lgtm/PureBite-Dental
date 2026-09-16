@@ -26,16 +26,16 @@ withDefaults(defineProps<Props>(), {
   <NuxtLink
     v-if="to"
     :to="to"
-    class="block rounded-[var(--radius-lg)] ring-1 ring-[var(--color-border)] bg-(--color-surface) transition hover:ring-(--color-primary)/40 hover:shadow-sm cursor-pointer"
+    class="block rounded-[var(--radius-xl)] bg-(--color-surface) transition cursor-pointer"
     :class="attention ? 'border-l-4 border-(--color-warning-accent)' : ''"
   >
-    <div class="p-4 sm:p-5">
-      <div class="flex items-start gap-3">
-        <div class="shrink-0 w-9 h-9 rounded-md bg-(--color-primary-soft) flex items-center justify-center">
+    <div class="p-5 sm:p-6">
+      <div class="flex items-start gap-3.5">
+        <div class="shrink-0 w-10 h-10 rounded-[12px] bg-(--color-primary-soft) flex items-center justify-center">
           <UIcon
             :name="icon"
             class="w-5 h-5"
-            :style="{ color: 'var(--color-primary-accent)' }"
+            :style="{ color: 'var(--color-primary)' }"
           />
         </div>
         <div class="min-w-0 flex-1">
@@ -79,16 +79,16 @@ withDefaults(defineProps<Props>(), {
 
   <div
     v-else
-    class="block rounded-[var(--radius-lg)] ring-1 ring-[var(--color-border)] bg-(--color-surface) transition"
+    class="block rounded-[var(--radius-xl)] bg-(--color-surface) transition"
     :class="attention ? 'border-l-4 border-(--color-warning-accent)' : ''"
   >
-    <div class="p-4 sm:p-5">
-      <div class="flex items-start gap-3">
-        <div class="shrink-0 w-9 h-9 rounded-md bg-(--color-primary-soft) flex items-center justify-center">
+    <div class="p-5 sm:p-6">
+      <div class="flex items-start gap-3.5">
+        <div class="shrink-0 w-10 h-10 rounded-[12px] bg-(--color-primary-soft) flex items-center justify-center">
           <UIcon
             :name="icon"
             class="w-5 h-5"
-            :style="{ color: 'var(--color-primary-accent)' }"
+            :style="{ color: 'var(--color-primary)' }"
           />
         </div>
         <div class="min-w-0 flex-1">

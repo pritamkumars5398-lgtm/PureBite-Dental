@@ -1,7 +1,181 @@
 {
   "app": {
     "name": "PureBite Dental",
-    "tagline": "Gestión de clínica dental"
+    "tagline": "Gestión de clínica dental",
+    "version": "v{version}"
+  },
+  "landing": {
+    "nav": {
+      "product": "Producto",
+      "features": "Funciones",
+      "pricing": "Precios",
+      "home": "Inicio",
+      "chart": "Odontograma"
+    },
+    "cta": {
+      "request": "Solicitar acceso",
+      "seeProduct": "Ver el producto",
+      "quote": "Pedir presupuesto",
+      "send": "Enviar solicitud",
+      "sending": "Enviando"
+    },
+    "hero": {
+      "eyebrow": "Software de clínica para equipos dentales",
+      "title": "Historia clínica, sillones",
+      "titleEm": "y la contabilidad.",
+      "lede": "Un expediente por paciente. Todo el equipo escribe en la misma historia, en el mismo sitio, al mismo tiempo."
+    },
+    "preview": {
+      "overview": "Inicio",
+      "patients": "Pacientes",
+      "appointments": "Agenda",
+      "welcome": "Tu clínica, en una pantalla",
+      "welcomeSub": "Agenda, historias y facturación sin cambiar de herramienta.",
+      "search": "Buscar",
+      "kpiSchedule": "Agenda",
+      "kpiPatients": "Pacientes",
+      "kpiChart": "Historias",
+      "kpiBilling": "Facturación"
+    },
+    "arch": {
+      "aria": "Arcada superior e inferior etiquetada en notación FDI",
+      "caption": "Notación de dos dígitos — cuadrante y diente"
+    },
+    "features": {
+      "eyebrow": "El producto",
+      "title": "Todo lo que el equipo ya hace en el sillón.",
+      "lede": "Historias, odontograma, agenda, presupuestos y facturas — sin un segundo sistema para el gráfico.",
+      "records": {
+        "title": "Historias de pacientes",
+        "body": "Identidad, antecedentes, alergias, medicación y contactos de urgencia en un expediente. Los cambios quedan versionados."
+      },
+      "schedule": {
+        "title": "Agenda y sillones",
+        "body": "Reserva por clínico y gabinete. El calendario impide dobles reservas en lugar de avisar después."
+      },
+      "odontogram": {
+        "title": "Odontograma",
+        "body": "Gráfico FDI de dientes presentes, ausentes, restaurados y planificados. La misma notación de dos dígitos."
+      },
+      "periodontogram": {
+        "title": "Periodontograma",
+        "body": "Sondaje SEPA, sangrado, placa y CAL en el paciente, no en una hoja aparte."
+      },
+      "plans": {
+        "title": "Planes de tratamiento",
+        "body": "Planifica sobre el gráfico y convierte el mismo plan en presupuesto y factura."
+      },
+      "catalog": {
+        "title": "Catálogo",
+        "body": "Catálogo de la clínica con categorías, superficies, sesiones e impuestos — los precios que comparte el odontograma."
+      },
+      "quotes": {
+        "title": "Presupuestos",
+        "body": "Presupuestos versionados, enlace al paciente y firmas. El personal usa su idioma; el paciente ve el de la clínica."
+      },
+      "billing": {
+        "title": "Facturas",
+        "body": "La factura nace del plan de tratamiento. Controla cobrado, pendiente y lo que sigue en el seguro."
+      },
+      "payments": {
+        "title": "Cobros y mayor",
+        "body": "Mayor del paciente, imputaciones y antigüedad — sin un segundo libro."
+      },
+      "recalls": {
+        "title": "Recordatorios de revisión",
+        "body": "Revisiones e higiene desde la historia, con la lista que usa recepción."
+      },
+      "media": {
+        "title": "Fotos, radiografías, documentos",
+        "body": "Consentimientos, DNI, radiografías y fotos clínicas en el paciente, no en una carpeta compartida."
+      },
+      "notes": {
+        "title": "Notas clínicas",
+        "body": "Notas junto al gráfico, con fecha de la visita, visibles para los roles que deben verlas."
+      },
+      "reports": {
+        "title": "Informes",
+        "body": "Agenda, presupuestos y facturación de la clínica — desde los mismos registros."
+      },
+      "reminders": {
+        "title": "Avisos",
+        "body": "Plantillas de email y SMS para citas y presupuestos pendientes, en el horario de la clínica."
+      },
+      "roles": {
+        "title": "Quién ve qué",
+        "body": "Recepción ve la agenda. Higienistas ven las historias. Las finanzas quedan en los roles que tú definas."
+      },
+      "copilot": {
+        "title": "Copiloto",
+        "body": "Pregunta a la historia en el idioma de la clínica. Solo ve lo que permite el rol con sesión iniciada."
+      }
+    },
+    "remaining": {
+      "eyebrow": "Odontograma",
+      "title": "Ver lo que sigue en boca.",
+      "lede": "Un gráfico FDI vectorial de dientes presentes — ausentes, restaurados y planificados — con la notación que ya usa el equipo.",
+      "remaining": "Presente",
+      "missing": "Ausente",
+      "restored": "Restaurado",
+      "planned": "Planificado",
+      "sample": "Gráfico de ejemplo, no es un paciente real",
+      "count": "{n} de 32 presentes",
+      "aria": "Arcada de ejemplo con dientes presentes, ausentes, restaurados y planificados"
+    },
+    "steps": {
+      "eyebrow": "Cómo encaja",
+      "title": "Gráfico, plan y cobro.",
+      "chart": { "title": "Gráfico", "body": "Marca presentes y ausentes en el odontograma. El periodontograma vive en el mismo paciente." },
+      "plan": { "title": "Plan", "body": "Arma el plan desde el catálogo. Superficies y sesiones quedan en el diente." },
+      "bill": { "title": "Cobro", "body": "El presupuesto y la factura salen de ese plan. Los pagos van al mayor del paciente." }
+    },
+    "pricing": {
+      "eyebrow": "Precios",
+      "title": "Una suscripción. Toda la clínica.",
+      "lede": "Pagas por tiempo, no por pacientes ni puestos. Cuéntanos cuántos sillones tienes y te damos presupuesto.",
+      "plans": "Planes",
+      "quote": "Presupuesto",
+      "perClinic": "Por clínica",
+      "quoteNote": "Según el número de sillones y clínicos. Sin cargo por paciente.",
+      "fine": "No hace falta tarjeta para hablar con nosotros.",
+      "months": "mes"
+    },
+    "included": {
+      "users": "Usuarios ilimitados, cuentas de equipo y acceso por roles",
+      "patients": "Pacientes e historiales ilimitados (sin tarifa por paciente)",
+      "clinical": "Odontograma, planificación de tratamientos e historia médica",
+      "schedule": "Agenda avanzada con soporte multi-gabinete",
+      "billing": "Facturación, presupuestos y generación de facturas",
+      "export": "Exportación de datos y soporte de la plataforma"
+    },
+    "request": {
+      "eyebrow": "Solicitar acceso",
+      "title": "Cuéntanos tu clínica.",
+      "lede": "Pide un presupuesto o el alta. Tras la revisión, tu clínica queda provisionada. Respondemos en un día laborable.",
+      "sentTitle": "Solicitud enviada.",
+      "sentBody": "Ya está con nuestro equipo. Recibirás respuesta en {email} en un día laborable."
+    },
+    "form": {
+      "name": "Tu nombre",
+      "clinic": "Nombre de la clínica",
+      "phone": "Teléfono",
+      "users": "Personas que lo usarán",
+      "message": "Mensaje (opcional)",
+      "required": "obligatorio",
+      "namePlaceholder": "Introduce tu nombre",
+      "clinicPlaceholder": "Introduce el nombre de la clínica",
+      "emailPlaceholder": "Introduce tu correo electrónico",
+      "phonePlaceholder": "Introduce tu teléfono",
+      "messagePlaceholder": "Cuéntanos qué necesitas..."
+    },
+    "toast": {
+      "missingTitle": "Faltan tres campos",
+      "missingBody": "Añade tu nombre, el de la clínica y un correo al que podamos responder.",
+      "sentTitle": "Solicitud enviada",
+      "sentBody": "Respondemos en un día laborable.",
+      "failTitle": "No se pudo enviar",
+      "failFallback": "El servidor no respondió. Inténtalo de nuevo en un momento."
+    }
   },
   "demo": {
     "bannerMessage": "Demo pública — no introduzcas datos reales de pacientes. La base de datos se reinicia periódicamente.",
@@ -27,7 +201,16 @@
     "menu": "Menú",
     "openMenu": "Abrir menú",
     "close": "Cerrar",
-    "toggleSidebar": "Alternar barra lateral"
+    "toggleSidebar": "Alternar barra lateral",
+    "searchPlaceholder": "Busca cualquier cosa…",
+    "quickAdd": "Añadir",
+    "daysRemaining": "{n} días restantes",
+    "clinicFallback": "Clínica",
+    "groups": {
+      "clinic": "Clínica",
+      "finance": "Finanzas",
+      "other": "Otros"
+    }
   },
   "auth": {
     "login": "Iniciar sesión",
@@ -45,7 +228,10 @@
     "sessionExpired": "Tu sesión ha expirado",
     "networkError": "No se pudo conectar con el servidor",
     "serverError": "El servidor no está disponible. Inténtalo de nuevo en unos minutos",
-    "unknownError": "Error inesperado. Inténtalo de nuevo"
+    "unknownError": "Error inesperado. Inténtalo de nuevo",
+    "welcomeBack": "Bienvenido de nuevo",
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña"
   },
   "actions": {
     "edit": "Editar",
@@ -58,6 +244,8 @@
   },
   "patients": {
     "title": "Pacientes",
+    "listTitle": "Paciente",
+    "addPatient": "Añadir paciente",
     "create": "Nuevo paciente",
     "edit": "Editar paciente",
     "search": "Buscar paciente...",
@@ -117,7 +305,11 @@
     "columns": {
       "city": "Ciudad",
       "contact": "Contacto",
-      "debt": "Deuda"
+      "debt": "Deuda",
+      "patientName": "Nombre del paciente",
+      "registered": "Registro",
+      "select": "Seleccionar",
+      "selectAll": "Seleccionar todos"
     },
     "sort": {
       "lastVisit": "Última visita",
@@ -297,6 +489,7 @@
     "editMedicalHistory": "Editar historial médico",
     "medicalSnapshot": {
       "title": "Información médica",
+      "allergiesAria": "Alergias",
       "allergiesEmpty": "Sin alergias conocidas",
       "allergiesNotReviewed": "Historial médico no registrado",
       "completeHistory": "Completar historial",
@@ -373,6 +566,8 @@
     "medicalHistory": "Historial médico",
     "completeMedicalHistory": "Sin historial médico. Complétalo para registrar alergias, condiciones y medicación.",
     "editMedicalHistory": "Editar historial",
+    "headerAria": "Cabecera del paciente",
+    "quickActionsAria": "Acciones rápidas del paciente",
     "quickActions": "Acciones rápidas",
     "edit": "Editar",
     "editPatient": "Editar paciente",
@@ -412,6 +607,11 @@
     "readOnly": "Solo lectura",
     "legend": "Leyenda",
     "statusLegend": "Estado del tratamiento",
+    "summary": {
+      "total": "{n} en total",
+      "toothCount": "{n} diente | {n} dientes",
+      "teethLabel": "diente | dientes"
+    },
     "toothPosition": "Posición del diente",
     "displaced": "Desplazado",
     "rotated": "Rotado",
@@ -800,6 +1000,11 @@
     "dailyView": "Día",
     "weeklyView": "Semana",
     "kanbanView": "Kanban",
+    "totalAppointments": "{count} citas en total",
+    "totalAppointmentsLabel": "citas en total",
+    "todaysAppointmentCount": "Citas de hoy: {count} paciente(s)",
+    "allDentists": "Todos los dentistas",
+    "notAvailable": "No disponible",
     "kanban": {
       "upcoming": "Por venir",
       "waiting": "Sala de espera",
@@ -871,7 +1076,19 @@
     "greetings": {
       "morning": "Buenos días",
       "afternoon": "Buenas tardes",
-      "evening": "Buenas noches"
+      "evening": "Buenas noches",
+      "named": "¡{greeting}, {name}!",
+      "unnamed": "¡{greeting}!"
+    },
+    "caption": {
+      "today": "Hoy",
+      "now": "Ahora",
+      "tomorrow": "Mañana",
+      "last7Days": "Últimos 7 días",
+      "open": "Abiertas",
+      "recent": "Recientes",
+      "thisWeek": "Esta semana",
+      "thisMonth": "Este mes"
     },
     "welcome": "Bienvenido a PureBite Dental",
     "welcomeMessage": "Comienza creando tu primer paciente.",
@@ -915,8 +1132,10 @@
       "empty": "Sin facturas vencidas"
     },
     "recent": {
-      "title": "Pacientes recientes",
-      "empty": "No hay pacientes aún"
+      "title": "Pacientes",
+      "empty": "No hay pacientes aún",
+      "new": "Pacientes nuevos",
+      "returning": "Pacientes recurrentes"
     },
     "weekGlance": {
       "title": "La semana en un vistazo",
@@ -924,6 +1143,7 @@
       "appointments": "Citas",
       "completed": "Completadas",
       "invoiced": "Facturado",
+      "previous": "7 días anteriores",
       "empty": "Sin datos esta semana"
     }
   },
@@ -973,7 +1193,8 @@
       "placeholder": "Buscar configuración…",
       "empty": "Sin resultados para esa búsqueda.",
       "navigate": "navegar",
-      "open": "abrir"
+      "open": "abrir",
+      "description": "Busca la configuración de la clínica"
     },
     "locked": {
       "title": "No tienes acceso a esta sección",
@@ -1346,6 +1567,34 @@
       "description": "Ajusta los filtros o límpialos para ver todos los registros."
     },
     "resultCount": "{shown} de {total}",
+    "totalSuffix": "{noun} en total",
+    "totalSuffixBare": "en total",
+    "columns": {
+      "patient": "Paciente",
+      "status": "Estado",
+      "date": "Fecha",
+      "amount": "Importe",
+      "number": "Número",
+      "method": "Método",
+      "phone": "Teléfono",
+      "reason": "Motivo",
+      "priority": "Prioridad",
+      "title": "Título"
+    },
+    "noun": {
+      "budgets": "presupuestos",
+      "invoices": "facturas",
+      "payments": "pagos",
+      "plans": "planes",
+      "treatments": "tratamientos",
+      "recalls": "recordatorios",
+      "reports": "informes",
+      "patients": "pacientes",
+      "vatTypes": "tipos de IVA"
+    },
+    "search": {
+      "clear": "Borrar búsqueda"
+    },
     "filter": {
       "title": "Filtros",
       "more": "Filtros",
@@ -1524,6 +1773,10 @@
       "pricing": "Precio",
       "scheduling": "Agenda",
       "clinical": "Clínico"
+    },
+    "listTabs": {
+      "active": "Tratamientos activos",
+      "inactive": "Tratamientos inactivos"
     }
   },
   "placeholders": {
@@ -1542,6 +1795,11 @@
     "delete": "Eliminar Tipo de IVA",
     "setAsDefault": "Establecer como predeterminado",
     "showInactive": "Mostrar inactivos",
+    "searchPlaceholder": "Buscar por nombre o porcentaje...",
+    "listTabs": {
+      "active": "Tipos activos",
+      "inactive": "Tipos inactivos"
+    },
     "noItems": "No hay tipos de IVA configurados",
     "namePlaceholder": "Ej: Reducido (10%)",
     "systemNote": "Los tipos de IVA del sistema solo permiten cambiar el estado predeterminado.",
@@ -1558,6 +1816,24 @@
   "treatmentPlans": {
     "title": "Planes de tratamiento",
     "description": "Gestiona planes de tratamiento para pacientes",
+    "pageSubtitle": "Tratamientos del plan, odontograma y notas clínicas",
+    "createSubtitle": "Elige al paciente y registra el esquema clínico",
+    "selectPatientHint": "Busca por nombre o teléfono para asociar este plan",
+    "noPatientResults": "Ningún paciente coincide con esta búsqueda",
+    "changePatient": "Cambiar",
+    "clinicalWorkspace": "Espacio clínico",
+    "lastTreatment": "Último tratamiento",
+    "itemStatus": {
+      "pending": "Pendiente",
+      "completed": "Completado",
+      "cancelled": "Cancelado"
+    },
+    "columns": {
+      "treatment": "Tratamiento",
+      "tooth": "Diente",
+      "status": "Estado",
+      "price": "Precio"
+    },
     "new": "Nuevo plan",
     "create": "Crear plan de tratamiento",
     "edit": "Editar plan",
@@ -1822,8 +2098,10 @@
     "title": "Presupuestos",
     "description": "Gestiona presupuestos de tratamientos para pacientes",
     "new": "Nuevo presupuesto",
+    "newHint": "Elige el paciente y las fechas de vigencia. Los tratamientos se añaden en la siguiente pantalla.",
     "edit": "Editar presupuesto",
     "view": "Ver presupuesto",
+    "details": "Datos del presupuesto",
     "delete": "Eliminar presupuesto",
     "duplicate": "Crear nueva versión",
     "noItems": "No hay presupuestos",
@@ -2915,7 +3193,8 @@
     "openHelp": "Abrir ayuda",
     "drawerTitle": "Ayuda de esta página",
     "unavailable": "Aún no hay ayuda contextual para esta página.",
-    "openFullManual": "Abrir manual completo"
+    "openFullManual": "Abrir manual completo",
+    "goToAdmin": "Abrir administración de la plataforma"
   },
   "saasAdmin": {
     "title": "Administración de la Plataforma",

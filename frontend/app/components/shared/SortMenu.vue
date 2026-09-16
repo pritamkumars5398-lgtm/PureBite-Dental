@@ -73,6 +73,7 @@ const dirLabel = computed(() => t(`lists.sort.${current.value.dir}`))
         size="sm"
         icon="i-lucide-arrow-down-up"
         trailing-icon="i-lucide-chevron-down"
+        class="rounded-full"
       >
         {{ currentOption?.label ?? t('lists.sort.label') }}
       </UButton>

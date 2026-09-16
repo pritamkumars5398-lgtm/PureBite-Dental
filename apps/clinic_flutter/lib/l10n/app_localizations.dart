@@ -101,8 +101,14 @@ abstract class AppLocalizations {
   /// No description provided for @appName.
   ///
   /// In en, this message translates to:
-  /// **'DentalPin'**
+  /// **'PureBite Dental'**
   String get appName;
+
+  /// No description provided for @appVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'v{version}'**
+  String appVersion(String version);
 
   /// No description provided for @loginTitle.
   ///

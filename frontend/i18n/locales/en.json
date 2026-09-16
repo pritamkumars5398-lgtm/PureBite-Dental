@@ -1,7 +1,181 @@
 {
   "app": {
     "name": "PureBite Dental",
-    "tagline": "Dental clinic management"
+    "tagline": "Dental clinic management",
+    "version": "v{version}"
+  },
+  "landing": {
+    "nav": {
+      "product": "Product",
+      "features": "Features",
+      "pricing": "Pricing",
+      "home": "Home",
+      "chart": "Chart"
+    },
+    "cta": {
+      "request": "Request access",
+      "seeProduct": "See what it does",
+      "quote": "Get a quote",
+      "send": "Send request",
+      "sending": "Sending"
+    },
+    "hero": {
+      "eyebrow": "Clinic software for dental teams",
+      "title": "Charts, chairs,",
+      "titleEm": "and the books.",
+      "lede": "One record per patient. Every clinician in your practice writing to the same chart, in the same place, at the same time."
+    },
+    "preview": {
+      "overview": "Overview",
+      "patients": "Patients",
+      "appointments": "Appointments",
+      "welcome": "Your practice, one screen",
+      "welcomeSub": "Schedule, charts, and billing without switching tools.",
+      "search": "Search",
+      "kpiSchedule": "Schedule",
+      "kpiPatients": "Patients",
+      "kpiChart": "Charts",
+      "kpiBilling": "Billing"
+    },
+    "arch": {
+      "aria": "Upper and lower dental arch labelled in FDI notation",
+      "caption": "Two-digit notation — quadrant, then tooth"
+    },
+    "features": {
+      "eyebrow": "The product",
+      "title": "Everything the chair-side team already does.",
+      "lede": "Records, the odontogram, the day’s chairs, quotes, and invoices — without a second system for the chart.",
+      "records": {
+        "title": "Patient records",
+        "body": "Identity, medical history, allergies, medications and emergency contacts in one chart. Changes are versioned."
+      },
+      "schedule": {
+        "title": "Agenda and chairs",
+        "body": "Book by clinician and cabinet. The calendar refuses double-bookings instead of warning you after the fact."
+      },
+      "odontogram": {
+        "title": "Odontogram",
+        "body": "FDI chart of remaining, missing, restored and planned teeth. Same two-digit notation the chair already uses."
+      },
+      "periodontogram": {
+        "title": "Periodontogram",
+        "body": "SEPA probing sites, bleeding, plaque and CAL snapshots stored on the patient, not in a side spreadsheet."
+      },
+      "plans": {
+        "title": "Treatment plans",
+        "body": "Plan the work on the chart, then turn the same plan into a quote and an invoice."
+      },
+      "catalog": {
+        "title": "Treatment catalog",
+        "body": "Clinic catalog with categories, surfaces, sessions and tax — the prices the odontogram and quotes share."
+      },
+      "quotes": {
+        "title": "Quotes",
+        "body": "Versioned treatment quotes, patient links, and signatures. Staff keep their own language; the patient sees yours."
+      },
+      "billing": {
+        "title": "Invoices",
+        "body": "Build the invoice from the treatment plan. Track what is paid, pending, and still with insurance."
+      },
+      "payments": {
+        "title": "Payments and ledger",
+        "body": "Patient ledger, allocations, and ageing — without inventing a second set of books."
+      },
+      "recalls": {
+        "title": "Recalls",
+        "body": "Hygiene and review recalls from the chart, with the list reception actually works."
+      },
+      "media": {
+        "title": "Photos, X-rays, documents",
+        "body": "Consent forms, ID, radiographs and clinical photos attached to the patient, not a shared drive."
+      },
+      "notes": {
+        "title": "Clinical notes",
+        "body": "Notes beside the chart, timestamped to the visit, visible to the roles that should see them."
+      },
+      "reports": {
+        "title": "Reports",
+        "body": "Scheduling, quotes and billing reports across the clinic — from the same records, not an export ritual."
+      },
+      "reminders": {
+        "title": "Reminders",
+        "body": "Email and SMS templates for appointments and pending quotes, on your clinic’s schedule."
+      },
+      "roles": {
+        "title": "Who sees what",
+        "body": "Receptionists see the schedule. Hygienists see charts. Finance stays with the roles you set."
+      },
+      "copilot": {
+        "title": "Copilot",
+        "body": "Ask the chart in the clinic’s language. It only sees what the signed-in role is allowed to see."
+      }
+    },
+    "remaining": {
+      "eyebrow": "Odontogram",
+      "title": "See what is still there.",
+      "lede": "A vector FDI chart of remaining teeth — missing, restored, and planned — the same notation clinicians already use.",
+      "remaining": "Remaining",
+      "missing": "Missing",
+      "restored": "Restored",
+      "planned": "Planned",
+      "sample": "Sample chart, not a live patient",
+      "count": "{n} of 32 remaining",
+      "aria": "Sample upper and lower dental arch showing remaining, missing, restored and planned teeth"
+    },
+    "steps": {
+      "eyebrow": "How it fits",
+      "title": "Chart, plan, then bill.",
+      "chart": { "title": "Chart", "body": "Mark remaining and missing teeth on the odontogram. Periodontal sites live on the same patient." },
+      "plan": { "title": "Plan", "body": "Build the treatment plan from the catalog. Surfaces and sessions stay attached to the tooth." },
+      "bill": { "title": "Bill", "body": "The quote and the invoice come from that plan. Payments post to the patient ledger." }
+    },
+    "pricing": {
+      "eyebrow": "Pricing",
+      "title": "One subscription. The whole practice.",
+      "lede": "You pay for time, not for patients or seats. Tell us your chair count and we will quote you.",
+      "plans": "Plans",
+      "quote": "Quote",
+      "perClinic": "Per clinic",
+      "quoteNote": "Scaled to your chair count and how many clinicians work them. No per-patient charge, ever.",
+      "fine": "No card required to talk to us.",
+      "months": "mo"
+    },
+    "included": {
+      "users": "Unlimited users, staff accounts, and role-based access",
+      "patients": "Unlimited patients and clinical records (no per-patient fees)",
+      "clinical": "Smart odontogram, treatment planning, and medical history",
+      "schedule": "Advanced schedule management with multi-cabinet support",
+      "billing": "Integrated billing, quoting, and invoice generation",
+      "export": "Data export and full platform support"
+    },
+    "request": {
+      "eyebrow": "Request access",
+      "title": "Tell us about your practice.",
+      "lede": "Ask for a quote or registration. Once reviewed, your clinic is provisioned on the platform. We reply within one business day.",
+      "sentTitle": "Request sent.",
+      "sentBody": "It is with our team now. Expect a reply at {email} within one business day."
+    },
+    "form": {
+      "name": "Your name",
+      "clinic": "Clinic name",
+      "phone": "Phone",
+      "users": "People who will use it",
+      "message": "Message (optional)",
+      "required": "required",
+      "namePlaceholder": "Enter your name",
+      "clinicPlaceholder": "Enter your clinic name",
+      "emailPlaceholder": "Enter your email address",
+      "phonePlaceholder": "Enter your phone number",
+      "messagePlaceholder": "Tell us about your needs..."
+    },
+    "toast": {
+      "missingTitle": "Three fields still empty",
+      "missingBody": "Add your name, your clinic name, and an email we can reply to.",
+      "sentTitle": "Request sent",
+      "sentBody": "We reply within one business day.",
+      "failTitle": "Request not sent",
+      "failFallback": "The server did not respond. Try again in a moment."
+    }
   },
   "demo": {
     "bannerMessage": "Public demo — do not enter real patient data. The database is reset periodically.",
@@ -27,7 +201,16 @@
     "menu": "Menu",
     "openMenu": "Open menu",
     "close": "Close",
-    "toggleSidebar": "Toggle sidebar"
+    "toggleSidebar": "Toggle sidebar",
+    "searchPlaceholder": "Search for anything here…",
+    "quickAdd": "Add",
+    "daysRemaining": "{n} days remaining",
+    "clinicFallback": "Clinic",
+    "groups": {
+      "clinic": "Clinic",
+      "finance": "Finance",
+      "other": "Other"
+    }
   },
   "auth": {
     "login": "Log in",
@@ -45,7 +228,10 @@
     "sessionExpired": "Your session has expired",
     "networkError": "Could not connect to the server",
     "serverError": "The server is unavailable. Please try again in a few minutes",
-    "unknownError": "Unexpected error. Please try again"
+    "unknownError": "Unexpected error. Please try again",
+    "welcomeBack": "Welcome back",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "actions": {
     "edit": "Edit",
@@ -58,6 +244,8 @@
   },
   "patients": {
     "title": "Patients",
+    "listTitle": "Patient",
+    "addPatient": "Add Patient",
     "create": "New patient",
     "edit": "Edit patient",
     "search": "Search patient...",
@@ -117,7 +305,11 @@
     "columns": {
       "city": "City",
       "contact": "Contact",
-      "debt": "Debt"
+      "debt": "Debt",
+      "patientName": "Patient name",
+      "registered": "Registered",
+      "select": "Select",
+      "selectAll": "Select all"
     },
     "sort": {
       "lastVisit": "Last visit",
@@ -269,6 +461,7 @@
     "editMedicalHistory": "Edit medical history",
     "medicalSnapshot": {
       "title": "Medical information",
+      "allergiesAria": "Allergies",
       "allergiesEmpty": "No known allergies",
       "allergiesNotReviewed": "Medical history not recorded",
       "completeHistory": "Complete history",
@@ -345,6 +538,8 @@
     "medicalHistory": "Medical history",
     "completeMedicalHistory": "No medical history. Complete it to record allergies, conditions and medication.",
     "editMedicalHistory": "Edit medical history",
+    "headerAria": "Patient header",
+    "quickActionsAria": "Patient quick actions",
     "quickActions": "Quick actions",
     "edit": "Edit",
     "editPatient": "Edit patient",
@@ -384,6 +579,11 @@
     "readOnly": "View only",
     "legend": "Legend",
     "statusLegend": "Treatment status",
+    "summary": {
+      "total": "{n} total",
+      "toothCount": "{n} tooth | {n} teeth",
+      "teethLabel": "tooth | teeth"
+    },
     "toothPosition": "Tooth position",
     "displaced": "Displaced",
     "rotated": "Rotated",
@@ -779,6 +979,11 @@
     "dailyView": "Day",
     "weeklyView": "Week",
     "kanbanView": "Kanban",
+    "totalAppointments": "{count} total appointments",
+    "totalAppointmentsLabel": "total appointments",
+    "todaysAppointmentCount": "Today's appointment: {count} patient(s)",
+    "allDentists": "All dentists",
+    "notAvailable": "Not available",
     "kanban": {
       "upcoming": "Upcoming",
       "waiting": "Waiting room",
@@ -850,7 +1055,19 @@
     "greetings": {
       "morning": "Good morning",
       "afternoon": "Good afternoon",
-      "evening": "Good evening"
+      "evening": "Good evening",
+      "named": "{greeting}, {name}!",
+      "unnamed": "{greeting}!"
+    },
+    "caption": {
+      "today": "Today",
+      "now": "Now",
+      "tomorrow": "Tomorrow",
+      "last7Days": "Last 7 days",
+      "open": "Open",
+      "recent": "Recent",
+      "thisWeek": "This week",
+      "thisMonth": "This month"
     },
     "welcome": "Welcome to PureBite Dental",
     "welcomeMessage": "Start by creating your first patient.",
@@ -894,8 +1111,10 @@
       "empty": "No overdue invoices"
     },
     "recent": {
-      "title": "Recent patients",
-      "empty": "No patients yet"
+      "title": "Patients",
+      "empty": "No patients yet",
+      "new": "New patients",
+      "returning": "Returning patients"
     },
     "weekGlance": {
       "title": "Week at a glance",
@@ -903,6 +1122,7 @@
       "appointments": "Appointments",
       "completed": "Completed",
       "invoiced": "Invoiced",
+      "previous": "Previous 7 days",
       "empty": "No data this week"
     }
   },
@@ -952,7 +1172,8 @@
       "placeholder": "Search settings…",
       "empty": "No matches for that search.",
       "navigate": "navigate",
-      "open": "open"
+      "open": "open",
+      "description": "Search clinic configuration and settings"
     },
     "locked": {
       "title": "You don't have access to this section",
@@ -1324,6 +1545,34 @@
       "description": "Adjust the filters or clear them to see all records."
     },
     "resultCount": "{shown} of {total}",
+    "totalSuffix": "total {noun}",
+    "totalSuffixBare": "total",
+    "columns": {
+      "patient": "Patient",
+      "status": "Status",
+      "date": "Date",
+      "amount": "Amount",
+      "number": "Number",
+      "method": "Method",
+      "phone": "Phone",
+      "reason": "Reason",
+      "priority": "Priority",
+      "title": "Title"
+    },
+    "noun": {
+      "budgets": "quotes",
+      "invoices": "invoices",
+      "payments": "payments",
+      "plans": "plans",
+      "treatments": "treatments",
+      "recalls": "recalls",
+      "reports": "reports",
+      "patients": "patients",
+      "vatTypes": "VAT types"
+    },
+    "search": {
+      "clear": "Clear search"
+    },
     "filter": {
       "title": "Filters",
       "more": "Filters",
@@ -1502,6 +1751,10 @@
       "pricing": "Pricing",
       "scheduling": "Scheduling",
       "clinical": "Clinical"
+    },
+    "listTabs": {
+      "active": "Active treatments",
+      "inactive": "Inactive treatments"
     }
   },
   "placeholders": {
@@ -1520,6 +1773,11 @@
     "delete": "Delete VAT Type",
     "setAsDefault": "Set as default",
     "showInactive": "Show inactive",
+    "searchPlaceholder": "Search by name or rate...",
+    "listTabs": {
+      "active": "Active types",
+      "inactive": "Inactive types"
+    },
     "noItems": "No VAT types configured",
     "namePlaceholder": "E.g.: Reduced (10%)",
     "systemNote": "System VAT types can only have their default status changed.",
@@ -1536,6 +1794,24 @@
   "treatmentPlans": {
     "title": "Treatment Plans",
     "description": "Manage treatment plans for patients",
+    "pageSubtitle": "Plan treatments, odontogram and clinical notes",
+    "createSubtitle": "Choose the patient and capture the clinical outline",
+    "selectPatientHint": "Search by name or phone to attach this plan",
+    "noPatientResults": "No patients match this search",
+    "changePatient": "Change",
+    "clinicalWorkspace": "Clinical workspace",
+    "lastTreatment": "Last treatment",
+    "itemStatus": {
+      "pending": "Pending",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "columns": {
+      "treatment": "Treatment",
+      "tooth": "Tooth",
+      "status": "Status",
+      "price": "Price"
+    },
     "new": "New plan",
     "create": "Create treatment plan",
     "edit": "Edit plan",
@@ -1800,8 +2076,10 @@
     "title": "Quotes",
     "description": "Manage treatment quotes for patients",
     "new": "New quote",
+    "newHint": "Choose the patient and validity dates. Treatments are added on the next screen.",
     "edit": "Edit quote",
     "view": "View quote",
+    "details": "Quote details",
     "delete": "Delete quote",
     "duplicate": "Create new version",
     "noItems": "No quotes",
@@ -2848,7 +3126,8 @@
     "openHelp": "Open help",
     "drawerTitle": "Help for this page",
     "unavailable": "No contextual help available for this page yet.",
-    "openFullManual": "Open full manual"
+    "openFullManual": "Open full manual",
+    "goToAdmin": "Open platform admin"
   },
   "saasAdmin": {
     "title": "Platform Administration",

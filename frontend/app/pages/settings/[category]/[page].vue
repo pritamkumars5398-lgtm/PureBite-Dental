@@ -54,7 +54,7 @@ const backLabel = computed(() => category.value ? t(category.value.labelKey) : t
     <!-- Locked: known category gated by permission, or page exists but requires permission user lacks -->
     <div
       v-if="!entry"
-      class="rounded-[var(--radius-lg)] ring-1 ring-[var(--color-border)] bg-(--color-surface) p-8"
+      class="rounded-[var(--radius-xl)] bg-(--color-surface) p-8"
     >
       <EmptyState
         icon="i-lucide-lock"
@@ -63,7 +63,8 @@ const backLabel = computed(() => category.value ? t(category.value.labelKey) : t
       >
         <template #actions>
           <UButton
-            variant="soft"
+            color="primary"
+            variant="solid"
             icon="i-lucide-arrow-left"
             :to="backTo"
           >
@@ -75,7 +76,7 @@ const backLabel = computed(() => category.value ? t(category.value.labelKey) : t
 
     <div
       v-else-if="loadError"
-      class="rounded-[var(--radius-lg)] ring-1 ring-[var(--color-border)] bg-(--color-surface) p-8"
+      class="rounded-[var(--radius-xl)] bg-(--color-surface) p-8"
     >
       <EmptyState
         icon="i-lucide-x-circle"
@@ -84,7 +85,8 @@ const backLabel = computed(() => category.value ? t(category.value.labelKey) : t
       >
         <template #actions>
           <UButton
-            variant="soft"
+            color="primary"
+            variant="solid"
             icon="i-lucide-arrow-left"
             :to="backTo"
           >

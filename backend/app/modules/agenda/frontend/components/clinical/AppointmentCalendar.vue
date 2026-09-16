@@ -21,6 +21,7 @@ const props = defineProps<{
   currentWeekStart: Date
   isLoading?: boolean
   highlightedAppointmentId?: string | null
+  hideChrome?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -43,6 +44,7 @@ watch(() => props.highlightedAppointmentId, (newId) => {
 }, { immediate: true })
 
 const { t, locale } = useI18n()
+const { statusLabel } = useAppointmentStatus()
 
 // Time slots configuration. START_HOUR/END_HOUR default to 8–21 and
 // get narrowed to the actual clinic opening hours when the schedules
@@ -270,16 +272,13 @@ function getProfessionalFullName(professionalId: string): string {
 // Get appointment style with cabinet color
 // Per DESIGN §7.3: fill at alpha 0.12 in cabinet colour, 3 px left border in full colour.
 function getAppointmentColorStyle(appointment: Appointment): Record<string, string> {
-  const color = getCabinetColor(appointment.cabinet)
-  // Convert hex to rgba with alpha for fill tint
+  const color = getProfessionalColor(appointment.professional_id)
   const r = parseInt(color.slice(1, 3), 16)
   const g = parseInt(color.slice(3, 5), 16)
   const b = parseInt(color.slice(5, 7), 16)
   return {
-    '--cabinet-color': color,
-    'backgroundColor': `rgba(${r}, ${g}, ${b}, 0.12)`,
-    'borderLeftColor': color,
-    'borderLeftWidth': '3px'
+    backgroundColor: `rgba(${r}, ${g}, ${b}, 0.22)`,
+    borderColor: `rgba(${r}, ${g}, ${b}, 0.35)`
   }
 }
 
@@ -287,23 +286,15 @@ function getAppointmentColorStyle(appointment: Appointment): Record<string, stri
 // Calendar block: fill = professional colour alpha 0.12 (inline), left border 3 px in full
 // professional colour (inline). Status modulates text colour and opacity only.
 function getStatusClass(status: Appointment['status']): string {
-  const baseClass = 'bg-surface ring-1 ring-[var(--color-border)]'
-
   switch (status) {
-    case 'scheduled':
-    case 'confirmed':
-      return `${baseClass} text-default`
-    case 'checked_in':
-    case 'in_treatment':
-      return `${baseClass} text-default`
     case 'completed':
-      return `${baseClass} text-muted opacity-70`
+      return 'text-default'
     case 'cancelled':
-      return `${baseClass} text-subtle line-through opacity-50`
+      return 'text-subtle line-through opacity-60'
     case 'no_show':
-      return `${baseClass} text-subtle opacity-60`
+      return 'text-subtle opacity-70'
     default:
-      return baseClass
+      return 'text-default'
   }
 }
 
@@ -322,9 +313,85 @@ function getStatusIcon(status: Appointment['status']): string {
     case 'no_show':
       return 'i-lucide-user-x'
     default:
-      return ''
+      return 'i-lucide-calendar'
   }
 }
+
+function getStatusChipClass(status: Appointment['status']): string {
+  switch (status) {
+    case 'completed':
+      return 'bg-emerald-50 text-emerald-600 ring-emerald-100'
+    case 'in_treatment':
+      return 'bg-amber-50 text-amber-700 ring-amber-100'
+    case 'checked_in':
+      return 'bg-orange-50 text-orange-600 ring-orange-100'
+    case 'cancelled':
+    case 'no_show':
+      return 'bg-rose-50 text-rose-600 ring-rose-100'
+    default:
+      return 'bg-white/70 text-slate-500 ring-white/80'
+  }
+}
+
+function formatHourLabel(slot: string): string {
+  const hour = Number(slot.split(':')[0] ?? 0)
+  const d = new Date()
+  d.setHours(hour, 0, 0, 0)
+  return d.toLocaleTimeString(locale.value, { hour: 'numeric' }).toLowerCase()
+}
+
+function formatClock(timeStr: string): string {
+  const parts = timeStr.split(':').map(Number)
+  const d = new Date()
+  d.setHours(parts[0] ?? 0, parts[1] ?? 0, 0, 0)
+  return d.toLocaleTimeString(locale.value, { hour: '2-digit', minute: '2-digit' })
+}
+
+function formatTimeRange(appointment: Appointment): string {
+  const start = appointment.start_time.split('T')[1]?.substring(0, 5) ?? '08:00'
+  const end = appointment.end_time.split('T')[1]?.substring(0, 5) ?? '08:15'
+  return `${formatClock(start)} > ${formatClock(end)}`
+}
+
+function treatmentLabel(appointment: Appointment): string {
+  if (appointment.treatment_type) return appointment.treatment_type
+  const first = appointment.treatments?.[0]
+  if (!first) return ''
+  const names = first.names
+  return names?.[locale.value] || names?.es || names?.en || first.internal_code
+}
+
+function patientName(appointment: Appointment): string {
+  if (!appointment.patient) return t('appointments.noPatient')
+  return `${appointment.patient.first_name} ${appointment.patient.last_name}`.trim()
+}
+
+const nowTick = ref(Date.now())
+let nowTimer: ReturnType<typeof setInterval> | null = null
+onMounted(() => {
+  nowTimer = setInterval(() => {
+    nowTick.value = Date.now()
+  }, 30_000)
+})
+onUnmounted(() => {
+  if (nowTimer) clearInterval(nowTimer)
+})
+
+const todayColumnIndex = computed(() => weekDays.value.findIndex(d => isToday(d)))
+
+const nowLine = computed(() => {
+  if (todayColumnIndex.value < 0) return null
+  const d = new Date(nowTick.value)
+  const minutes = d.getHours() * 60 + d.getMinutes()
+  const start = startHour.value * 60
+  const end = endHour.value * 60
+  if (minutes < start || minutes > end) return null
+  return {
+    top: `${((minutes - start) / SLOT_MINUTES) * getSlotHeight()}px`,
+    label: d.toLocaleTimeString(locale.value, { hour: '2-digit', minute: '2-digit' }),
+    dayIndex: todayColumnIndex.value
+  }
+})
 
 // Handle drag-to-create on empty slot
 function startCreateDrag(date: Date, timeSlot: string, dayIndex: number, event: MouseEvent) {
@@ -644,8 +711,10 @@ const allAppointmentsWithDayIndex = computed(() => {
 
 <template>
   <div class="flex flex-col h-full">
-    <!-- Calendar header -->
-    <div class="flex items-center justify-between mb-4 flex-shrink-0">
+    <div
+      v-if="!hideChrome"
+      class="flex items-center justify-between mb-4 flex-shrink-0"
+    >
       <div class="flex items-center gap-2">
         <UButton
           variant="outline"
@@ -689,22 +758,20 @@ const allAppointmentsWithDayIndex = computed(() => {
     <div
       v-else
       ref="calendarRef"
-      class="flex-1 overflow-auto ring-1 ring-[var(--color-border)] rounded-token-lg"
+      class="flex-1 overflow-auto ring-1 ring-[var(--color-border)] rounded-token-lg bg-surface"
     >
       <div class="min-w-[800px]">
         <!-- Day headers -->
-        <div class="grid grid-cols-8 border-b border-default bg-surface-muted sticky top-0 z-10">
-          <div class="p-2 text-center text-caption text-subtle border-r border-subtle">
-            <!-- Empty -->
-          </div>
+        <div class="grid grid-cols-8 border-b border-default bg-surface sticky top-0 z-20">
+          <div class="p-2 text-center text-caption text-subtle border-r border-subtle" />
           <div
             v-for="day in weekDays"
             :key="day.toISOString()"
             class="p-2 text-center border-r border-subtle last:border-r-0"
-            :class="{ 'bg-[var(--color-primary-soft)]': isToday(day) }"
+            :class="{ 'bg-[var(--color-primary-soft)]/40': isToday(day) }"
           >
             <span
-              class="text-ui"
+              class="text-sm font-semibold"
               :class="isToday(day) ? 'text-[var(--color-primary-soft-text)]' : 'text-default'"
             >
               {{ formatDayHeader(day) }}
@@ -717,27 +784,31 @@ const allAppointmentsWithDayIndex = computed(() => {
           <div
             v-for="(slot, slotIndex) in timeSlots"
             :key="slot"
-            class="grid grid-cols-8 border-b border-[var(--color-border-subtle)] h-[var(--density-slot-height,28px)]"
-            :class="{ 'border-[var(--color-border)]': slotIndex % SLOTS_PER_HOUR === 0 }"
+            class="grid grid-cols-8 h-[var(--density-slot-height,28px)]"
+            :class="slotIndex % SLOTS_PER_HOUR === 0 ? 'border-t border-[var(--color-border)]' : 'border-t border-dashed border-[var(--color-border-subtle)]'"
           >
-            <div class="p-1 text-right border-r border-subtle flex items-center justify-end pr-2">
+            <div class="pr-3 border-r border-subtle flex items-start justify-end">
               <span
                 v-if="slotIndex % SLOTS_PER_HOUR === 0"
-                class="text-caption text-subtle tnum"
+                class="text-caption text-subtle tnum -translate-y-2"
               >
-                {{ slot }}
+                {{ formatHourLabel(slot) }}
               </span>
             </div>
             <div
               v-for="(day, dayIdx) in weekDays"
               :key="`${day.toISOString()}-${slot}`"
-              class="border-r border-[var(--color-border-subtle)] last:border-r-0 cursor-cell hover:bg-[var(--color-primary-soft)]/50 transition-colors relative"
+              class="group/slot border-r border-[var(--color-border-subtle)] last:border-r-0 cursor-cell relative"
               :class="{
-                'bg-[var(--color-primary-soft)]/40': isToday(day),
+                'bg-[var(--color-primary-soft)]/20': isToday(day),
                 'border-[var(--color-border)]': slotIndex % SLOTS_PER_HOUR === 0
               }"
               @mousedown="startCreateDrag(day, slot, dayIdx, $event)"
-            />
+            >
+              <span class="absolute inset-0 hidden group-hover/slot:flex items-center justify-center pointer-events-none text-[var(--color-primary)]">
+                <UIcon name="i-lucide-plus" class="w-4 h-4" />
+              </span>
+            </div>
           </div>
 
           <!-- Appointments overlay -->
@@ -759,8 +830,8 @@ const allAppointmentsWithDayIndex = computed(() => {
                 <div
                   v-for="(seg, segIdx) in blockedSegments.filter(s => s.dateKey === formatLocalDate(day))"
                   :key="`blocked-${day.toISOString()}-${segIdx}`"
-                  class="absolute inset-x-0 pointer-events-none z-10 schedules-blocked"
-                  :title="seg.reason || 'Clínica cerrada'"
+                  class="absolute inset-x-0 pointer-events-none z-10 schedules-blocked flex items-center justify-center"
+                  :title="seg.reason || t('appointments.freeSlots.clinicClosed')"
                   :style="{
                     top: `${seg.startSlot * getSlotHeight()}px`,
                     height: `${(seg.endSlot - seg.startSlot) * getSlotHeight()}px`
@@ -786,21 +857,32 @@ const allAppointmentsWithDayIndex = computed(() => {
                 </div>
 
                 <div
+                  v-if="nowLine && nowLine.dayIndex === dayIndex"
+                  class="absolute left-0 right-0 z-30 pointer-events-none"
+                  :style="{ top: nowLine.top }"
+                >
+                  <div class="relative">
+                    <div class="h-px bg-red-500" />
+                    <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[10px] font-semibold text-white bg-slate-900 rounded-full px-2 py-0.5 tnum">
+                      {{ nowLine.label }}
+                    </span>
+                  </div>
+                </div>
+
+                <div
                   v-for="{ appointment } in allAppointmentsWithDayIndex.filter(a => a.dayIndex === dayIndex)"
                   :key="appointment.id"
-                  class="group absolute rounded overflow-hidden pointer-events-auto select-none shadow-sm"
+                  class="group absolute rounded-xl overflow-hidden pointer-events-auto select-none shadow-sm ring-1"
                   :class="[
                     getStatusClass(appointment.status),
-                    dragState?.appointmentId === appointment.id ? 'cursor-grabbing ring-2 ring-primary-500' : 'cursor-grab hover:ring-2 hover:ring-primary-500',
+                    dragState?.appointmentId === appointment.id ? 'cursor-grabbing ring-2 ring-primary-500' : 'cursor-grab hover:ring-2 hover:ring-primary-400/60',
                     highlightedAppointmentId === appointment.id ? 'ring-4 ring-warning-500 animate-pulse z-50' : ''
                   ]"
                   :style="{ ...getAppointmentStyle(appointment), ...getAppointmentColorStyle(appointment), ...getOverlapStyle(appointment) }"
                   @click="handleAppointmentClick(appointment, $event)"
                   @mousedown="startDrag(appointment, $event, 'move')"
                 >
-                  <!-- Content -->
-                  <div class="px-1.5 h-full flex flex-col py-0.5 relative">
-                    <!-- Professional badge -->
+                  <div class="px-1.5 h-full flex flex-col py-0.5 relative min-w-0">
                     <div
                       v-if="professionals && professionals.length > 0"
                       class="absolute top-0.5 right-0.5 w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-bold shadow-sm"
@@ -809,7 +891,6 @@ const allAppointmentsWithDayIndex = computed(() => {
                     >
                       {{ getProfessionalInitials(appointment.professional_id) }}
                     </div>
-                    <!-- Quick-action dropdown (shown on hover) -->
                     <div
                       class="absolute top-0.5 left-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-20"
                       @click.stop
@@ -818,13 +899,8 @@ const allAppointmentsWithDayIndex = computed(() => {
                       <AppointmentQuickActions :appointment="appointment" dense />
                     </div>
                     <div class="flex items-center gap-1 min-h-[18px] pr-5 pl-5">
-                      <UIcon
-                        v-if="getStatusIcon(appointment.status)"
-                        :name="getStatusIcon(appointment.status)"
-                        class="w-3 h-3 flex-shrink-0"
-                      />
-                      <span class="text-xs font-medium truncate">
-                        {{ appointment.patient ? `${appointment.patient.last_name}` : 'Sin paciente' }}
+                      <span class="text-xs font-semibold truncate">
+                        {{ patientName(appointment) }}
                       </span>
                       <UIcon
                         v-if="notesIndicator.has(appointment.id)"
@@ -833,15 +909,23 @@ const allAppointmentsWithDayIndex = computed(() => {
                         :title="$t('appointments.hasNotes', 'Tiene notas')"
                       />
                     </div>
-                    <div
-                      v-if="appointment.treatment_type || appointment.cabinet"
-                      class="text-xs opacity-60 truncate"
-                    >
-                      {{ appointment.cabinet }}{{ appointment.treatment_type ? ` · ${appointment.treatment_type}` : '' }}
+                    <div class="text-[10px] text-muted tnum truncate pl-5">
+                      {{ formatTimeRange(appointment) }}
                     </div>
+                    <div
+                      v-if="treatmentLabel(appointment)"
+                      class="text-[10px] text-muted truncate pl-5"
+                    >
+                      {{ treatmentLabel(appointment) }}
+                    </div>
+                    <span
+                      class="absolute bottom-1 right-1 text-[9px] font-medium px-1 py-0.5 rounded ring-1 max-w-[46%] truncate"
+                      :class="getStatusChipClass(appointment.status)"
+                    >
+                      {{ statusLabel(appointment.status) }}
+                    </span>
                   </div>
 
-                  <!-- Resize handle -->
                   <div
                     class="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
                     @mousedown.stop="startDrag(appointment, $event, 'resize')"

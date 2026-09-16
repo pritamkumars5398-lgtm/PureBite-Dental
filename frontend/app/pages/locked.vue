@@ -101,7 +101,7 @@ async function handleLogout() {
 }
 
 .expired {
-  --paper:  #F7F6F2;
+  --paper:  #FFFFFF;
   --ink:    #16191A;
   --ink-60: #5A6062;
   --ink-30: #9BA1A1;

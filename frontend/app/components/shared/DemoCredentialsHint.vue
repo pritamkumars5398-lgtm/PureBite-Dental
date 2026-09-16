@@ -24,7 +24,7 @@ async function copy(value: string) {
 <template>
   <div
     v-if="demoMode"
-    class="alert-surface-info rounded-token-md px-4 py-3 mt-4 space-y-2"
+    class="alert-surface-info rounded-[var(--radius-xl)] px-4 py-3.5 mt-4 space-y-2 ring-1 ring-[var(--color-border-subtle)]"
   >
     <div class="flex items-center gap-2">
       <UIcon

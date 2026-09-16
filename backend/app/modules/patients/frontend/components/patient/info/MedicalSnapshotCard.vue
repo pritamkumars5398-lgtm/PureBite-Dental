@@ -56,28 +56,23 @@ function allergyTooltip(a: AllergyEntry): string {
     :class="showCriticalBorder ? 'border-l-4 border-(--color-danger-accent)' : ''"
     role="region"
     aria-labelledby="medical-snapshot-title"
+    :ui="{ root: 'rounded-[var(--radius-xl)]', header: 'px-5 py-4', body: 'p-5' }"
   >
     <template #header>
       <div class="flex items-center justify-between gap-3">
-        <div class="flex items-center gap-2 min-w-0">
-          <UIcon
-            name="i-lucide-heart-pulse"
-            class="w-5 h-5 text-default shrink-0"
-            aria-hidden="true"
-          />
-          <h2
-            id="medical-snapshot-title"
-            class="text-h2 text-default truncate"
-          >
-            {{ t('patients.medicalSnapshot.title') }}
-          </h2>
-        </div>
+        <h2
+          id="medical-snapshot-title"
+          class="text-[11px] font-semibold uppercase tracking-wide text-muted truncate"
+        >
+          {{ t('patients.medicalSnapshot.title') }}
+        </h2>
         <UButton
           v-if="canEdit"
-          variant="soft"
+          variant="ghost"
           color="neutral"
           icon="i-lucide-pencil"
           size="sm"
+          class="rounded-full"
           :aria-label="t('patients.editMedicalHistory')"
           @click="emit('edit')"
         >
@@ -89,7 +84,7 @@ function allergyTooltip(a: AllergyEntry): string {
     <!-- Allergies block — three states -->
     <section
       class="mb-4"
-      aria-label="Alergias"
+      :aria-label="t('patients.medicalSnapshot.allergiesAria')"
     >
       <!-- A. No medical data at all -->
       <div
@@ -188,7 +183,7 @@ function allergyTooltip(a: AllergyEntry): string {
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
       <!-- Chronic / systemic diseases -->
       <section>
-        <h3 class="text-caption uppercase tracking-wide text-subtle flex items-center gap-1.5">
+        <h3 class="text-[11px] font-semibold uppercase tracking-wide text-muted flex items-center gap-1.5">
           <UIcon
             name="i-lucide-activity"
             class="w-3.5 h-3.5"
@@ -213,7 +208,7 @@ function allergyTooltip(a: AllergyEntry): string {
         </div>
         <p
           v-else
-          class="text-body text-subtle mt-2"
+          class="text-sm text-muted mt-2"
         >
           —
         </p>
@@ -221,7 +216,7 @@ function allergyTooltip(a: AllergyEntry): string {
 
       <!-- Medications -->
       <section>
-        <h3 class="text-caption uppercase tracking-wide text-subtle flex items-center gap-1.5">
+        <h3 class="text-[11px] font-semibold uppercase tracking-wide text-muted flex items-center gap-1.5">
           <UIcon
             name="i-lucide-pill"
             class="w-3.5 h-3.5"
@@ -247,7 +242,7 @@ function allergyTooltip(a: AllergyEntry): string {
         </ul>
         <p
           v-else
-          class="text-body text-subtle mt-2"
+          class="text-sm text-muted mt-2"
         >
           —
         </p>
@@ -255,7 +250,7 @@ function allergyTooltip(a: AllergyEntry): string {
 
       <!-- Special conditions -->
       <section>
-        <h3 class="text-caption uppercase tracking-wide text-subtle flex items-center gap-1.5">
+        <h3 class="text-[11px] font-semibold uppercase tracking-wide text-muted flex items-center gap-1.5">
           <UIcon
             name="i-lucide-clipboard-list"
             class="w-3.5 h-3.5"
@@ -285,7 +280,7 @@ function allergyTooltip(a: AllergyEntry): string {
         </div>
         <p
           v-else
-          class="text-body text-subtle mt-2"
+          class="text-sm text-muted mt-2"
         >
           —
         </p>

@@ -54,10 +54,12 @@ const options = computed(() => [
 </script>
 
 <template>
-  <SegmentedControl
-    :model-value="modelValue"
-    :options="options"
-    full-width
-    @update:model-value="(v) => emit('update:modelValue', v as ClinicalMode)"
-  />
+  <div class="rounded-[20px] bg-surface ring-1 ring-[var(--color-border-subtle)] p-2">
+    <SegmentedControl
+      :model-value="modelValue"
+      :options="options"
+      full-width
+      @update:model-value="(v) => emit('update:modelValue', v as ClinicalMode)"
+    />
+  </div>
 </template>

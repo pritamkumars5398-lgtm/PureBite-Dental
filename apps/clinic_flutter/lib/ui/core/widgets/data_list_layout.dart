@@ -21,6 +21,7 @@ class DataListLayout extends StatelessWidget {
     this.actionLabel,
     this.actionIcon,
     this.onAction,
+    this.showTitle = false,
     required this.isLoading,
     required this.isEmpty,
     required this.emptyState,
@@ -36,6 +37,7 @@ class DataListLayout extends StatelessWidget {
   final String? actionLabel;
   final IconData? actionIcon;
   final VoidCallback? onAction;
+  final bool showTitle;
   final bool isLoading;
   final bool isEmpty;
   final Widget emptyState;
@@ -57,6 +59,7 @@ class DataListLayout extends StatelessWidget {
           AppPageHeader(
             title: title,
             subtitle: subtitle,
+            showTitle: showTitle,
             actions: [
               if (actionLabel != null)
                 AppButton(

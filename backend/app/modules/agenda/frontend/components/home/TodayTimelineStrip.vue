@@ -126,14 +126,15 @@ function openAppointment(a: Appointment) {
 }
 
 const pending = computed(() => !todayLoaded.value)
-const isEmpty = computed(() => !pending.value && todayAppointments.value.length === 0)
+const total = computed(() => todayAppointments.value.length)
+const isEmpty = computed(() => !pending.value && total.value === 0)
 </script>
 
 <template>
-  <SectionCard
-    icon="i-lucide-clock"
-    icon-role="primary"
+  <DashboardCard
     :title="t('dashboard.timeline.title')"
+    :caption="t('dashboard.caption.today')"
+    class="h-full min-h-[280px]"
   >
     <template #actions>
       <UButton
@@ -149,24 +150,32 @@ const isEmpty = computed(() => !pending.value && todayAppointments.value.length 
 
     <div
       v-if="pending"
-      class="space-y-2"
+      class="space-y-3"
     >
-      <USkeleton class="h-5 w-full" />
+      <USkeleton class="h-9 w-16" />
+      <USkeleton class="h-4 w-28" />
       <USkeleton class="h-8 w-full" />
       <USkeleton class="h-8 w-full" />
     </div>
 
-    <EmptyState
-      v-else-if="isEmpty"
-      icon="i-lucide-calendar-x"
-      :title="t('dashboard.timeline.empty')"
-    />
-
     <div
       v-else
-      class="relative overflow-x-auto"
+      class="space-y-4"
     >
-      <div class="min-w-[480px] md:min-w-[640px]">
+      <div>
+        <p class="text-display text-default tnum tracking-tight">
+          {{ total }}
+        </p>
+        <p class="text-caption text-muted mt-1">
+          {{ isEmpty ? t('dashboard.timeline.empty') : t('dashboard.todayKpi.title') }}
+        </p>
+      </div>
+
+      <div
+        v-if="!isEmpty"
+        class="relative overflow-x-auto rounded-2xl bg-[var(--color-canvas)] p-3 shadow-[0_6px_16px_rgba(15,23,42,0.05)]"
+      >
+        <div class="min-w-[480px] md:min-w-[640px]">
         <div class="relative h-5 border-b border-[var(--color-border-subtle)] mb-3">
           <span
             v-for="h in hourMarkers"
@@ -239,7 +248,8 @@ const isEmpty = computed(() => !pending.value && todayAppointments.value.length 
             </div>
           </div>
         </div>
+        </div>
       </div>
     </div>
-  </SectionCard>
+  </DashboardCard>
 </template>

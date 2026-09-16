@@ -18,6 +18,7 @@ const { t } = useI18n()
   <SectionCard
     :icon="icon"
     :title="title"
+    class="!rounded-[var(--radius-xl)]"
   >
     <div class="flex items-start gap-3">
       <UIcon
