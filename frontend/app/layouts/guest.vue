@@ -19,13 +19,14 @@ const { t } = useI18n()
     </svg>
 
     <DemoBanner />
-    <div class="relative z-10 px-4 pt-5 sm:px-8">
+    <div class="relative z-10 px-4 pt-5 sm:px-8 flex items-center justify-between gap-3">
       <NuxtLink
         to="/landing"
         class="inline-flex items-center text-ui font-semibold tracking-tight text-default hover:text-primary-accent transition-colors"
       >
         {{ t('app.name') }}
       </NuxtLink>
+      <UColorModeButton class="rounded-full" />
     </div>
     <div class="relative z-10 flex-1 flex items-center justify-center px-4 py-10">
       <slot />

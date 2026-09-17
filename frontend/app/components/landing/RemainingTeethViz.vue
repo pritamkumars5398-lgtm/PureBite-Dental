@@ -127,7 +127,7 @@ const legend = [
 .viz__count { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.03em; }
 .viz__note { margin: 0; font-size: 12px; color: var(--color-text-subtle); }
 .viz__arch {
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--color-border-subtle);
   border-radius: 24px;
   padding: 20px 16px 16px;
@@ -160,8 +160,8 @@ const legend = [
   font-size: 9px;
   color: var(--color-text-subtle);
 }
-.is-remaining path { fill: #fff; stroke: #94a3b8; }
-.is-missing path { fill: transparent; stroke: #94a3b8; stroke-dasharray: 3 2; opacity: .45; }
+.is-remaining path { fill: var(--color-canvas); stroke: var(--color-text-subtle); }
+.is-missing path { fill: transparent; stroke: var(--color-text-subtle); stroke-dasharray: 3 2; opacity: .45; }
 .is-restored path { fill: var(--color-primary-soft); stroke: var(--color-primary); }
 .is-planned path { fill: var(--color-warning-soft); stroke: var(--color-warning-accent); }
 .is-hover { background: var(--color-canvas); }
@@ -175,7 +175,7 @@ const legend = [
 }
 .viz__swatch {
   width: 14px; height: 18px; border-radius: 6px 6px 8px 8px;
-  border: 1.5px solid #94a3b8; background: #fff;
+  border: 1.5px solid var(--color-text-subtle); background: var(--color-surface);
 }
 .viz__swatch.is-missing { background: transparent; border-style: dashed; opacity: .7; }
 .viz__swatch.is-restored { background: var(--color-primary-soft); border-color: var(--color-primary); }

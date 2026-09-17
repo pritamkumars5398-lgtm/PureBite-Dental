@@ -57,8 +57,9 @@ function kind(id: string) {
 }
 .arch-art__tooth svg { width: 100%; max-width: 28px; height: 40px; display: block; }
 .arch-art__tooth path { stroke-width: 1.15; }
-.is-remaining path { fill: #fff; stroke: #94a3b8; }
-.is-missing path { fill: transparent; stroke: #94a3b8; stroke-dasharray: 3 2; opacity: .4; }
+.is-remaining path { fill: var(--color-surface); stroke: var(--color-text-subtle); }
+.dark .is-remaining path { fill: rgba(250, 250, 250, 0.92); }
+.is-missing path { fill: transparent; stroke: var(--color-text-subtle); stroke-dasharray: 3 2; opacity: .4; }
 .is-restored path { fill: var(--color-primary-soft); stroke: var(--color-primary); }
 .is-planned path { fill: var(--color-warning-soft); stroke: var(--color-warning-accent); }
 </style>
