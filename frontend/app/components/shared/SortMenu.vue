@@ -73,7 +73,7 @@ const dirLabel = computed(() => t(`lists.sort.${current.value.dir}`))
         size="sm"
         icon="i-lucide-arrow-down-up"
         trailing-icon="i-lucide-chevron-down"
-        class="rounded-full"
+        class="min-h-11 rounded-[var(--radius-lg)]"
       >
         {{ currentOption?.label ?? t('lists.sort.label') }}
       </UButton>
@@ -85,6 +85,7 @@ const dirLabel = computed(() => t(`lists.sort.${current.value.dir}`))
       :icon="current.dir === 'asc' ? 'i-lucide-arrow-up' : 'i-lucide-arrow-down'"
       :aria-label="dirLabel"
       :title="dirLabel"
+      class="min-h-11 min-w-11 rounded-[var(--radius-lg)]"
       @click="toggleDir"
     />
   </div>
