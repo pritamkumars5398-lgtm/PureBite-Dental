@@ -15,10 +15,13 @@ export interface TotalLine {
 interface Props {
   lines: TotalLine[]
   title?: string
+  /** Show shimmer skeleton while totals are loading. */
+  loading?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  title: undefined
+  title: undefined,
+  loading: false,
 })
 
 const { t } = useI18n()
@@ -50,12 +53,39 @@ function signedValue(line: TotalLine): string {
 <template>
   <UCard>
     <template #header>
-      <h2 class="text-h2 text-default">
+      <USkeleton
+        v-if="loading"
+        class="h-5 w-32"
+      />
+      <h2
+        v-else
+        class="text-h2 text-default"
+      >
         {{ heading }}
       </h2>
     </template>
 
-    <dl class="space-y-2">
+    <!-- Shimmer rows while loading -->
+    <div
+      v-if="loading"
+      class="space-y-3"
+      aria-busy="true"
+      aria-label="Loading…"
+    >
+      <div
+        v-for="i in Math.max(lines.length, 4)"
+        :key="i"
+        class="flex items-center justify-between gap-3"
+      >
+        <USkeleton class="h-4 w-1/3" />
+        <USkeleton class="h-4 w-1/4" />
+      </div>
+    </div>
+
+    <dl
+      v-else
+      class="space-y-2"
+    >
       <template
         v-for="line in lines"
         :key="line.key"

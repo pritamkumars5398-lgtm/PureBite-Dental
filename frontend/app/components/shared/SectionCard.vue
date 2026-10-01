@@ -19,11 +19,14 @@ interface Props {
   title?: string
   /** Hide the header entirely */
   noHeader?: boolean
+  /** Show shimmer skeleton while content is loading. */
+  loading?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   iconRole: 'primary',
-  noHeader: false
+  noHeader: false,
+  loading: false,
 })
 
 const iconColorVar = computed(() => {
@@ -77,7 +80,20 @@ const iconColorVar = computed(() => {
       </div>
     </template>
 
-    <slot />
+    <!-- Shimmer content block while loading -->
+    <div
+      v-if="loading"
+      class="space-y-3"
+      aria-busy="true"
+      aria-label="Loading…"
+    >
+      <USkeleton class="h-5 w-2/3" />
+      <USkeleton class="h-4 w-full" />
+      <USkeleton class="h-4 w-5/6" />
+      <USkeleton class="h-4 w-4/6" />
+    </div>
+
+    <slot v-else />
 
     <template
       v-if="$slots.footer"

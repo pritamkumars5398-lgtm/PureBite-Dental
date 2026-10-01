@@ -10,10 +10,13 @@ export interface InfoItem {
 interface Props {
   items: InfoItem[]
   title?: string
+  /** Show shimmer skeleton while data is loading. */
+  loading?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  title: undefined
+  title: undefined,
+  loading: false,
 })
 
 const { t } = useI18n()
@@ -34,12 +37,39 @@ async function copy(value: string | number) {
 <template>
   <UCard>
     <template #header>
-      <h2 class="text-h2 text-default">
+      <USkeleton
+        v-if="loading"
+        class="h-5 w-32"
+      />
+      <h2
+        v-else
+        class="text-h2 text-default"
+      >
         {{ heading }}
       </h2>
     </template>
 
-    <dl class="space-y-3">
+    <!-- Shimmer rows while loading -->
+    <div
+      v-if="loading"
+      class="space-y-3"
+      aria-busy="true"
+      aria-label="Loading…"
+    >
+      <div
+        v-for="i in Math.max(items.length, 4)"
+        :key="i"
+        class="flex items-center justify-between gap-3"
+      >
+        <USkeleton class="h-4 w-1/3" />
+        <USkeleton class="h-4 w-1/4" />
+      </div>
+    </div>
+
+    <dl
+      v-else
+      class="space-y-3"
+    >
       <div
         v-for="item in items"
         :key="item.key"
