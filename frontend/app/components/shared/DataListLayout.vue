@@ -83,13 +83,14 @@ function onPage(value: number) {
       </div>
     </header>
 
-    <div class="px-5 sm:px-6 py-4 flex flex-col gap-3 lg:flex-row lg:items-center">
-      <p class="shrink-0 text-lg text-default">
+    <div class="px-5 sm:px-6 py-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-4">
+      <!-- Count: use inline-flex + gap so the bold number never glues to the suffix text -->
+      <p class="shrink-0 inline-flex items-baseline gap-1.5 text-lg text-default">
         <span class="font-semibold tnum">{{ total }}</span>
-        <span class="text-muted"> {{ countSuffix }}</span>
+        <span class="text-muted text-base">{{ countSuffix }}</span>
       </p>
 
-      <div class="flex-1 min-w-0 flex items-center gap-2">
+      <div class="flex-1 min-w-0 flex items-center gap-3">
         <div
           v-if="$slots.toolbar"
           class="flex-1 min-w-0"

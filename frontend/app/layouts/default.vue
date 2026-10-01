@@ -497,7 +497,7 @@ function onSearchBlur() {
           </div>
 
           <!-- Right actions -->
-          <div class="flex items-center gap-1 shrink-0">
+          <div class="flex items-center gap-1.5 shrink-0">
             <UDropdownMenu
               v-if="showQuickAdd"
               :items="quickAddItems"
@@ -512,44 +512,50 @@ function onSearchBlur() {
               />
             </UDropdownMenu>
 
-            <HelpButton />
-            <NuxtLink
-              v-if="adminItem"
-              :to="adminItem.to"
-              :title="t('nav.saas_admin')"
-              :aria-label="t('nav.saas_admin')"
-              class="hidden sm:inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors"
-              :class="[
-                isActive(adminItem.to)
-                  ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary-soft-text)]'
-                  : 'text-muted hover:bg-canvas hover:text-default'
-              ]"
-            >
-              <UIcon
-                :name="adminItem.icon"
-                class="w-[18px] h-[18px]"
-              />
-            </NuxtLink>
-            <DensityToggle />
-            <UColorModeButton class="rounded-full" />
+            <!-- Icon group: help, admin panel, density, color mode, settings -->
+            <div class="flex items-center gap-0.5">
+              <HelpButton />
+              <NuxtLink
+                v-if="adminItem"
+                :to="adminItem.to"
+                :title="t('nav.saas_admin')"
+                :aria-label="t('nav.saas_admin')"
+                class="hidden sm:inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors"
+                :class="[
+                  isActive(adminItem.to)
+                    ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary-soft-text)]'
+                    : 'text-muted hover:bg-canvas hover:text-default'
+                ]"
+              >
+                <UIcon
+                  :name="adminItem.icon"
+                  class="w-[18px] h-[18px]"
+                />
+              </NuxtLink>
+              <DensityToggle />
+              <UColorModeButton class="rounded-full" />
 
-            <NuxtLink
-              v-if="settingsItem"
-              :to="settingsItem.to"
-              :title="settingsItem.label"
-              :aria-label="settingsItem.label"
-              class="hidden sm:inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors"
-              :class="[
-                isActive(settingsItem.to)
-                  ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary-soft-text)]'
-                  : 'text-muted hover:bg-canvas hover:text-default'
-              ]"
-            >
-              <UIcon
-                :name="settingsItem.icon"
-                class="w-[18px] h-[18px]"
-              />
-            </NuxtLink>
+              <NuxtLink
+                v-if="settingsItem"
+                :to="settingsItem.to"
+                :title="settingsItem.label"
+                :aria-label="settingsItem.label"
+                class="hidden sm:inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors"
+                :class="[
+                  isActive(settingsItem.to)
+                    ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary-soft-text)]'
+                    : 'text-muted hover:bg-canvas hover:text-default'
+                ]"
+              >
+                <UIcon
+                  :name="settingsItem.icon"
+                  class="w-[18px] h-[18px]"
+                />
+              </NuxtLink>
+            </div>
+
+            <!-- Vertical separator -->
+            <div class="hidden lg:block w-px h-6 bg-[var(--color-border-subtle)] mx-1 shrink-0" />
 
             <UDropdownMenu
               v-if="auth.user.value"
@@ -557,7 +563,7 @@ function onSearchBlur() {
             >
               <button
                 type="button"
-                class="flex items-center gap-2 pl-1 pr-1.5 py-1 rounded-token-pill hover:bg-canvas transition-colors min-w-0"
+                class="flex items-center gap-2 pl-1 pr-2 py-1 rounded-token-pill hover:bg-canvas transition-colors min-w-0"
                 :title="daysRemaining !== null ? t('nav.daysRemaining', { n: daysRemaining }) : undefined"
               >
                 <UAvatar
