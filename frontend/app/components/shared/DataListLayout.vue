@@ -115,15 +115,42 @@ function onPage(value: number) {
       class="mx-5 sm:mx-6 mb-3 rounded-[var(--radius-lg)]"
     />
 
+    <!-- Rich shimmer skeleton rows — mirror the real row column structure -->
     <div
       v-if="loading"
-      class="px-5 sm:px-6 pb-6 space-y-3"
+      class="border-t border-[var(--color-border-subtle)]"
+      aria-busy="true"
+      aria-label="Loading…"
     >
-      <USkeleton
+      <div
         v-for="i in skeletonRows"
         :key="i"
-        class="h-11 w-full rounded-[var(--radius-lg)]"
-      />
+        class="flex items-center gap-3 px-5 sm:px-6 py-3 min-h-[60px] border-b border-[var(--color-border-subtle)]"
+      >
+        <!-- Checkbox placeholder -->
+        <USkeleton class="w-4 h-4 shrink-0 rounded" />
+
+        <!-- Avatar circle -->
+        <USkeleton class="w-8 h-8 shrink-0 rounded-full" />
+
+        <!-- Name + Patient ID stacked -->
+        <div class="flex-1 min-w-0 space-y-1.5">
+          <USkeleton class="h-4 rounded" :style="{ width: `${48 + (i * 11) % 28}%` }" />
+          <USkeleton class="h-3 rounded w-24" />
+        </div>
+
+        <!-- Phone -->
+        <USkeleton class="hidden md:block h-3.5 w-28 shrink-0 rounded" />
+
+        <!-- Email -->
+        <USkeleton class="hidden xl:block h-3.5 w-36 shrink-0 rounded" />
+
+        <!-- Registered date -->
+        <USkeleton class="hidden lg:block h-3.5 w-20 shrink-0 rounded" />
+
+        <!-- Debt -->
+        <USkeleton class="h-3.5 w-16 shrink-0 rounded ml-auto" />
+      </div>
     </div>
 
     <slot
