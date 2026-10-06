@@ -68,13 +68,13 @@ const agingSlices = computed(() => {
     >
       <div>
         <p class="text-micro uppercase tracking-wide text-subtle">
-          {{ t('invoices.reports.pending') }}
+          {{ t('invoice.reports.pending') }}
         </p>
         <p class="text-display text-default tnum mt-1">
           {{ formatMoney(balance) }}
         </p>
         <p class="text-caption text-muted tnum mt-1">
-          {{ total }} {{ t('invoices.reports.invoices') }}
+          {{ total }} {{ t('invoice.reports.invoices') }}
         </p>
       </div>
 

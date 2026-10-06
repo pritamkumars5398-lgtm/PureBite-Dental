@@ -49,9 +49,11 @@ onActivated(load)
 const { format: formatMoney } = useCurrency()
 
 function delta(cur: number, prev: number): { pct: number | null, dir: 'up' | 'down' | 'flat' } {
+  // Guard against NaN/null values coming from the API
+  if (!isFinite(cur) || isNaN(cur) || !isFinite(prev) || isNaN(prev)) return { pct: null, dir: 'flat' }
   if (!prev) return { pct: null, dir: 'flat' }
   const pct = ((cur - prev) / prev) * 100
-  if (Math.abs(pct) < 0.5) return { pct: 0, dir: 'flat' }
+  if (!isFinite(pct) || isNaN(pct) || Math.abs(pct) < 0.5) return { pct: 0, dir: 'flat' }
   return { pct, dir: pct > 0 ? 'up' : 'down' }
 }
 
@@ -108,7 +110,7 @@ const allMissing = computed(() =>
 )
 
 function deltaLabel(d: { pct: number | null, dir: 'up' | 'down' | 'flat' } | null): string {
-  if (!d || d.pct === null) return ''
+  if (!d || d.pct === null || !isFinite(d.pct) || isNaN(d.pct)) return ''
   if (d.pct === 0) return '0%'
   return `${Math.abs(d.pct).toFixed(1)}%`
 }
@@ -176,7 +178,7 @@ function deltaClass(dir: 'up' | 'down' | 'flat'): string {
         <div v-if="paid !== null">
           <p class="text-micro uppercase tracking-wide text-subtle flex items-center gap-1.5">
             <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-warning-accent)]" />
-            {{ t('invoices.reports.totalPaid') }}
+            {{ t('invoice.reports.totalPaid') }}
           </p>
           <div class="flex items-baseline gap-2 mt-1 flex-wrap">
             <p class="text-h1 text-default tnum">
