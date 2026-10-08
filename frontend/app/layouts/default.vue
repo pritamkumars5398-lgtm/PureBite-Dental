@@ -246,7 +246,7 @@ function onSearchBlur() {
   <div class="h-svh overflow-hidden bg-canvas">
     <div class="flex h-full overflow-hidden bg-surface">
       <!-- Desktop/tablet sidebar — fixed width, pinned while the page scrolls -->
-      <aside class="hidden md:flex relative z-20 w-64 shrink-0 flex-col bg-surface">
+      <aside class="hidden md:flex relative z-20 w-64 shrink-0 flex-col bg-surface border-r border-subtle dark:border-white/10">
         <!-- Clinic identity only — never the product name -->
         <div class="px-3 pt-4 pb-3 shrink-0">
           <NuxtLink
@@ -340,7 +340,7 @@ function onSearchBlur() {
       <USlideover
         v-model:open="mobileNavOpen"
         side="left"
-        :ui="{ content: 'w-72 max-w-[80vw] bg-surface', header: 'hidden' }"
+        :ui="{ content: 'w-72 max-w-[80vw] bg-surface border-r border-subtle dark:border-white/10', header: 'hidden' }"
       >
         <template #content>
           <div class="flex flex-col h-full">
