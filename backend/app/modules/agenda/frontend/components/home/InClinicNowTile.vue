@@ -78,7 +78,7 @@ const bars = computed(() => {
         <div
           v-for="bar in bars"
           :key="bar.key"
-          class="rounded-2xl bg-[var(--color-canvas)] px-3 py-3 shadow-[0_6px_16px_rgba(15,23,42,0.05)]"
+          class="rounded-2xl bg-[var(--color-canvas)] px-3 py-3 shadow-[0_6px_16px_rgba(15,23,42,0.05)] border border-transparent dark:border-[var(--color-border-subtle)]"
         >
           <p class="text-display text-default tnum tracking-tight">
             {{ bar.value }}

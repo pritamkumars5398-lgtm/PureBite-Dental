@@ -74,7 +74,7 @@ const stats = computed(() => {
         <div
           v-for="s in stats"
           :key="s.key"
-          class="rounded-2xl bg-[var(--color-canvas)] px-3 py-2.5 shadow-[0_6px_16px_rgba(15,23,42,0.05)]"
+          class="rounded-2xl bg-[var(--color-canvas)] px-3 py-2.5 shadow-[0_6px_16px_rgba(15,23,42,0.05)] border border-transparent dark:border-[var(--color-border-subtle)]"
         >
           <p class="text-h2 text-default tnum tracking-tight">
             {{ s.value }}

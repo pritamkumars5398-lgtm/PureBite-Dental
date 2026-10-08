@@ -173,7 +173,7 @@ const isEmpty = computed(() => !pending.value && total.value === 0)
 
       <div
         v-if="!isEmpty"
-        class="relative overflow-x-auto rounded-2xl bg-[var(--color-canvas)] p-3 shadow-[0_6px_16px_rgba(15,23,42,0.05)]"
+        class="relative overflow-x-auto rounded-2xl bg-[var(--color-canvas)] p-3 shadow-[0_6px_16px_rgba(15,23,42,0.05)] border border-transparent dark:border-[var(--color-border-subtle)]"
       >
         <div class="min-w-[480px] md:min-w-[640px]">
         <div class="relative h-5 border-b border-[var(--color-border-subtle)] mb-3">

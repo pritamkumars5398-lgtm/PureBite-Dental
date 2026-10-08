@@ -14,7 +14,7 @@ defineProps<{
   <NuxtLink
     v-if="to"
     :to="to"
-    class="dashboard-card flex flex-col h-full min-w-0 rounded-[20px] bg-surface p-5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+    class="dashboard-card flex flex-col h-full min-w-0 rounded-[20px] bg-surface p-5 border border-transparent dark:border-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
   >
     <div
       v-if="title || caption || $slots.actions || $slots.title"
@@ -45,7 +45,7 @@ defineProps<{
   </NuxtLink>
   <div
     v-else
-    class="dashboard-card flex flex-col h-full min-w-0 rounded-[20px] bg-surface p-5"
+    class="dashboard-card flex flex-col h-full min-w-0 rounded-[20px] bg-surface p-5 border border-transparent dark:border-white/10"
   >
     <div
       v-if="title || caption || $slots.actions || $slots.title"
